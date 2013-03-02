@@ -1,1 +1,36 @@
-todo!
+ResCU - a lightweight Rest client utility
+------------------------------------------
+
+ResCU enables the user to create a proxy Rest client in run-time directly from a JAX-RS annotated interface.
+ResCU is mostly focused on json-based service.
+
+Many other libraries do this (eg. Jersey and RESTEasy); the benefit of ResCU is that it is very lightweight
+with minimal dependencies. This makes it great for Android apps etc.
+
+
+Dependencies:
+
+- jackson (json parser)
+- slf4j (logging interface)
+- jsr-311 (JAX-RS) (a set of REST-service specific annotations)
+- jsr-305 (a set of annotations)
+
+
+Benefits:
+
+- lightweight, minimal dependencies.
+- JAX-RS-annotated server-side interfaces may be reused to create clients.
+- Support for basic HTTP authentication and some common request signing paradigms.
+
+
+Limitations:
+
+- This is meant mostly for json-based REST services, ie. the response body is always interpreted as json. No XML.
+- JAX-RS: basic support is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam,
+   @HeaderParam, @PathParam. No support for @MatrixParam.
+
+
+Logging:
+
+ResCU uses slf4j for logging. For best results, a supported logging implementation (eg. log4j, JUL, logback, ...)
+should be provided in runtime. See slf4j's documentation for more info.
