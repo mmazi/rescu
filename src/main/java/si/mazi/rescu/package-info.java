@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2013 Matija Mazi
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 /**
  * Classes in this package may be used to create proxy client objects for REST web services.
  * <p/>
- * For a working example see the Bitstamp interface and its usages in the rescu-bitstamp module.
+ * For a working example see the XChange project on github.
  * <p/>
  * This is based on JAX-RS ({@link javax.ws.rs} -- only the JAX-RS annotations are used) and {@link java.lang.reflect.Proxy}.
  * <p/>
@@ -14,7 +36,8 @@
  *
  * <p/>
  * Basic support is provided for {@link javax.ws.rs.Path}, {@link javax.ws.rs.GET}, {@link javax.ws.rs.POST},
- * {@link javax.ws.rs.QueryParam}, {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}.
+ * {@link javax.ws.rs.DELETE}, {@link javax.ws.rs.HEAD}, {@link javax.ws.rs.OPTIONS}, {@link javax.ws.rs.QueryParam},
+ * {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}.
  * <p/>
  *
  * Some of the classes here may also be useful even when not using the JAX-RS approach to calling REST web services,

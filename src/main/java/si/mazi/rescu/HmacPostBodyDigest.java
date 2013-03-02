@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2013 Matija Mazi
- * Copyright (C) 2013 Xeiam LLC http://xeiam.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -68,7 +67,6 @@ public class HmacPostBodyDigest implements ParamsDigest {
         return secretKeyBase64 == null ? null : new HmacPostBodyDigest(secretKeyBase64);
     }
 
-    @Override
     public String digestParams(RestMethodMetadata restMethodMetadata) {
 
         mac.update(restMethodMetadata.getRequestBody().getBytes());
