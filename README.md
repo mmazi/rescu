@@ -1,11 +1,11 @@
-ResCU - a lightweight Rest client utility
+ResCU - a lightweight Rest client utility for Java (JAX-RS)
 ------------------------------------------
 
 ResCU enables the user to create a proxy Rest client in run-time directly from a JAX-RS annotated interface.
 ResCU is mostly focused on json-based services.
 
-Many other libraries do this (eg. Jersey and RESTEasy); the benefit of ResCU is that it is very lightweight
-with minimal dependencies. This makes it good for Android apps etc.
+Several other libraries do this (eg. Jersey and RESTEasy); the benefit of ResCU is that it is very lightweight with
+minimal dependencies. This makes it useful for quickly creating REST clients in Android apps etc.
 
 
 Dependencies:
