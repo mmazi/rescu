@@ -5,9 +5,11 @@
     <groupId>si.mazi.rescu</groupId>
     <artifactId>rescu</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <name>ResCU</name>
     <description>A lightweight REST client utility</description>
+    <url>https://github.com/mmazi/rescu</url>
 
     <inceptionYear>2012</inceptionYear>
 
