@@ -42,9 +42,9 @@ should be provided in runtime. See slf4j's documentation for more info.
 Usage
 ---------------
 
-# Create a JAX-RS-annotated interface (or get it from the REST service developer), eg. `ExampleService`.
-# Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
-# That's it! Just use the `service` object you just got.
+1. Create a JAX-RS-annotated interface (or get it from the REST service developer), eg. `ExampleService`.
+2. Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
+3. That's it! Just use the `service` object you just got.
 
 For several working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitcoinCentralPollingTradeService.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitcoincentral/src/main/java/com/xeiam/xchange/bitcoincentral/service/trade/polling/BitcoinCentralPollingTradeService.java).
 
