@@ -41,7 +41,7 @@ should be provided in runtime. See slf4j's documentation for more info.
 Usage
 ---------------
 
-1. Create a JAX-RS-annotated interface (or get it from the REST service developer), eg. `ExampleService`.
+1. Create a JAX-RS-annotated interface (or get it from the REST service developer), eg. `ExampleService.java`.
 2. Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
 3. That's it! Just use the `service` object you just got.
 
