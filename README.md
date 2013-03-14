@@ -21,7 +21,7 @@ Benefits
 ---------------
 
 - lightweight, minimal dependencies.
-- JAX-RS-annotated server-side interfaces may be reused to create clients.
+- JAX-RS-annotated server-side interfaces may be reused to create clients; basic support is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam, @HeaderParam, @PathParam.
 - Support for basic HTTP authentication and some common request signing paradigms.
 
 
@@ -29,8 +29,7 @@ Limitations
 ---------------
 
 - This is meant mostly for json-based REST services, ie. the response body is always interpreted as json. No XML.
-- JAX-RS: basic support is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam,
-   @HeaderParam, @PathParam. No support for @MatrixParam.
+- JAX-RS: No support for @MatrixParam.
 
 
 Logging
