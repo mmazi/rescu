@@ -45,6 +45,15 @@
         <url>http://ci.xeiam.com/</url>
     </ciManagement>
 
+    <distributionManagement>
+        <repository>
+            <id>oss.sonatype-nexus-staging</id>
+            <name>Sonatype Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <downloadUrl>https://oss.sonatype.org/content/groups/public/com/github/mmazi/rescu</downloadUrl>
+    </distributionManagement>
+
     <build>
         <plugins>
             <!-- Ensure compilation is done under Java 6 in all environments -->
