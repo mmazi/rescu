@@ -41,6 +41,18 @@ should be provided in runtime. See slf4j's documentation for more info.
 Usage
 ---------------
 
+#### Maven
+
+Rescu is hosted in Maven Central so all you need to do is add this dependency to your pom:
+
+    <dependency>
+        <groupId>com.github.mmazi</groupId>
+        <artifactId>rescu</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+
+#### Usage in code
+
 1. Create a JAX-RS-annotated interface (or get it from the REST service developer), eg. `ExampleService.java`.
 2. Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
 3. That's it! Just use the `service` object you just got.
