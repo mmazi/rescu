@@ -108,8 +108,8 @@ public class HttpTemplate {
     private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
 
         Assert.notNull(method, "method cannot be null");
-        Assert.notNull(method, "urlString cannot be null");
-        Assert.notNull(method, "httpHeaders cannot be null");
+        Assert.notNull(urlString, "urlString cannot be null");
+        Assert.notNull(httpHeaders, "httpHeaders cannot be null");
 
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());
