@@ -51,6 +51,7 @@ public class HttpTemplate {
      * Default request header fields
      */
     private Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
+    private final int readTimeout = Config.getHttpReadTimeout();
 
     /**
      * Constructor
@@ -145,7 +146,11 @@ public class HttpTemplate {
      */
     protected HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
 
-        return (HttpURLConnection) new URL(urlString).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
+        if (readTimeout > 0) {
+            connection.setReadTimeout(readTimeout);
+        }
+        return connection;
     }
 
     /**

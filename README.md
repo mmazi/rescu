@@ -59,6 +59,14 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
 
 For several working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitcoinCentralPollingTradeService.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitcoincentral/src/main/java/com/xeiam/xchange/bitcoincentral/service/trade/polling/BitcoinCentralPollingTradeService.java).
 
+#### Settings
+
+Rescu can be configured by adding a `rescu.properties` file in your classpath.
+
+Supported settings with example values (copy this into your `rescu.properties` file):
+
+    rescu.http.readTimeoutMillis = 5000  # Read timeout in milliseconds when performing HTTP requests.
+
 
 Important note:
 ---------------
