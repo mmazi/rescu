@@ -21,43 +21,42 @@
  */
 package si.mazi.rescu;
 
+import javax.ws.rs.Path;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-
-import javax.ws.rs.Path;
 
 /**
  * @author Matija Mazi
  */
-class RestInvocationHandler implements InvocationHandler {
+public class RestInvocationHandler implements InvocationHandler {
 
-  private final HttpTemplate httpTemplate;
-  private final String intfacePath;
-  private final String baseUrl;
+    private final HttpTemplate httpTemplate;
+    private final String intfacePath;
+    private final String baseUrl;
 
-  /**
-   * Constructor
-   *
-   * @param restInterface
-   * @param url
-   */
-  public RestInvocationHandler(Class<?> restInterface, String url) {
+    /**
+     * Constructor
+     *
+     * @param restInterface
+     * @param url
+     */
+    public RestInvocationHandler(Class<?> restInterface, String url) {
 
-    this.intfacePath = restInterface.getAnnotation(Path.class).value();
-    this.baseUrl = url;
-    this.httpTemplate = new HttpTemplate();
-  }
+        this.intfacePath = restInterface.getAnnotation(Path.class).value();
+        this.baseUrl = url;
+        this.httpTemplate = new HttpTemplate();
+    }
 
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-    RestRequestData restRequestData = RestRequestData.create(method, args, baseUrl, intfacePath);
-    return invokeHttp(restRequestData);
-  }
+        RestRequestData restRequestData = RestRequestData.create(method, args, baseUrl, intfacePath);
+        return invokeHttp(restRequestData);
+    }
 
-  protected Object invokeHttp(RestRequestData restRequestData) {
+    protected Object invokeHttp(RestRequestData restRequestData) {
 
-    return httpTemplate.executeRequest(restRequestData.url, restRequestData.returnType, restRequestData.params.getRequestBody(), restRequestData.params.getHttpHeaders(), restRequestData.httpMethod,
-        restRequestData.params.getContentType());
-  }
+        return httpTemplate.executeRequest(restRequestData.url, restRequestData.returnType, restRequestData.params.getRequestBody(), restRequestData.params.getHttpHeaders(), restRequestData.httpMethod,
+                restRequestData.params.getContentType());
+    }
 
 }
