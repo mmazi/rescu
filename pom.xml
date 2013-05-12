@@ -51,6 +51,13 @@
             <name>Sonatype Nexus Release Repository</name>
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
+
+        <snapshotRepository>
+            <id>oss.sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+
         <downloadUrl>https://oss.sonatype.org/content/groups/public/com/github/mmazi/rescu</downloadUrl>
     </distributionManagement>
 
