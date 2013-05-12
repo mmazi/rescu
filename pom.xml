@@ -47,13 +47,13 @@
 
     <distributionManagement>
         <repository>
-            <id>oss.sonatype-nexus-staging</id>
+            <id>sonatype-nexus-staging</id>
             <name>Sonatype Nexus Release Repository</name>
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
 
         <snapshotRepository>
-            <id>oss.sonatype-nexus-snapshots</id>
+            <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
