@@ -37,7 +37,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
   /**
    * Constructor
-   * 
+   *
    * @param restInterface
    * @param url
    */
