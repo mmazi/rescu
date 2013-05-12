@@ -50,42 +50,34 @@ public class Params implements Serializable {
      * private Constructor to prevent instantiation
      */
     private Params() {
-
     }
 
     public static Params of() {
-
         return new Params();
     }
 
     public static Params of(String param, Object value) {
-
         return of().add(param, value);
     }
 
     public static Params of(String p1, Object v1, String p2, Object v2) {
-
         return of(p1, v1).add(p2, v2);
     }
 
     public static Params of(String p1, Object v1, String p2, Object v2, String p3, Object v3) {
-
         return of(p1, v1, p2, v2).add(p3, v3);
     }
 
     public static Params of(String p1, Object v1, String p2, Object v2, String p3, Object v3, String p4, Object v4) {
-
         return of(p1, v1, p2, v2, p3, v3).add(p4, v4);
     }
 
     public Params add(String param, Object value) {
-
         data.put(param, value);
         return this;
     }
 
     private String toQueryString(boolean encode) {
-
         StringBuilder b = new StringBuilder();
         for (String param : data.keySet()) {
             if (isParamSet(param)) {
@@ -99,7 +91,6 @@ public class Params implements Serializable {
     }
 
     private String encode(String data, boolean encode) {
-
         try {
             return encode ? URLEncoder.encode(data, "UTF-8") : data;
         } catch (UnsupportedEncodingException e) {
@@ -108,27 +99,22 @@ public class Params implements Serializable {
     }
 
     void setRestMethodMetadata(RestMethodMetadata restMethodMetadata) {
-
         this.restMethodMetadata = restMethodMetadata;
     }
 
     public String asQueryString() {
-
         return toQueryString(true);
     }
 
     public String asFormEncodedRequestBody() {
-
         return toQueryString(false);
     }
 
     public boolean isEmpty() {
-
         return data.isEmpty();
     }
 
     public String applyToPath(String path) {
-
         for (String paramName : data.keySet()) {
             if (!isParamSet(paramName)) {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
@@ -139,7 +125,6 @@ public class Params implements Serializable {
     }
 
     public Map<String, String> asHttpHeaders() {
-
         Map<String, String> stringMap = new LinkedHashMap<String, String>();
         for (String key : data.keySet()) {
             if (isParamSet(key)) {
@@ -150,7 +135,6 @@ public class Params implements Serializable {
     }
 
     private String getParamValue(String key) {
-
         Object paramValue = data.get(key);
         if (paramValue instanceof ParamsDigest) {
             return ((ParamsDigest) paramValue).digestParams(restMethodMetadata);
@@ -160,13 +144,11 @@ public class Params implements Serializable {
     }
 
     private boolean isParamSet(String key) {
-
         return data.containsKey(key) && data.get(key) != null;
     }
 
     @Override
     public String toString() {
-
         return toQueryString(false);
     }
 }
