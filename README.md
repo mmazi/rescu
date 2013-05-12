@@ -65,7 +65,7 @@ Rescu can be configured by adding a `rescu.properties` file in your classpath.
 
 Supported settings with example values (copy this into your `rescu.properties` file):
 
-    rescu.http.readTimeoutMillis = 5000  # Read timeout in milliseconds when performing HTTP requests.
+    rescu.http.readTimeoutMillis = 5000  # Read timeout in milliseconds when performing HTTP requests. The default is 30000 (30 seconds).
 
 
 Important note:

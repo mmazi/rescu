@@ -22,7 +22,7 @@ public class Config {
 
     static {
         Properties dfts = new Properties();
-        dfts.setProperty(HTTP_READ_TIMEOUT, "0");
+        dfts.setProperty(HTTP_READ_TIMEOUT, "30000");
 
         Properties properties = new Properties(dfts);
         InputStream propsStream = RestProxyFactory.class.getResourceAsStream("/rescu.properties");
