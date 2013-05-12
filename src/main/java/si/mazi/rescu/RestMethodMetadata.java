@@ -34,6 +34,8 @@ import java.util.*;
 /**
  * This holds name-value mapping for various types of params used in REST (QueryParam, PathParam, FormParam, HeaderParam).
  *
+ * One RestMethodMetadata corresponds to one method invocation.
+ *
  * @author Matija Mazi
  */
 public class RestMethodMetadata implements Serializable {
