@@ -49,16 +49,14 @@ public class RestInvocationParams implements Serializable {
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams = new ArrayList<Object>();
 
-    public RestInvocationParams(Method method, Object[] args) {
+    RestInvocationParams(Method method, Object[] args) {
 
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
         this.contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
 
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
-            Params params = Params.of();
-            params.setRestInvocationParams(this);
-            paramsMap.put(annotationClass, params);
+            paramsMap.put(annotationClass, Params.of());
         }
 
         Annotation[][] paramAnnotations = method.getParameterAnnotations();
@@ -86,13 +84,10 @@ public class RestInvocationParams implements Serializable {
     }
 
     // todo: this is needed only for testing
-    public RestInvocationParams(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
+    RestInvocationParams(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
 
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
-        for (Params params : this.paramsMap.values()) {
-            params.setRestInvocationParams(this);
-        }
     }
 
     static RestInvocationParams createInstance(Method method, Object[] args) {
@@ -110,6 +105,18 @@ public class RestInvocationParams implements Serializable {
         }
         // This is not one of the annotations in PARAM_ANNOTATION_CLASSES.
         return null;
+    }
+
+    public void processDigests() {
+        for (int i = 0; i < unannanotatedParams.size(); i++) {
+            Object param = unannanotatedParams.get(i);
+            if (param instanceof ParamsDigest) {
+                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
+            }
+        }
+        for (Params params : paramsMap.values()) {
+            params.digestAll(this);
+        }
     }
 
     public String getPath(String methodPath) {
