@@ -67,9 +67,9 @@ public class HmacPostBodyDigest implements ParamsDigest {
         return secretKeyBase64 == null ? null : new HmacPostBodyDigest(secretKeyBase64);
     }
 
-    public String digestParams(RestMethodMetadata restMethodMetadata) {
+    public String digestParams(RestInvocationParams restInvocationParams) {
 
-        mac.update(restMethodMetadata.getRequestBody().getBytes());
+        mac.update(restInvocationParams.getRequestBody().getBytes());
         return Base64.encodeBytes(mac.doFinal()).trim();
     }
 }

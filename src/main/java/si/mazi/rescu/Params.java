@@ -44,7 +44,7 @@ import java.util.Map;
 public class Params implements Serializable {
 
     private Map<String, Object> data = new LinkedHashMap<String, Object>();
-    private RestMethodMetadata restMethodMetadata;
+    private RestInvocationParams restInvocationParams;
 
     /**
      * private Constructor to prevent instantiation
@@ -98,8 +98,8 @@ public class Params implements Serializable {
         }
     }
 
-    void setRestMethodMetadata(RestMethodMetadata restMethodMetadata) {
-        this.restMethodMetadata = restMethodMetadata;
+    void setRestInvocationParams(RestInvocationParams restInvocationParams) {
+        this.restInvocationParams = restInvocationParams;
     }
 
     public String asQueryString() {
@@ -137,7 +137,7 @@ public class Params implements Serializable {
     private String getParamValue(String key) {
         Object paramValue = data.get(key);
         if (paramValue instanceof ParamsDigest) {
-            return ((ParamsDigest) paramValue).digestParams(restMethodMetadata);
+            return ((ParamsDigest) paramValue).digestParams(restInvocationParams);
         }
         // return new ObjectMapper().writeValueAsString(paramValue);
         return paramValue.toString();
