@@ -44,7 +44,6 @@ import java.util.Map;
 public class Params implements Serializable {
 
     private Map<String, Object> data = new LinkedHashMap<String, Object>();
-    private RestInvocationParams restInvocationParams;
 
     /**
      * private Constructor to prevent instantiation
@@ -98,10 +97,6 @@ public class Params implements Serializable {
         }
     }
 
-    void setRestInvocationParams(RestInvocationParams restInvocationParams) {
-        this.restInvocationParams = restInvocationParams;
-    }
-
     public String asQueryString() {
         return toQueryString(true);
     }
@@ -136,11 +131,16 @@ public class Params implements Serializable {
 
     private String getParamValue(String key) {
         Object paramValue = data.get(key);
-        if (paramValue instanceof ParamsDigest) {
-            return ((ParamsDigest) paramValue).digestParams(restInvocationParams);
-        }
-        // return new ObjectMapper().writeValueAsString(paramValue);
         return paramValue.toString();
+    }
+
+    public void digestAll(RestInvocationParams invocationParams) {
+        for (String paramName : data.keySet()) {
+            Object paramValue = data.get(paramName);
+            if (paramValue instanceof ParamsDigest) {
+                data.put(paramName, ((ParamsDigest) paramValue).digestParams(invocationParams));
+            }
+        }
     }
 
     private boolean isParamSet(String key) {
@@ -151,4 +151,5 @@ public class Params implements Serializable {
     public String toString() {
         return toQueryString(false);
     }
+
 }
