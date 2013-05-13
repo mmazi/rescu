@@ -73,12 +73,12 @@ public class RestInvocationHandlerTest {
 
     private void assertRequestData(TestRestInvocationHandler testHandler, String url, HttpMethod httpMethod, Class resultClass, String postBody, Map<String, String> headers) {
 
-        assertEquals(url, testHandler.invocationUrl);
-        assertEquals(httpMethod, testHandler.restMethodMetadata.httpMethod);
-        assertEquals(resultClass, testHandler.restMethodMetadata.returnType);
-        assertEquals(postBody, testHandler.params.getRequestBody());
+        assertEquals(url, testHandler.restRequestData.url);
+        assertEquals(httpMethod, testHandler.restRequestData.httpMethod);
+        assertEquals(resultClass, testHandler.restRequestData.returnType);
+        assertEquals(postBody, testHandler.restRequestData.params.getRequestBody());
         if (headers != null) {
-            assertEquals(headers, testHandler.params.getHttpHeaders());
+            assertEquals(headers, testHandler.restRequestData.params.getHttpHeaders());
         }
     }
 
@@ -89,7 +89,7 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.testJsonBody(new DummyAccountInfo("mm", "USD", 3));
-        assertEquals("{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}", testHandler.params.getRequestBody());
+        assertEquals("{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}", testHandler.restRequestData.params.getRequestBody());
 
     }
 
@@ -105,19 +105,17 @@ public class RestInvocationHandlerTest {
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
-        private RestMethodMetadata restMethodMetadata;
-        private RestInvocationParams params;
-        private String invocationUrl;
+        private RestRequestData restRequestData;
 
         public TestRestInvocationHandler(Class<?> restInterface) {
+
             super(restInterface, "https://example.com");
         }
 
         @Override
-        protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
-            this.restMethodMetadata = restMethodMetadata;
-            this.params = params;
-            invocationUrl = restMethodMetadata.getInvocationUrl(params);
+        protected Object invokeHttp(RestRequestData restRequestData) {
+
+            this.restRequestData = restRequestData;
             return null;
         }
     }

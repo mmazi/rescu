@@ -21,85 +21,136 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
- * @author Matija Mazi
+ * This holds name-value mapping for various types of params used in REST (QueryParam, PathParam, FormParam, HeaderParam).
  *
- * This is the metadata about a rest-enabled method. The metadata is read by reflection from the interface.
+ * One RestMethodMetadata corresponds to one method invocation.
+ *
+ * @author Matija Mazi
  */
-class RestMethodMetadata implements Serializable {
+public class RestMethodMetadata implements Serializable {
 
     @SuppressWarnings("unchecked")
-    private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
+    private static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
 
-    protected final Class<?> returnType;
-    protected final HttpMethod httpMethod;
-    protected final String baseUrl;
-    protected final String intfacePath;
-    protected final String methodPathTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate) {
+    private final String contentType;
+    private final Map<Class<? extends Annotation>, Params> paramsMap;
+    private final List<Object> unannanotatedParams = new ArrayList<Object>();
 
-        this.returnType = returnType;
-        this.httpMethod = httpMethod;
-        this.baseUrl = baseUrl;
-        this.intfacePath = intfacePath;
-        this.methodPathTemplate = methodPathTemplate;
-    }
+    public RestMethodMetadata(Method method, Object[] args) {
 
-    static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
+        Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
+        this.contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
 
-        Path pathAnn = method.getAnnotation(Path.class);
-        String methodPathTemplate = pathAnn == null ? null : pathAnn.value();
-        HttpMethod httpMethod = getHttpMethod(method);
-        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate);
-    }
+        paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
+            Params params = Params.of();
+            params.setRestMethodMetadata(this);
+            paramsMap.put(annotationClass, params);
+        }
 
-    static HttpMethod getHttpMethod(Method method) {
-
-        HttpMethod httpMethod = null;
-        for (Class<? extends Annotation> m : HTTP_METHOD_ANNS) {
-            if (method.isAnnotationPresent(m)) {
-                if (httpMethod != null) {
-                    throw new IllegalArgumentException("Method is annotated with more than one HTTP-method annotation: " + method);
+        Annotation[][] paramAnnotations = method.getParameterAnnotations();
+        for (int i = 0; i < paramAnnotations.length; i++) {
+            Annotation[] paramAnns = paramAnnotations[i];
+            if (paramAnns.length == 0) {
+                unannanotatedParams.add(args[i]);
+            }
+            for (Annotation paramAnn : paramAnns) {
+                String paramName = getParamName(paramAnn);
+                if (paramName != null) {
+                    this.paramsMap.get(paramAnn.annotationType()).add(paramName, args[i]);
                 }
-                httpMethod = HttpMethod.valueOf(m.getSimpleName());
             }
         }
-        if (httpMethod == null) {
-            throw new IllegalArgumentException("Method must be annotated with a HTTP-method annotation: " + method);
+
+        // Support using method method name as a parameter.
+        for (Class<? extends Annotation> paramAnnotationClass : PARAM_ANNOTATION_CLASSES) {
+            if (method.isAnnotationPresent(paramAnnotationClass)) {
+                Annotation paramAnn = method.getAnnotation(paramAnnotationClass);
+                String paramName = getParamName(paramAnn);
+                this.paramsMap.get(paramAnnotationClass).add(paramName, method.getName());
+            }
         }
-        return httpMethod;
     }
 
-    public String getInvocationUrl(RestInvocationParams params) {
-        String methodPath = methodPathTemplate == null ? null : params.getPath(methodPathTemplate);
-        return getInvocationUrl(baseUrl, intfacePath, methodPath, params.getQueryString());
-    }
+    // todo: this is needed only for testing
+    public RestMethodMetadata(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
 
-    private String getInvocationUrl(String baseUrl, String intfacePath, String method, String queryString) {
-
-        // TODO make more robust in terms of path separator ('/') handling
-        // (Use UriBuilder?)
-        String completeUrl = baseUrl;
-        completeUrl = appendIfNotEmpty(completeUrl, intfacePath, "/");
-        completeUrl = appendIfNotEmpty(completeUrl, method, "/");
-        completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
-        return completeUrl;
-    }
-
-    private static String appendIfNotEmpty(String url, String next, String separator) {
-
-        if (next != null && next.trim().length() > 0 && !next.equals("/")) {
-            url += separator + next;
+        this.contentType = contentType;
+        this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
+        for (Params params : this.paramsMap.values()) {
+            params.setRestMethodMetadata(this);
         }
-        return url;
     }
 
+    static RestMethodMetadata createInstance(Method method, Object[] args) {
+
+        return new RestMethodMetadata(method, args);
+    }
+
+    private static String getParamName(Annotation queryParam) {
+
+        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
+            String paramName = AnnotationUtils.getValueOrNull(annotationClass, queryParam);
+            if (paramName != null) {
+                return paramName;
+            }
+        }
+        // This is not one of the annotations in PARAM_ANNOTATION_CLASSES.
+        return null;
+    }
+
+    public String getPath(String methodPath) {
+
+        return paramsMap.get(PathParam.class).applyToPath(methodPath);
+    }
+
+    public String getRequestBody() {
+
+        if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
+            return paramsMap.get(FormParam.class).asFormEncodedRequestBody();
+        } else if (MediaType.APPLICATION_JSON.equals(contentType)) {
+            if (!paramsMap.get(FormParam.class).isEmpty()) {
+                throw new IllegalArgumentException("@FormParams are not allowed with " + MediaType.APPLICATION_JSON);
+            } else if (unannanotatedParams.size() > 1) {
+                throw new IllegalArgumentException("Can only have a single unnanotated parameter with " + MediaType.APPLICATION_JSON);
+            }
+            if (unannanotatedParams.size() == 0) {
+                return null;
+            }
+            try {
+                return objectMapper.writeValueAsString(unannanotatedParams.get(0));
+            } catch (IOException e) {
+                throw new RuntimeException("Error writing json, probably a bug.", e);
+            }
+        }
+        throw new IllegalArgumentException("Unsupported media type: " + contentType);
+    }
+
+    public Map<String, String> getHttpHeaders() {
+
+        return paramsMap.get(HeaderParam.class).asHttpHeaders();
+    }
+
+    public String getQueryString() {
+
+        return paramsMap.get(QueryParam.class).asQueryString();
+    }
+
+    public String getContentType() {
+
+        return contentType;
+    }
 }

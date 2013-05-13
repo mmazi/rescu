@@ -34,6 +34,12 @@ public class RestInvocationHandler implements InvocationHandler {
     private final String intfacePath;
     private final String baseUrl;
 
+    /**
+     * Constructor
+     *
+     * @param restInterface
+     * @param url
+     */
     public RestInvocationHandler(Class<?> restInterface, String url) {
 
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
@@ -43,15 +49,14 @@ public class RestInvocationHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-        RestMethodMetadata restMethodMetadata = RestMethodMetadata.create(method, baseUrl, intfacePath); // todo: this may be cached for method
-        RestInvocationParams params = RestInvocationParams.createInstance(method, args);
-        return invokeHttp(restMethodMetadata, params);
+        RestRequestData restRequestData = RestRequestData.create(method, args, baseUrl, intfacePath);
+        return invokeHttp(restRequestData);
     }
 
-    protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
+    protected Object invokeHttp(RestRequestData restRequestData) {
 
-        return httpTemplate.executeRequest(restMethodMetadata.getInvocationUrl(params), restMethodMetadata.returnType,
-                params.getRequestBody(), params.getHttpHeaders(), restMethodMetadata.httpMethod, params.getContentType());
+        return httpTemplate.executeRequest(restRequestData.url, restRequestData.returnType, restRequestData.params.getRequestBody(), restRequestData.params.getHttpHeaders(), restRequestData.httpMethod,
+                restRequestData.params.getContentType());
     }
 
 }
