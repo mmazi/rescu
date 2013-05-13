@@ -28,5 +28,5 @@ package si.mazi.rescu;
  */
 public interface ParamsDigest {
 
-    public String digestParams(RestMethodMetadata restMethodMetadata);
+    public String digestParams(RestInvocationParams restInvocationParams);
 }
