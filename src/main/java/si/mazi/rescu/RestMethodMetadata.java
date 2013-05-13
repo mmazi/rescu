@@ -33,7 +33,7 @@ import java.util.List;
  *
  * This is the metadata about a rest-enabled method. The metadata is read by reflection from the interface.
  */
-public class RestMethodMetadata implements Serializable {
+class RestMethodMetadata implements Serializable {
 
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
@@ -50,13 +50,13 @@ public class RestMethodMetadata implements Serializable {
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
-        this.methodPathTemplate = methodPathTemplate == null ? "" : methodPathTemplate;
+        this.methodPathTemplate = methodPathTemplate;
     }
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
 
         Path pathAnn = method.getAnnotation(Path.class);
-        String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
+        String methodPathTemplate = pathAnn == null ? null : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
         return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate);
     }
@@ -77,4 +77,29 @@ public class RestMethodMetadata implements Serializable {
         }
         return httpMethod;
     }
+
+    public String getInvocationUrl(RestInvocationParams params) {
+        String methodPath = methodPathTemplate == null ? null : params.getPath(methodPathTemplate);
+        return getInvocationUrl(baseUrl, intfacePath, methodPath, params.getQueryString());
+    }
+
+    private String getInvocationUrl(String baseUrl, String intfacePath, String method, String queryString) {
+
+        // TODO make more robust in terms of path separator ('/') handling
+        // (Use UriBuilder?)
+        String completeUrl = baseUrl;
+        completeUrl = appendIfNotEmpty(completeUrl, intfacePath, "/");
+        completeUrl = appendIfNotEmpty(completeUrl, method, "/");
+        completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
+        return completeUrl;
+    }
+
+    private static String appendIfNotEmpty(String url, String next, String separator) {
+
+        if (next != null && next.trim().length() > 0 && !next.equals("/")) {
+            url += separator + next;
+        }
+        return url;
+    }
+
 }

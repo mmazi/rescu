@@ -36,9 +36,6 @@ import java.util.*;
  *
  * One RestInvocationParams instance corresponds to one method invocation.
  *
- * todo: perhaps this should be split into RestInvocationParams and RestInvocation, where the latter would contain
- * a RestInvocationParams and RestMethodMetadata (or the data derived from both, ie. methodPatha and invocationUrl).
- *
  * @author Matija Mazi
  */
 public class RestInvocationParams implements Serializable {
@@ -51,9 +48,6 @@ public class RestInvocationParams implements Serializable {
     private final String contentType;
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams = new ArrayList<Object>();
-
-    private String methodPath;
-    private String invocationUrl;
 
     RestInvocationParams(Method method, Object[] args) {
 
@@ -96,11 +90,9 @@ public class RestInvocationParams implements Serializable {
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
     }
 
-    static RestInvocationParams createInstance(Method method, Object[] args, RestMethodMetadata restMethodMetadata) {
+    static RestInvocationParams createInstance(Method method, Object[] args) {
 
-        RestInvocationParams invocationParams = new RestInvocationParams(method, args);
-        invocationParams.apply(restMethodMetadata);
-        return invocationParams;
+        return new RestInvocationParams(method, args);
     }
 
     private static String getParamName(Annotation queryParam) {
@@ -115,26 +107,7 @@ public class RestInvocationParams implements Serializable {
         return null;
     }
 
-    static String getInvocationUrl(String baseUrl, String intfacePath, String method, String queryString) {
-        // TODO make more robust in terms of path separator ('/') handling
-        // (Use UriBuilder?)
-        String completeUrl = baseUrl;
-        completeUrl = appendIfNotEmpty(completeUrl, intfacePath, "/");
-        completeUrl = appendIfNotEmpty(completeUrl, method, "/");
-        completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
-        return completeUrl;
-    }
-
-    static String appendIfNotEmpty(String url, String next, String separator) {
-        if (next != null && next.trim().length() > 0 && !next.equals("/")) {
-            url += separator + next;
-        }
-        return url;
-    }
-
-    private void apply(RestMethodMetadata restMethodMetadata) {
-        methodPath = getPath(restMethodMetadata.methodPathTemplate);
-        invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, restMethodMetadata.intfacePath, methodPath, getQueryString());
+    public void processDigests() {
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
             if (param instanceof ParamsDigest) {
@@ -142,7 +115,7 @@ public class RestInvocationParams implements Serializable {
             }
         }
         for (Params params : paramsMap.values()) {
-            params.digestAll(restMethodMetadata, this);
+            params.digestAll(this);
         }
     }
 
@@ -186,13 +159,5 @@ public class RestInvocationParams implements Serializable {
     public String getContentType() {
 
         return contentType;
-    }
-
-    public String getInvocationUrl() {
-        return invocationUrl;
-    }
-
-    public String getMethodPath() {
-        return methodPath;
     }
 }
