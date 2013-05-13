@@ -11,7 +11,7 @@ import java.util.Properties;
  * @author Matija Mazi <br/>
  * @created 5/11/13 1:28 PM
  */
-public class Config {
+class Config {
     public static final String RESCU_PROPERTIES = "rescu.properties";
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);

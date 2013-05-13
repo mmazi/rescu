@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * Various HTTP utility methods
  */
-public class HttpTemplate {
+class HttpTemplate {
 
     public final static String CHARSET_UTF_8 = "UTF-8";
 

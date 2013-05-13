@@ -29,7 +29,7 @@ import javax.ws.rs.Path;
 /**
  * @author Matija Mazi
  */
-public class RestInvocationHandler implements InvocationHandler {
+class RestInvocationHandler implements InvocationHandler {
 
   private final HttpTemplate httpTemplate;
   private final String intfacePath;
