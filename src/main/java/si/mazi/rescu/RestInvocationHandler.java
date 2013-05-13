@@ -45,7 +45,6 @@ public class RestInvocationHandler implements InvocationHandler {
 
         RestMethodMetadata restMethodMetadata = RestMethodMetadata.create(method, baseUrl, intfacePath); // todo: this may be cached for method
         RestInvocationParams params = RestInvocationParams.createInstance(method, args);
-        params.processDigests();
         return invokeHttp(restMethodMetadata, params);
     }
 
