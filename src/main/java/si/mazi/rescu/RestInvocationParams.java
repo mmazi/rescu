@@ -90,7 +90,7 @@ public class RestInvocationParams implements Serializable {
     }
 
     // todo: this is needed only for testing
-    RestInvocationParams(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
+    public RestInvocationParams(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
 
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
