@@ -204,7 +204,7 @@ class HttpTemplate {
             }
         }
 
-        log.debug("Response body: {}", responseString);
+        log.trace("Response body: {}", responseString);
         return responseString;
     }
 
