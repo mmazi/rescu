@@ -198,11 +198,6 @@ class HttpTemplate {
             throw new HttpException("Problem " + method + "ing -- malformed URL: " + urlString, e);
         } catch (IOException e) {
             throw new HttpException("Problem " + method + "ing (IO)", e);
-        } finally {
-            // This is a bit messy
-            if (connection != null) {
-                connection.disconnect();
-            }
         }
 
         log.trace("Response body: {}", responseString);
