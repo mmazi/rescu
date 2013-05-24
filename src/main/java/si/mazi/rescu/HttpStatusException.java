@@ -1,16 +1,14 @@
 package si.mazi.rescu;
 
-import java.io.InputStream;
-
 /**
  * @author Matija Mazi <br/>
  * @created 5/24/13 8:46 PM
  */
 public class HttpStatusException extends HttpException {
     private final int httpStatusCode;
-    private final InputStream httpBody;
+    private final String httpBody;
 
-    public HttpStatusException(String message, int httpStatusCode, InputStream httpBody) {
+    public HttpStatusException(String message, int httpStatusCode, String httpBody) {
         super(message);
         this.httpStatusCode = httpStatusCode;
         this.httpBody = httpBody;
@@ -20,7 +18,7 @@ public class HttpStatusException extends HttpException {
         return httpStatusCode;
     }
 
-    public InputStream getHttpBody() {
+    public String getHttpBody() {
         return httpBody;
     }
 }

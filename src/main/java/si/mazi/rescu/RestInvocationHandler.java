@@ -51,7 +51,8 @@ public class RestInvocationHandler implements InvocationHandler {
     protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
 
         return httpTemplate.executeRequest(params.getInvocationUrl(), restMethodMetadata.returnType,
-                params.getRequestBody(), params.getHttpHeaders(), restMethodMetadata.httpMethod, params.getContentType());
+                params.getRequestBody(), params.getHttpHeaders(), restMethodMetadata.httpMethod, params.getContentType(),
+                restMethodMetadata.exceptionType);
     }
 
 }

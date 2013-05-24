@@ -21,6 +21,7 @@
  */
 package si.mazi.rescu;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import si.mazi.rescu.dto.DummyAccountInfo;
 import si.mazi.rescu.dto.DummyTicker;
@@ -43,139 +44,41 @@ public class HttpTemplateTest {
 
     @Test
     public void testGetForJsonObject() throws Exception {
-
-        // Configure to use the example JSON objects
-        final HttpURLConnection mockHttpURLConnection = configureMockHttpURLConnectionForGet("/example-ticker.json");
-
-        // Provide a mocked out HttpURLConnection
+        final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-ticker.json");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-
-        // Perform the test
-
-        DummyTicker ticker = testObject.executeRequest("http://example.com/ticker", DummyTicker.class, null, new HashMap<String, String>(), HttpMethod.GET, null);
-
-        // Verify the results
+        DummyTicker ticker = testObject.executeRequest("http://example.com/ticker", DummyTicker.class, null, new HashMap<String, String>(), HttpMethod.GET, null, null);
         assertEquals(34567L, ticker.getVolume());
     }
 
     @Test
     public void testReadInputStreamAsEncodedString() throws Exception {
-
         HttpTemplate testObject = new HttpTemplate();
-
         InputStream inputStream = HttpTemplateTest.class.getResourceAsStream("/example-httpdata.txt");
         assertEquals("Test data", testObject.readInputStreamAsEncodedString(inputStream, "UTF-8"));
     }
 
     @Test
     public void testPostForJsonObject() throws Exception {
-
-        // Configure to use the example JSON objects
-        final HttpURLConnection mockHttpURLConnection = configureMockHttpURLConnectionForPost("/example-accountinfo-data.json");
-
-        // Configure the test object (overridden methods are tested elsewhere)
+        final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-accountinfo-data.json");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-
-        DummyAccountInfo accountInfo = testObject.executeRequest("http://example.org/accountinfo", DummyAccountInfo.class, "Example", new HashMap<String, String>(), HttpMethod.POST, null);
-
+        DummyAccountInfo accountInfo = testObject.executeRequest("http://example.org/accountinfo", DummyAccountInfo.class, "Example", new HashMap<String, String>(), HttpMethod.POST, null, null);
         assertEquals("test", accountInfo.getUsername());
-
     }
 
-    /**
-     * Mocking HttpURLConnection through JMockit leads to problems with URL constructors that introduce very complex workarounds. In the interests of simplicity an implementation approach is used.
-     *
-     * @param resourcePath A classpath resource for the input stream to use in the response
-     * @return A mock HttpURLConnection
-     * @throws MalformedURLException If something goes wrong
-     */
-    private HttpURLConnection configureMockHttpURLConnectionForPost(final String resourcePath) throws MalformedURLException {
-
-        return new HttpURLConnection(new URL("http://example.org")) {
-
-            @Override
-            public void disconnect() {
-
-            }
-
-            @Override
-            public boolean usingProxy() {
-
-                return false;
-            }
-
-            @Override
-            public void connect() throws IOException {
-
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-
-                return HttpTemplateTest.class.getResourceAsStream(resourcePath);
-            }
-
-            @Override
-            public OutputStream getOutputStream() throws IOException {
-
-                return new ByteArrayOutputStream();
-            }
-
-            @Override
-            public String getHeaderField(String s) {
-
-                if ("Content-Type".equalsIgnoreCase(s)) {
-                    // Provide a Windows charset
-                    return "application/json; charset=cp1252";
-                }
-                return null;
-            }
-
-        };
-
-    }
-
-    /**
-     * Mocking HttpURLConnection through JMockit leads to problems with URL constructors that introduce very complex workarounds. In the interests of simplicity an implementation approach is used.
-     *
-     * @param resourcePath A classpath resource for the input stream to use in the response
-     * @return A mock HttpURLConnection
-     * @throws java.net.MalformedURLException If something goes wrong
-     */
-    public static HttpURLConnection configureMockHttpURLConnectionForGet(final String resourcePath) throws MalformedURLException {
-
-        return new HttpURLConnection(new URL("http://example.org")) {
-
-            @Override
-            public void disconnect() {
-
-            }
-
-            @Override
-            public boolean usingProxy() {
-
-                return false;
-            }
-
-            @Override
-            public void connect() throws IOException {
-
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-
-                return HttpTemplateTest.class.getResourceAsStream(resourcePath);
-            }
-
-            @Override
-            public String getHeaderField(String s) {
-
-                return null;
-            }
-
-        };
-
+    @Test
+    public void testPostWithError() throws Exception {
+        final HttpURLConnection mockHttpURLConnection = new MockErrorHttpURLConnection("/error.json");
+        HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
+        try {
+            testObject.executeRequest("http://example.org/accountinfo", DummyAccountInfo.class, "Example", new HashMap<String, String>(), HttpMethod.POST, null, ExampleException.class);
+            Assert.assertTrue(false, "An exception should have been thrown.");
+        } catch (ExampleException e) {
+            Assert.assertEquals(e.getError(), "Order not found");
+            Assert.assertEquals(e.getToken(), "unknown_error");
+            Assert.assertEquals(e.getResult(), "error");
+        } catch (Exception e) {
+            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
+        }
     }
 
     private static class MockHttpTemplate extends HttpTemplate {
@@ -183,20 +86,51 @@ public class HttpTemplateTest {
         private final HttpURLConnection mockHttpURLConnection;
 
         public MockHttpTemplate(HttpURLConnection mockHttpURLConnection) {
-
             this.mockHttpURLConnection = mockHttpURLConnection;
         }
 
         @Override
         public HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
-
             return mockHttpURLConnection;
         }
+    }
+
+    private static class MockHttpURLConnection extends HttpURLConnection {
+
+        protected final String resourcePath;
+
+        public MockHttpURLConnection(String resourcePath) throws MalformedURLException {
+            super(new URL("http://example.org"));
+            this.resourcePath = resourcePath;
+        }
+
+        @Override public void disconnect() { }
+
+        @Override public boolean usingProxy() { return false; }
+
+        @Override public void connect() throws IOException { }
+
+        @Override public int getResponseCode() throws IOException { return 200; }
+
+        @Override public OutputStream getOutputStream() throws IOException { return new ByteArrayOutputStream(); }
+
+        @Override public InputStream getInputStream() throws IOException {
+            return HttpTemplateTest.class.getResourceAsStream(resourcePath);
+        }
+    }
+
+    private static class MockErrorHttpURLConnection extends MockHttpURLConnection {
+        public MockErrorHttpURLConnection(String errorResourcePath) throws MalformedURLException {
+            super(errorResourcePath);
+        }
+
+        @Override public int getResponseCode() throws IOException { return 500; }
+
+        @Override public InputStream getInputStream() throws IOException { return null; }
 
         @Override
-        protected int checkHttpStatusCode(HttpURLConnection connection) throws IOException {
-
-            return 200;
+        public InputStream getErrorStream() {
+            return HttpTemplateTest.class.getResourceAsStream(resourcePath);
         }
     }
 }

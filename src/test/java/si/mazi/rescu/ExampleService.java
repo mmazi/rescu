@@ -50,7 +50,7 @@ public interface ExampleService {
 
     @POST
     @FormParam("method")
-    Object getInfo(Long from, Long count);
+    Object getInfo(Long from, Long count) throws ExampleException;
 
     @GET
     @Path("auth")

@@ -25,6 +25,7 @@ import javax.ws.rs.*;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,22 +44,33 @@ public class RestMethodMetadata implements Serializable {
     protected final String baseUrl;
     protected final String intfacePath;
     protected final String methodPathTemplate;
+    protected final Class<? extends RuntimeException> exceptionType;
 
-    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate) {
-
+    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType) {
         this.returnType = returnType;
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
         this.methodPathTemplate = methodPathTemplate == null ? "" : methodPathTemplate;
+        this.exceptionType = exceptionType;
     }
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
-
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
-        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate);
+        Type[] thrownExceptions = method.getGenericExceptionTypes();
+        Class<? extends RuntimeException> exceptionType = null;
+        if (thrownExceptions.length > 1) {
+            throw new IllegalArgumentException("At most one exception is supported on an API method; this method has more: " + method);
+        } else if (thrownExceptions.length == 1) {
+            //noinspection unchecked
+            exceptionType = (Class<? extends RuntimeException>) thrownExceptions[0];
+            if (!RuntimeException.class.isAssignableFrom(exceptionType)) {
+                throw new IllegalArgumentException("Only RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
+            }
+        }
+        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType);
     }
 
     static HttpMethod getHttpMethod(Method method) {
