@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.Assert;
 
+import javax.xml.ws.http.HTTPException;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -208,18 +209,13 @@ class HttpTemplate {
         return responseString;
     }
 
-    protected int checkHttpStatusCode(HttpURLConnection connection) throws IOException {
+    protected int checkHttpStatusCode(HttpURLConnection connection) throws IOException, HTTPException {
 
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
         if (httpStatus != 200) {
-            String error = connection.getErrorStream() == null ? null : new BufferedReader(new InputStreamReader(connection.getErrorStream())).readLine();
-            String msg = "Status code " + httpStatus;
-            if (error != null) {
-                msg += "; first body line: " + error;
-            }
-            throw new HttpException(msg);
+            throw new HttpStatusException("Status code not OK", httpStatus, connection.getErrorStream());
         }
         return httpStatus;
     }
