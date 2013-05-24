@@ -31,24 +31,11 @@ package si.mazi.rescu;
  */
 public class HttpException extends RuntimeException {
 
-    /**
-     * Constructor
-     *
-     * @param s
-     */
-    public HttpException(String s) {
-
-        super(s);
+    public HttpException(String message) {
+        super(message);
     }
 
-    /**
-     * Constructor
-     *
-     * @param s
-     * @param throwable
-     */
-    public HttpException(String s, Throwable throwable) {
-
-        super(s, throwable);
+    public HttpException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
