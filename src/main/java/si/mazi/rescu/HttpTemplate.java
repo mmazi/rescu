@@ -113,11 +113,12 @@ class HttpTemplate {
             log.debug("Request http status = {}", httpStatus);
 
             if (httpStatus != 200) {
-                InputStream errorStream = connection.getErrorStream();
+                String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
+                log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
                 if (exceptionType != null) {
-                    throw JSONUtils.getJsonObject(readInputStreamAsEncodedString(errorStream, responseEncoding), exceptionType, objectMapper);
+                    throw JSONUtils.getJsonObject(httpBody, exceptionType, objectMapper);
                 } else {
-                    throw new HttpStatusException("HTTP status code not 200", httpStatus, readInputStreamAsEncodedString(errorStream, responseEncoding));
+                    throw new HttpStatusException("HTTP status code not 200", httpStatus, httpBody);
                 }
             }
 
