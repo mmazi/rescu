@@ -12,6 +12,6 @@
         <appender-ref ref="CONSOLE_APPENDER"/>
     </root>
 
-    <logger name="si.mazi.rescu" level="DEBUG"/>
+    <logger name="si.mazi.rescu" level="trace"/>
 
 </configuration>
