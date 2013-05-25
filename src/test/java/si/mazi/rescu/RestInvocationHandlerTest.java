@@ -21,6 +21,7 @@
  */
 package si.mazi.rescu;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import si.mazi.rescu.dto.DummyAccountInfo;
 import si.mazi.rescu.dto.Order;
@@ -28,8 +29,6 @@ import si.mazi.rescu.dto.Order;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -44,19 +43,19 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
-        assertRequestData(testHandler, "https://example.com/api/2/buy/", "buy/", HttpMethod.POST, Order.class, "user=john&password=secret&amount=3.14&price=10.00", null);
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00");
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), null);
-        assertRequestData(testHandler, "https://example.com/api/2/buy/", "buy/", HttpMethod.POST, Order.class, "user=john&password=secret&amount=3.14", null);
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14");
 
         proxy.withdrawBitcoin("john", "secret", new BigDecimal("3.14"), "mybitcoinaddress");
-        assertRequestData(testHandler, "https://example.com/api/2/bitcoin_withdrawal/john?amount=3.14&address=mybitcoinaddress", "bitcoin_withdrawal/john", HttpMethod.POST, Object.class, "password=secret", null);
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/bitcoin_withdrawal/john?amount=3.14&address=mybitcoinaddress", HttpMethod.POST, "https://example.com", "api/2/bitcoin_withdrawal/john", "bitcoin_withdrawal/john", "amount=3.14&address=mybitcoinaddress", "password=secret");
 
         proxy.getTicker("btc", "usd");
-        assertRequestData(testHandler, "https://example.com/api/2/btc_usd/ticker", "btc_usd/ticker", HttpMethod.GET, Object.class, "", null);
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/btc_usd/ticker", HttpMethod.GET, "https://example.com", "api/2/btc_usd/ticker", "btc_usd/ticker", "", "");
 
         proxy.getInfo(1000L, 2000L);
-        assertRequestData(testHandler, "https://example.com/api/2", "", HttpMethod.POST, Object.class, "method=getInfo", null);
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo");
     }
 
     @Test
@@ -68,18 +67,22 @@ public class RestInvocationHandlerTest {
         proxy.testBasicAuth(new BasicAuthCredentials("Aladdin", "open sesame"), 23);
         HashMap<String, String> authHeaders = new HashMap<String, String>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-        assertRequestData(testHandler, "https://example.com/api/2/auth?param=23", "auth", HttpMethod.GET, Object.class, "", authHeaders);
+        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", "");
     }
 
-    private void assertRequestData(TestRestInvocationHandler testHandler, String url, String methodPath, HttpMethod httpMethod, Class resultClass, String postBody, Map<String, String> headers) {
+    private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
 
-        assertEquals(url, testHandler.params.getInvocationUrl());
-        assertEquals(methodPath, testHandler.params.getMethodPath());
-        assertEquals(httpMethod, testHandler.restMethodMetadata.httpMethod);
-        assertEquals(resultClass, testHandler.restMethodMetadata.returnType);
-        assertEquals(postBody, testHandler.params.getRequestBody());
+        Assert.assertEquals(testHandler.params.getInvocationUrl(), url);
+        Assert.assertEquals(testHandler.params.getMethodPath(), methodPath);
+        Assert.assertEquals(testHandler.params.getBaseUrl(), baseUrl);
+        Assert.assertEquals(testHandler.params.getQueryString(), queryString);
+        Assert.assertEquals(testHandler.params.getPath(), path);
+        Assert.assertEquals(testHandler.restMethodMetadata.httpMethod, httpMethod);
+        Assert.assertEquals(testHandler.restMethodMetadata.returnType, resultClass);
+        Assert.assertEquals(testHandler.params.getRequestBody(), postBody);
+        Assert.assertEquals(testHandler.params.getRequestBody(), postBody);
         if (headers != null) {
-            assertEquals(headers, testHandler.params.getHttpHeaders());
+            Assert.assertEquals(headers, testHandler.params.getHttpHeaders());
         }
     }
 
@@ -90,7 +93,7 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.testJsonBody(new DummyAccountInfo("mm", "USD", 3));
-        assertEquals("{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}", testHandler.params.getRequestBody());
+        Assert.assertEquals(testHandler.params.getRequestBody(), "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
 
     }
 
@@ -101,7 +104,7 @@ public class RestInvocationHandlerTest {
         RootPathService proxy = RestProxyFactory.createProxy(RootPathService.class, testHandler);
 
         proxy.cancel("424");
-        assertRequestData(testHandler, "https://example.com/cancel?id=424", "cancel", HttpMethod.DELETE, Double.class, "", null);
+        assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", "");
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

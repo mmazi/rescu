@@ -54,6 +54,9 @@ public class RestInvocationParams implements Serializable {
 
     private String methodPath;
     private String invocationUrl;
+    private String queryString;
+    private String path;
+    private String baseUrl;
 
     RestInvocationParams(Method method, Object[] args) {
 
@@ -115,26 +118,34 @@ public class RestInvocationParams implements Serializable {
         return null;
     }
 
-    static String getInvocationUrl(String baseUrl, String intfacePath, String method, String queryString) {
+    static String getInvocationUrl(String baseUrl, String path, String queryString) {
         // TODO make more robust in terms of path separator ('/') handling
         // (Use UriBuilder?)
         String completeUrl = baseUrl;
-        completeUrl = appendIfNotEmpty(completeUrl, intfacePath, "/");
-        completeUrl = appendIfNotEmpty(completeUrl, method, "/");
+        completeUrl = appendIfNotEmpty(completeUrl, path, "/");
         completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
         return completeUrl;
     }
 
     static String appendIfNotEmpty(String url, String next, String separator) {
-        if (next != null && next.trim().length() > 0 && !next.equals("/")) {
-            url += separator + next;
+        if (!url.isEmpty() && next != null && !next.isEmpty()) {
+            if (!url.endsWith(separator) && !next.startsWith(separator)) {
+                url += separator;
+            }
+            url += next;
         }
         return url;
     }
 
     private void apply(RestMethodMetadata restMethodMetadata) {
+        baseUrl = restMethodMetadata.baseUrl;
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
-        invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, restMethodMetadata.intfacePath, methodPath, getQueryString());
+        path = restMethodMetadata.intfacePath;
+        path = appendIfNotEmpty(path, methodPath, "/");
+        queryString = paramsMap.get(QueryParam.class).asQueryString();
+
+        invocationUrl = getInvocationUrl(baseUrl, path, queryString);
+
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
             if (param instanceof ParamsDigest) {
@@ -178,21 +189,44 @@ public class RestInvocationParams implements Serializable {
         return paramsMap.get(HeaderParam.class).asHttpHeaders();
     }
 
-    public String getQueryString() {
-
-        return paramsMap.get(QueryParam.class).asQueryString();
-    }
-
     public String getContentType() {
-
         return contentType;
     }
 
+    /**
+     * @return The invocation url that is used in this invocation.
+     */
     public String getInvocationUrl() {
         return invocationUrl;
     }
 
+    /**
+     * @return The part of the url path that corresponds to the method.
+     */
     public String getMethodPath() {
         return methodPath;
+    }
+
+    /**
+     * @return The whole url path: the interface path together with the method path.
+     * This is usally the part of the url that follows the host name.
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * @return The base of the url: this usually contains the protocol (eg. http) and the host name
+     * (eg. http://www.example.com/) but may be longer.
+     */
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    /**
+     * @return The part of the invocation url that follows the '?' charater, ie. the &-separated name=value parameter pairs.
+     */
+    public String getQueryString() {
+        return queryString;
     }
 }
