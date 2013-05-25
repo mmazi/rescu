@@ -104,7 +104,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>1.0.9</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>
@@ -121,7 +120,6 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.8</version>
-                <scope>test</scope>
             </dependency>
 
         </dependencies>
@@ -157,6 +155,12 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
         </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <profiles>
