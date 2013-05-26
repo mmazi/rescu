@@ -29,10 +29,7 @@ import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.AssertUtil;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +49,8 @@ class HttpTemplate {
      */
     private Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
     private final int readTimeout = Config.getHttpReadTimeout();
+    private final String proxyHostname = Config.getProxyHostname();
+    private final int proxyPort = Config.getProxyPort();
 
     /**
      * Constructor
@@ -187,7 +186,14 @@ class HttpTemplate {
      */
     protected HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
 
-        HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection();
+        Proxy proxy;
+        if (proxyPort != -1 && !proxyHostname.equals("")) {
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHostname, proxyPort));
+        } else {
+            proxy = Proxy.NO_PROXY;
+        }
+
+        HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection(proxy);
         if (readTimeout > 0) {
             connection.setReadTimeout(readTimeout);
         }
