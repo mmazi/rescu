@@ -18,7 +18,7 @@ class Config {
 
     private static final String HTTP_READ_TIMEOUT = "rescu.http.readTimeoutMillis";
 
-    private static final String PROXY_HOSTNAME = "rescu.http.readProxyAddress";
+    private static final String PROXY_HOSTNAME = "rescu.http.readProxyHostname";
 
     private static final String PROXY_PORT = "rescu.http.readProxyPort";
 
