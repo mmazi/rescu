@@ -67,7 +67,7 @@ class HttpTemplate {
         // User agent provides statistics for servers, but some use it for content negotiation so fake good agents
         defaultHttpHeaders.put("User-Agent", "ResCU JDK/6 AppleWebKit/535.7 Chrome/16.0.912.36 Safari/535.7"); // custom User-Agent
 
-        proxy = Config.getProxyPort() == -1 || Config.getProxyHostname().equals("")
+        proxy = Config.getProxyPort() == null || Config.getProxyHostname() == null
                 ? Proxy.NO_PROXY
                 : new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Config.getProxyHostname(), Config.getProxyPort()));
     }

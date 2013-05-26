@@ -26,13 +26,11 @@ class Config {
 
     private static final String proxyHostname;
 
-    private static final int proxyPort;
+    private static final Integer proxyPort;
 
     static {
         Properties dfts = new Properties();
         dfts.setProperty(HTTP_READ_TIMEOUT, "30000");
-        dfts.setProperty(PROXY_HOSTNAME, "");
-        dfts.setProperty(PROXY_PORT, "-1");
 
         Properties properties = new Properties(dfts);
         InputStream propsStream = RestProxyFactory.class.getResourceAsStream("/rescu.properties");
@@ -47,8 +45,10 @@ class Config {
 
         httpReadTimeout = Integer.parseInt(properties.getProperty(HTTP_READ_TIMEOUT));
         proxyHostname = properties.getProperty(PROXY_HOSTNAME);
-        proxyPort = Integer.parseInt(properties.getProperty(PROXY_PORT));
+        String proxyPortStr = properties.getProperty(PROXY_PORT);
+        proxyPort = proxyPortStr == null ? null : Integer.parseInt(proxyPortStr);
 
+        log.debug("Configuration from rescu.properties:");
         log.debug("httpReadTimeout = {}", httpReadTimeout);
         log.debug("proxyHostname = {}", proxyHostname);
         log.debug("proxyPort = {}", proxyPort);
@@ -62,7 +62,7 @@ class Config {
         return proxyHostname;
     }
 
-    public static int getProxyPort() {
+    public static Integer getProxyPort() {
         return proxyPort;
     }
 }
