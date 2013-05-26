@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import si.mazi.rescu.utils.Assert;
+import si.mazi.rescu.utils.AssertUtil;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -90,8 +90,8 @@ class HttpTemplate {
         log.trace("Request body = {}", requestBody);
         log.trace("Request headers = {}", httpHeaders);
 
-        Assert.notNull(urlString, "urlString cannot be null");
-        Assert.notNull(httpHeaders, "httpHeaders should not be null");
+        AssertUtil.notNull(urlString, "urlString cannot be null");
+        AssertUtil.notNull(httpHeaders, "httpHeaders should not be null");
 
         httpHeaders.put("Accept", "application/json");
         if (contentType != null) {
@@ -149,9 +149,9 @@ class HttpTemplate {
      */
     private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
 
-        Assert.notNull(method, "method cannot be null");
-        Assert.notNull(urlString, "urlString cannot be null");
-        Assert.notNull(httpHeaders, "httpHeaders cannot be null");
+        AssertUtil.notNull(method, "method cannot be null");
+        AssertUtil.notNull(urlString, "urlString cannot be null");
+        AssertUtil.notNull(httpHeaders, "httpHeaders cannot be null");
 
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());

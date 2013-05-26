@@ -28,8 +28,10 @@ package si.mazi.rescu.utils;
  * <ul>
  * <li>Provision of useful assertions to trap programmer errors early</li>
  * </ul>
+ *
+ * todo: replace with hamcrest
  */
-public abstract class Assert {
+public abstract class AssertUtil {
 
     /**
      * <p>

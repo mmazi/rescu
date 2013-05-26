@@ -22,7 +22,7 @@
 package si.mazi.rescu;
 
 import org.testng.annotations.Test;
-import si.mazi.rescu.utils.Assert;
+import si.mazi.rescu.utils.AssertUtil;
 
 import javax.ws.rs.Path;
 
@@ -35,9 +35,17 @@ public class AnnotationUtilsTest {
     public void testGetFromMethodOrClass() throws Exception {
 
         Path path = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getTicker", String.class, String.class), Path.class);
-        Assert.isTrue(path.value().equals("{ident}_{currency}/ticker"), "Wrong path.");
+        AssertUtil.isTrue(path.value().equals("{ident}_{currency}/ticker"), "Wrong path.");
 
         Path pathFromIntf = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getInfo", Long.class, Long.class), Path.class);
-        Assert.isTrue(pathFromIntf.value().equals("api/2"), "Wrong path: " + pathFromIntf.value());
+        AssertUtil.isTrue(pathFromIntf.value().equals("api/2"), "Wrong path: " + pathFromIntf.value());
     }
+
+/*
+    @Test
+    public void testGetMethodAnnotations() throws Exception {
+        Method method = ExampleService.class.getMethod("testJsonBody", DummyAccountInfo.class);
+        Assert.;
+    }
+*/
 }

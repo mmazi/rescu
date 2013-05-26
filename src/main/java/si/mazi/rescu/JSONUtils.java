@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import si.mazi.rescu.utils.Assert;
+import si.mazi.rescu.utils.AssertUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -55,11 +55,11 @@ public class JSONUtils {
      */
     public static <T> T getJsonObject(String jsonString, Class<T> returnType, ObjectMapper objectMapper) {
 
-        Assert.notNull(jsonString, "jsonString cannot be null");
+        AssertUtil.notNull(jsonString, "jsonString cannot be null");
         if (jsonString.trim().length() == 0) {
             return null;
         }
-        Assert.notNull(objectMapper, "objectMapper cannot be null");
+        AssertUtil.notNull(objectMapper, "objectMapper cannot be null");
         try {
             return objectMapper.readValue(jsonString, returnType);
         } catch (IOException e) {
@@ -78,8 +78,8 @@ public class JSONUtils {
      */
     public static Map<String, Object> getJsonGenericMap(String jsonString, ObjectMapper objectMapper) {
 
-        Assert.notNull(jsonString, "jsonString cannot be null");
-        Assert.notNull(objectMapper, "objectMapper cannot be null");
+        AssertUtil.notNull(jsonString, "jsonString cannot be null");
+        AssertUtil.notNull(objectMapper, "objectMapper cannot be null");
         try {
             return objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
             });
@@ -98,8 +98,8 @@ public class JSONUtils {
      */
     public static String getJSONString(Object object, ObjectMapper objectMapper) {
 
-        Assert.notNull(object, "object cannot be null");
-        Assert.notNull(objectMapper, "objectMapper cannot be null");
+        AssertUtil.notNull(object, "object cannot be null");
+        AssertUtil.notNull(objectMapper, "objectMapper cannot be null");
         try {
             return objectMapper.writeValueAsString(object);
         } catch (IOException e) {
