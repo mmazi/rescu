@@ -44,7 +44,7 @@ public class RestInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         RestMethodMetadata restMethodMetadata = RestMethodMetadata.create(method, baseUrl, intfacePath); // todo: this may be cached for method
-        RestInvocationParams params = RestInvocationParams.createInstance(method, args, restMethodMetadata);
+        RestInvocationParams params = new RestInvocationParams(restMethodMetadata, args);
         return invokeHttp(restMethodMetadata, params);
     }
 

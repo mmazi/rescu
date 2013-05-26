@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Matija Mazi
@@ -47,18 +48,27 @@ public class RestMethodMetadata implements Serializable {
     protected final String methodPathTemplate;
     protected final Class<? extends RuntimeException> exceptionType;
     protected final String contentType;
+    protected final String methodName;
+    protected final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
+    protected final Annotation[][] parameterAnnotations;
 
-    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType, String contentType) {
+    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType, String contentType, String methodName, Map<Class<? extends Annotation>, Annotation> methodAnnotationMap, Annotation[][] parameterAnnotations) {
         this.returnType = returnType;
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
         this.contentType = contentType;
+        this.methodName = methodName;
+        this.methodAnnotationMap = methodAnnotationMap;
+        this.parameterAnnotations = parameterAnnotations;
         this.methodPathTemplate = methodPathTemplate == null ? "" : methodPathTemplate;
         this.exceptionType = exceptionType;
     }
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
+        String methodName = method.getName();
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, RestInvocationParams.PARAM_ANNOTATION_CLASSES);
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
         String contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
         Path pathAnn = method.getAnnotation(Path.class);
@@ -75,7 +85,7 @@ public class RestMethodMetadata implements Serializable {
                 throw new IllegalArgumentException("Only RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
             }
         }
-        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType, contentType);
+        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType, contentType, methodName, methodAnnotationMap, parameterAnnotations);
     }
 
     static HttpMethod getHttpMethod(Method method) {

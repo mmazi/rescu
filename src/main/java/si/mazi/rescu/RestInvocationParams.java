@@ -31,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -47,7 +46,7 @@ import java.util.*;
 public class RestInvocationParams implements Serializable {
 
     @SuppressWarnings("unchecked")
-    private static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
+    protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -61,13 +60,13 @@ public class RestInvocationParams implements Serializable {
     private String path;
     private String baseUrl;
 
-    RestInvocationParams(Method method, Object[] args) {
+    RestInvocationParams(RestMethodMetadata restMethodMetadata, Object[] args) {
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
             paramsMap.put(annotationClass, Params.of());
         }
 
-        Annotation[][] paramAnnotations = method.getParameterAnnotations();
+        Annotation[][] paramAnnotations = restMethodMetadata.parameterAnnotations;
         for (int i = 0; i < paramAnnotations.length; i++) {
             Annotation[] paramAnns = paramAnnotations[i];
             if (paramAnns.length == 0) {
@@ -81,15 +80,34 @@ public class RestInvocationParams implements Serializable {
             }
         }
 
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, PARAM_ANNOTATION_CLASSES);
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = restMethodMetadata.methodAnnotationMap;
 
-        // Support using method method name as a parameter.
+        // Support using method name as a parameter.
         for (Class<? extends Annotation> paramAnnotationClass : methodAnnotationMap.keySet()) {
             Annotation annotation = methodAnnotationMap.get(paramAnnotationClass);
             if (annotation != null) {
                 String paramName = getParamName(annotation);
-                this.paramsMap.get(paramAnnotationClass).add(paramName, method.getName());
+                this.paramsMap.get(paramAnnotationClass).add(paramName, restMethodMetadata.methodName);
             }
+        }
+
+        contentType = restMethodMetadata.contentType;
+        baseUrl = restMethodMetadata.baseUrl;
+        methodPath = getPath(restMethodMetadata.methodPathTemplate);
+        path = restMethodMetadata.intfacePath;
+        path = appendIfNotEmpty(path, methodPath, "/");
+        queryString = paramsMap.get(QueryParam.class).asQueryString();
+
+        invocationUrl = getInvocationUrl(baseUrl, path, queryString);
+
+        for (int i = 0; i < unannanotatedParams.size(); i++) {
+            Object param = unannanotatedParams.get(i);
+            if (param instanceof ParamsDigest) {
+                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
+            }
+        }
+        for (Params params : paramsMap.values()) {
+            params.digestAll(restMethodMetadata, this);
         }
     }
 
@@ -98,12 +116,6 @@ public class RestInvocationParams implements Serializable {
 
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
-    }
-
-    static RestInvocationParams createInstance(Method method, Object[] args, RestMethodMetadata restMethodMetadata) {
-        RestInvocationParams invocationParams = new RestInvocationParams(method, args);
-        invocationParams.apply(restMethodMetadata);
-        return invocationParams;
     }
 
     private static String getParamName(Annotation queryParam) {
@@ -135,27 +147,6 @@ public class RestInvocationParams implements Serializable {
             url += next;
         }
         return url;
-    }
-
-    private void apply(RestMethodMetadata restMethodMetadata) {
-        contentType = restMethodMetadata.contentType;
-        baseUrl = restMethodMetadata.baseUrl;
-        methodPath = getPath(restMethodMetadata.methodPathTemplate);
-        path = restMethodMetadata.intfacePath;
-        path = appendIfNotEmpty(path, methodPath, "/");
-        queryString = paramsMap.get(QueryParam.class).asQueryString();
-
-        invocationUrl = getInvocationUrl(baseUrl, path, queryString);
-
-        for (int i = 0; i < unannanotatedParams.size(); i++) {
-            Object param = unannanotatedParams.get(i);
-            if (param instanceof ParamsDigest) {
-                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
-            }
-        }
-        for (Params params : paramsMap.values()) {
-            params.digestAll(restMethodMetadata, this);
-        }
     }
 
     public String getPath(String methodPath) {
