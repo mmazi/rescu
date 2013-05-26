@@ -73,4 +73,4 @@ Important note:
 ---------------
 
 I am very open to new suggestions, change requests etc. If ResCU seems almost right for you, but not quite,
-do write me a note.
+do write me a note, eg. by [opening an issue](https://github.com/mmazi/rescu/issues/new).
