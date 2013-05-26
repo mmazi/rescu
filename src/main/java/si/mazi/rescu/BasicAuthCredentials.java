@@ -40,9 +40,9 @@ public class BasicAuthCredentials implements ParamsDigest {
         this.password = password;
     }
 
-    public String digestParams(RestInvocationParams restInvocationParams) {
+    public String digestParams(RestInvocation restInvocation) {
 
-        // ignore restInvocationParams, just need username & password
+        // ignore restInvocation, just need username & password
         try {
             byte[] inputBytes = (username + ":" + password).getBytes("ISO-8859-1");
             return "Basic " + Base64.encodeBytes(inputBytes);

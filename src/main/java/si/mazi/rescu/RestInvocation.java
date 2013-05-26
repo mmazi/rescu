@@ -36,13 +36,13 @@ import java.util.*;
 /**
  * This holds name-value mapping for various types of params used in REST (QueryParam, PathParam, FormParam, HeaderParam).
  *
- * One RestInvocationParams instance corresponds to one method invocation.
+ * One RestInvocation instance corresponds to one method invocation.
  *
  * todo: A better name for this class would be RestInvocation.
  *
  * @author Matija Mazi
  */
-public class RestInvocationParams implements Serializable {
+public class RestInvocation implements Serializable {
 
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
@@ -57,9 +57,12 @@ public class RestInvocationParams implements Serializable {
     private String invocationUrl;
     private String queryString;
     private String path;
-    private String baseUrl;
 
-    RestInvocationParams(RestMethodMetadata restMethodMetadata, Object[] args) {
+    private RestMethodMetadata restMethodMetadata;
+
+    RestInvocation(RestMethodMetadata restMethodMetadata, Object[] args) {
+        this.restMethodMetadata = restMethodMetadata;
+
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
             paramsMap.put(annotationClass, Params.of());
@@ -91,13 +94,12 @@ public class RestInvocationParams implements Serializable {
         }
 
         contentType = restMethodMetadata.contentType;
-        baseUrl = restMethodMetadata.baseUrl;
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
         path = restMethodMetadata.intfacePath;
         path = appendIfNotEmpty(path, methodPath, "/");
         queryString = paramsMap.get(QueryParam.class).asQueryString();
 
-        invocationUrl = getInvocationUrl(baseUrl, path, queryString);
+        invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, path, queryString);
 
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
@@ -106,12 +108,12 @@ public class RestInvocationParams implements Serializable {
             }
         }
         for (Params params : paramsMap.values()) {
-            params.digestAll(restMethodMetadata, this);
+            params.digestAll(this);
         }
     }
 
     // todo: this is needed only for testing
-    public RestInvocationParams(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
+    public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
 
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
@@ -211,7 +213,7 @@ public class RestInvocationParams implements Serializable {
      * (eg. http://www.example.com/) but may be longer.
      */
     public String getBaseUrl() {
-        return baseUrl;
+        return restMethodMetadata.baseUrl;
     }
 
     /**
@@ -219,5 +221,9 @@ public class RestInvocationParams implements Serializable {
      */
     public String getQueryString() {
         return queryString;
+    }
+
+    public RestMethodMetadata getRestMethodMetadata() {
+        return restMethodMetadata;
     }
 }

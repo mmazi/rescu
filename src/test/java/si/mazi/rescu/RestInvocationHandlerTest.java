@@ -72,17 +72,17 @@ public class RestInvocationHandlerTest {
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
 
-        Assert.assertEquals(testHandler.params.getInvocationUrl(), url);
-        Assert.assertEquals(testHandler.params.getMethodPath(), methodPath);
-        Assert.assertEquals(testHandler.params.getBaseUrl(), baseUrl);
-        Assert.assertEquals(testHandler.params.getQueryString(), queryString);
-        Assert.assertEquals(testHandler.params.getPath(), path);
-        Assert.assertEquals(testHandler.restMethodMetadata.httpMethod, httpMethod);
-        Assert.assertEquals(testHandler.restMethodMetadata.returnType, resultClass);
-        Assert.assertEquals(testHandler.params.getRequestBody(), postBody);
-        Assert.assertEquals(testHandler.params.getRequestBody(), postBody);
+        Assert.assertEquals(testHandler.invocation.getInvocationUrl(), url);
+        Assert.assertEquals(testHandler.invocation.getMethodPath(), methodPath);
+        Assert.assertEquals(testHandler.invocation.getBaseUrl(), baseUrl);
+        Assert.assertEquals(testHandler.invocation.getQueryString(), queryString);
+        Assert.assertEquals(testHandler.invocation.getPath(), path);
+        Assert.assertEquals(testHandler.invocation.getRestMethodMetadata().httpMethod, httpMethod);
+        Assert.assertEquals(testHandler.invocation.getRestMethodMetadata().returnType, resultClass);
+        Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
+        Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
         if (headers != null) {
-            Assert.assertEquals(headers, testHandler.params.getHttpHeaders());
+            Assert.assertEquals(headers, testHandler.invocation.getHttpHeaders());
         }
     }
 
@@ -93,7 +93,7 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.testJsonBody(new DummyAccountInfo("mm", "USD", 3));
-        Assert.assertEquals(testHandler.params.getRequestBody(), "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
+        Assert.assertEquals(testHandler.invocation.getRequestBody(), "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
 
     }
 
@@ -109,17 +109,15 @@ public class RestInvocationHandlerTest {
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
-        private RestMethodMetadata restMethodMetadata;
-        private RestInvocationParams params;
+        private RestInvocation invocation;
 
         public TestRestInvocationHandler(Class<?> restInterface) {
             super(restInterface, "https://example.com");
         }
 
         @Override
-        protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
-            this.restMethodMetadata = restMethodMetadata;
-            this.params = params;
+        protected Object invokeHttp(RestInvocation invocation) {
+            this.invocation = invocation;
             return null;
         }
     }

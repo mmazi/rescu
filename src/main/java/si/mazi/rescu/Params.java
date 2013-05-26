@@ -134,7 +134,7 @@ public class Params implements Serializable {
         return paramValue.toString();
     }
 
-    public void digestAll(RestMethodMetadata restMethodMetadata, RestInvocationParams invocationParams) {
+    public void digestAll(RestInvocation invocationParams) {
         for (String paramName : data.keySet()) {
             Object paramValue = data.get(paramName);
             if (paramValue instanceof ParamsDigest) {

@@ -67,7 +67,7 @@ public class RestMethodMetadata implements Serializable {
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
         String methodName = method.getName();
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, RestInvocationParams.PARAM_ANNOTATION_CLASSES);
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, RestInvocation.PARAM_ANNOTATION_CLASSES);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
         String contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
