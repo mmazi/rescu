@@ -24,6 +24,8 @@ package si.mazi.rescu;
 import javax.ws.rs.Path;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Matija Mazi
@@ -34,22 +36,30 @@ public class RestInvocationHandler implements InvocationHandler {
     private final String intfacePath;
     private final String baseUrl;
 
-    public RestInvocationHandler(Class<?> restInterface, String url) {
+    private final Map<Method, RestMethodMetadata> cache = new HashMap<Method, RestMethodMetadata>();
 
+    public RestInvocationHandler(Class<?> restInterface, String url) {
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
         this.httpTemplate = new HttpTemplate();
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-        RestMethodMetadata restMethodMetadata = RestMethodMetadata.create(method, baseUrl, intfacePath); // todo: this may be cached for method
+        RestMethodMetadata restMethodMetadata = getMetadata(method);
         RestInvocationParams params = new RestInvocationParams(restMethodMetadata, args);
         return invokeHttp(restMethodMetadata, params);
     }
 
-    protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
+    private RestMethodMetadata getMetadata(Method method) {
+        RestMethodMetadata metadata = cache.get(method);
+        if (metadata == null) {
+            metadata = RestMethodMetadata.create(method, baseUrl, intfacePath);
+            cache.put(method, metadata);
+        }
+        return metadata;
+    }
 
+    protected Object invokeHttp(RestMethodMetadata restMethodMetadata, RestInvocationParams params) {
         return httpTemplate.executeRequest(params.getInvocationUrl(), restMethodMetadata.returnType,
                 params.getRequestBody(), params.getHttpHeaders(), restMethodMetadata.httpMethod, params.getContentType(),
                 restMethodMetadata.exceptionType);
