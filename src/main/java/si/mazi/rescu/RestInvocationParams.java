@@ -81,11 +81,13 @@ public class RestInvocationParams implements Serializable {
             }
         }
 
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, PARAM_ANNOTATION_CLASSES);
+
         // Support using method method name as a parameter.
-        for (Class<? extends Annotation> paramAnnotationClass : PARAM_ANNOTATION_CLASSES) {
-            if (method.isAnnotationPresent(paramAnnotationClass)) {
-                Annotation paramAnn = method.getAnnotation(paramAnnotationClass);
-                String paramName = getParamName(paramAnn);
+        for (Class<? extends Annotation> paramAnnotationClass : methodAnnotationMap.keySet()) {
+            Annotation annotation = methodAnnotationMap.get(paramAnnotationClass);
+            if (annotation != null) {
+                String paramName = getParamName(annotation);
                 this.paramsMap.get(paramAnnotationClass).add(paramName, method.getName());
             }
         }

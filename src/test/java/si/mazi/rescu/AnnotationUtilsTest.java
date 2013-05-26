@@ -21,10 +21,17 @@
  */
 package si.mazi.rescu;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
+import si.mazi.rescu.dto.DummyAccountInfo;
 import si.mazi.rescu.utils.AssertUtil;
 
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Matija Mazi <br/>
@@ -41,11 +48,25 @@ public class AnnotationUtilsTest {
         AssertUtil.isTrue(pathFromIntf.value().equals("api/2"), "Wrong path: " + pathFromIntf.value());
     }
 
-/*
+    @SuppressWarnings("unchecked")
     @Test
     public void testGetMethodAnnotations() throws Exception {
         Method method = ExampleService.class.getMethod("testJsonBody", DummyAccountInfo.class);
-        Assert.;
+        testForAnns(method, Arrays.<Class<? extends Annotation>>asList(POST.class, Consumes.class));
+        testForAnns(method, Arrays.<Class<? extends Annotation>>asList(Path.class));
+        testForAnns(method, Arrays.<Class<? extends Annotation>>asList());
+
+        List<Class<? extends Annotation>> classes = Arrays.asList(POST.class, GET.class, DELETE.class, PUT.class, HEAD.class);
+        Map<Class<? extends Annotation>,Annotation> map = AnnotationUtils.getMethodAnnotationMap(method, classes);
+        Assert.assertEquals(map.keySet(), Arrays.asList(POST.class));
+        Assert.assertTrue(POST.class.isInstance(map.get(POST.class)));
     }
-*/
+
+    private void testForAnns(Method method, List<Class<? extends Annotation>> classes) {
+        Map<Class<? extends Annotation>,Annotation> map = AnnotationUtils.getMethodAnnotationMap(method, classes);
+        Assert.assertEquals(map.keySet(), classes);
+        for (Class<? extends Annotation> annClass : classes) {
+            Assert.assertTrue(annClass.isInstance(map.get(annClass)));
+        }
+    }
 }

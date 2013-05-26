@@ -23,6 +23,9 @@ package si.mazi.rescu;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Matija Mazi <br/>
@@ -59,5 +62,18 @@ public class AnnotationUtils {
             }
         }
         return null;
+    }
+
+    /**
+     * @return a map of annotations on the method that belong to the given collection.
+     */
+    static Map<Class<? extends Annotation>, Annotation> getMethodAnnotationMap(Method method, Collection<Class<? extends Annotation>> annotationClasses) {
+        Annotation[] methodAnnotations = method.getAnnotations();
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = new HashMap<Class<? extends Annotation>, Annotation>();
+        for (Annotation methodAnnotation : methodAnnotations) {
+            methodAnnotationMap.put(methodAnnotation.annotationType(), methodAnnotation);
+        }
+        methodAnnotationMap.keySet().retainAll(annotationClasses);
+        return methodAnnotationMap;
     }
 }
