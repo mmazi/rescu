@@ -38,8 +38,6 @@ import java.util.*;
  *
  * One RestInvocation instance corresponds to one method invocation.
  *
- * todo: A better name for this class would be RestInvocation.
- *
  * @author Matija Mazi
  */
 public class RestInvocation implements Serializable {
