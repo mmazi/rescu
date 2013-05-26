@@ -22,6 +22,7 @@
 package si.mazi.rescu;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -45,17 +46,21 @@ public class RestMethodMetadata implements Serializable {
     protected final String intfacePath;
     protected final String methodPathTemplate;
     protected final Class<? extends RuntimeException> exceptionType;
+    protected final String contentType;
 
-    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType) {
+    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType, String contentType) {
         this.returnType = returnType;
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
+        this.contentType = contentType;
         this.methodPathTemplate = methodPathTemplate == null ? "" : methodPathTemplate;
         this.exceptionType = exceptionType;
     }
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
+        Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
+        String contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
@@ -70,7 +75,7 @@ public class RestMethodMetadata implements Serializable {
                 throw new IllegalArgumentException("Only RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
             }
         }
-        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType);
+        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType, contentType);
     }
 
     static HttpMethod getHttpMethod(Method method) {

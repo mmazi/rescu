@@ -23,7 +23,10 @@ package si.mazi.rescu;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.ws.rs.*;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.Serializable;
@@ -48,10 +51,10 @@ public class RestInvocationParams implements Serializable {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String contentType;
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams = new ArrayList<Object>();
 
+    private String contentType;
     private String methodPath;
     private String invocationUrl;
     private String queryString;
@@ -59,10 +62,6 @@ public class RestInvocationParams implements Serializable {
     private String baseUrl;
 
     RestInvocationParams(Method method, Object[] args) {
-
-        Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
-        this.contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
-
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
             paramsMap.put(annotationClass, Params.of());
@@ -100,7 +99,6 @@ public class RestInvocationParams implements Serializable {
     }
 
     static RestInvocationParams createInstance(Method method, Object[] args, RestMethodMetadata restMethodMetadata) {
-
         RestInvocationParams invocationParams = new RestInvocationParams(method, args);
         invocationParams.apply(restMethodMetadata);
         return invocationParams;
@@ -138,6 +136,7 @@ public class RestInvocationParams implements Serializable {
     }
 
     private void apply(RestMethodMetadata restMethodMetadata) {
+        contentType = restMethodMetadata.contentType;
         baseUrl = restMethodMetadata.baseUrl;
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
         path = restMethodMetadata.intfacePath;
