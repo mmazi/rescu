@@ -49,14 +49,12 @@ class HttpTemplate {
      */
     private Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
     private final int readTimeout = Config.getHttpReadTimeout();
-    private final String proxyHostname = Config.getProxyHostname();
-    private final int proxyPort = Config.getProxyPort();
+    private final Proxy proxy;
 
     /**
      * Constructor
      */
     public HttpTemplate() {
-
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -68,6 +66,10 @@ class HttpTemplate {
         defaultHttpHeaders.put("Accept", "text/plain");
         // User agent provides statistics for servers, but some use it for content negotiation so fake good agents
         defaultHttpHeaders.put("User-Agent", "ResCU JDK/6 AppleWebKit/535.7 Chrome/16.0.912.36 Safari/535.7"); // custom User-Agent
+
+        proxy = Config.getProxyPort() == -1 || Config.getProxyHostname().equals("")
+                ? Proxy.NO_PROXY
+                : new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Config.getProxyHostname(), Config.getProxyPort()));
     }
 
     /**
@@ -185,14 +187,6 @@ class HttpTemplate {
      * @throws IOException
      */
     protected HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
-
-        Proxy proxy;
-        if (proxyPort != -1 && !proxyHostname.equals("")) {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHostname, proxyPort));
-        } else {
-            proxy = Proxy.NO_PROXY;
-        }
-
         HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection(proxy);
         if (readTimeout > 0) {
             connection.setReadTimeout(readTimeout);
