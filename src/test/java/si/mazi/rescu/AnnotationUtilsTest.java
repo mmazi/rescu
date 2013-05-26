@@ -29,14 +29,18 @@ import si.mazi.rescu.utils.AssertUtil;
 import javax.ws.rs.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Matija Mazi <br/>
  */
 public class AnnotationUtilsTest {
+
+    public static final Comparator<Class<? extends Annotation>> CLASS_NAME_COMPARATOR = new Comparator<Class<? extends Annotation>>() {
+        public int compare(Class<? extends Annotation> o1, Class<? extends Annotation> o2) {
+            return o1.getCanonicalName().compareTo(o2.getCanonicalName());
+        }
+    };
 
     @Test
     public void testGetFromMethodOrClass() throws Exception {
@@ -64,9 +68,15 @@ public class AnnotationUtilsTest {
 
     private void testForAnns(Method method, List<Class<? extends Annotation>> classes) {
         Map<Class<? extends Annotation>,Annotation> map = AnnotationUtils.getMethodAnnotationMap(method, classes);
-        Assert.assertEquals(map.keySet(), classes);
+        Assert.assertEquals(sort(map.keySet()), sort(classes));
         for (Class<? extends Annotation> annClass : classes) {
             Assert.assertTrue(annClass.isInstance(map.get(annClass)));
         }
+    }
+
+    private static Set<Class<? extends Annotation>> sort(Collection<Class<? extends Annotation>> classes) {
+        SortedSet<Class<? extends Annotation>> sortedSet = new TreeSet<Class<? extends Annotation>>(CLASS_NAME_COMPARATOR);
+        sortedSet.addAll(classes);
+        return sortedSet;
     }
 }
