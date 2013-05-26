@@ -38,8 +38,7 @@ import java.util.*;
  *
  * One RestInvocationParams instance corresponds to one method invocation.
  *
- * todo: perhaps this should be split into RestInvocationParams and RestInvocation, where the latter would contain
- * a RestInvocationParams and RestMethodMetadata (or the data derived from both, ie. methodPatha and invocationUrl).
+ * todo: A better name for this class would be RestInvocation.
  *
  * @author Matija Mazi
  */
