@@ -18,13 +18,13 @@ class Config {
 
     private static final String HTTP_READ_TIMEOUT = "rescu.http.readTimeoutMillis";
 
-    private static final String PROXY_HOSTNAME = "rescu.http.readProxyHostname";
+    private static final String PROXY_HOST = "rescu.http.readProxyHost";
 
     private static final String PROXY_PORT = "rescu.http.readProxyPort";
 
     private static final int httpReadTimeout;
 
-    private static final String proxyHostname;
+    private static final String proxyHost;
 
     private static final Integer proxyPort;
 
@@ -44,13 +44,13 @@ class Config {
         }
 
         httpReadTimeout = Integer.parseInt(properties.getProperty(HTTP_READ_TIMEOUT));
-        proxyHostname = properties.getProperty(PROXY_HOSTNAME);
+        proxyHost = properties.getProperty(PROXY_HOST);
         String proxyPortStr = properties.getProperty(PROXY_PORT);
         proxyPort = proxyPortStr == null ? null : Integer.parseInt(proxyPortStr);
 
         log.debug("Configuration from rescu.properties:");
         log.debug("httpReadTimeout = {}", httpReadTimeout);
-        log.debug("proxyHostname = {}", proxyHostname);
+        log.debug("proxyHost = {}", proxyHost);
         log.debug("proxyPort = {}", proxyPort);
     }
 
@@ -58,8 +58,8 @@ class Config {
         return httpReadTimeout;
     }
 
-    public static String getProxyHostname() {
-        return proxyHostname;
+    public static String getProxyHost() {
+        return proxyHost;
     }
 
     public static Integer getProxyPort() {
