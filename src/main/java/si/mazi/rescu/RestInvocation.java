@@ -139,7 +139,7 @@ public class RestInvocation implements Serializable {
     }
 
     static String appendIfNotEmpty(String url, String next, String separator) {
-        if (!url.isEmpty() && next != null && !next.isEmpty()) {
+        if (url.length() > 0 && next != null && next.length() > 0) {
             if (!url.endsWith(separator) && !next.startsWith(separator)) {
                 url += separator;
             }
