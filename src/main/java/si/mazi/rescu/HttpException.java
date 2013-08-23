@@ -29,7 +29,7 @@ package si.mazi.rescu;
  * <li>Indication that there was an HTTP communication problem</li>
  * </ul>
  */
-public class HttpException extends RuntimeException {
+public class HttpException extends RestMethodInvocationException {
 
     public HttpException(String message) {
         super(message);

@@ -63,9 +63,8 @@ public class JSONUtils {
         try {
             return objectMapper.readValue(jsonString, returnType);
         } catch (IOException e) {
-            // Rethrow as runtime exception
             log.error("Error unmarshalling from json: " + jsonString);
-            throw new RuntimeException("Problem getting JSON object", e);
+            throw new RestJsonException("Problem getting JSON object", e);
         }
     }
 
@@ -84,8 +83,7 @@ public class JSONUtils {
             return objectMapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
             });
         } catch (IOException e) {
-            // Rethrow as runtime exception
-            throw new RuntimeException("Problem getting JSON generic map", e);
+            throw new RestJsonException("Problem getting JSON generic map", e);
         }
     }
 
@@ -103,8 +101,7 @@ public class JSONUtils {
         try {
             return objectMapper.writeValueAsString(object);
         } catch (IOException e) {
-            // Rethrow as runtime exception
-            throw new RuntimeException("Problem getting JSON String", e);
+            throw new RestJsonException("Problem getting JSON String", e);
         }
     }
 

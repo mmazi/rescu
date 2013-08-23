@@ -21,6 +21,7 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.FormParam;
@@ -28,7 +29,6 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -168,8 +168,8 @@ public class RestInvocation implements Serializable {
             }
             try {
                 return objectMapper.writeValueAsString(unannanotatedParams.get(0));
-            } catch (IOException e) {
-                throw new RuntimeException("Error writing json, probably a bug.", e);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Error writing json, probably a bug in rescu.", e);
             }
         }
         throw new IllegalArgumentException("Unsupported media type: " + contentType);

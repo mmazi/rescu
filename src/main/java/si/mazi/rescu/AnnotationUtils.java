@@ -41,7 +41,7 @@ public class AnnotationUtils {
         try {
             return (String) ann.getClass().getMethod("value").invoke(ann);
         } catch (Exception e) {
-            throw new RuntimeException("Annotation " + annotationClass + " has no element 'value'.");
+            throw new RuntimeException("Annotation " + annotationClass + " has no element 'value'. This is a bug in rescu.");
         }
     }
 
