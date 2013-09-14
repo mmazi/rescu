@@ -21,11 +21,17 @@
  */
 package si.mazi.rescu;
 
+import com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.testng.internal.collections.Pair;
 import si.mazi.rescu.dto.DummyAccountInfo;
 import si.mazi.rescu.dto.Order;
 
+import javax.ws.rs.FormParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,19 +49,20 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
-        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00");
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00", FormParam.class, "user", "john");
 
-        proxy.buy("john", "secret", new BigDecimal("3.14"), null);
-        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14");
+        BigDecimal amount = new BigDecimal("3.14");
+        proxy.buy("john", "secret", amount, null);
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14", FormParam.class, "amount", amount);
 
-        proxy.withdrawBitcoin("john", "secret", new BigDecimal("3.14"), "mybitcoinaddress");
-        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/bitcoin_withdrawal/john?amount=3.14&address=mybitcoinaddress", HttpMethod.POST, "https://example.com", "api/2/bitcoin_withdrawal/john", "bitcoin_withdrawal/john", "amount=3.14&address=mybitcoinaddress", "password=secret");
+        proxy.withdrawBitcoin("john", "secret", amount, "mybitcoinaddress");
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/bitcoin_withdrawal/john?amount=3.14&address=mybitcoinaddress", HttpMethod.POST, "https://example.com", "api/2/bitcoin_withdrawal/john", "bitcoin_withdrawal/john", "amount=3.14&address=mybitcoinaddress", "password=secret", QueryParam.class, "amount", amount);
 
         proxy.getTicker("btc", "usd");
-        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/btc_usd/ticker", HttpMethod.GET, "https://example.com", "api/2/btc_usd/ticker", "btc_usd/ticker", "", "");
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2/btc_usd/ticker", HttpMethod.GET, "https://example.com", "api/2/btc_usd/ticker", "btc_usd/ticker", "", "", PathParam.class, "ident", "btc");
 
         proxy.getInfo(1000L, 2000L);
-        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo");
+        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo", FormParam.class, "method", "getInfo");
     }
 
     @Test
@@ -64,14 +71,18 @@ public class RestInvocationHandlerTest {
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
-        proxy.testBasicAuth(new BasicAuthCredentials("Aladdin", "open sesame"), 23);
+        BasicAuthCredentials credentials = new BasicAuthCredentials("Aladdin", "open sesame");
+        proxy.testBasicAuth(credentials, 23);
         HashMap<String, String> authHeaders = new HashMap<String, String>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", "");
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
+        assertRequestData(testHandler, resultClass, headers, url, httpMethod, baseUrl, path, methodPath, queryString, postBody, null, null, null);
+    }
 
+    private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody, Class<? extends Annotation> paramAnn, String paramName, Object expectedParamValue) {
         Assert.assertEquals(testHandler.invocation.getInvocationUrl(), url);
         Assert.assertEquals(testHandler.invocation.getMethodPath(), methodPath);
         Assert.assertEquals(testHandler.invocation.getBaseUrl(), baseUrl);
@@ -79,6 +90,14 @@ public class RestInvocationHandlerTest {
         Assert.assertEquals(testHandler.invocation.getPath(), path);
         Assert.assertEquals(testHandler.invocation.getRestMethodMetadata().httpMethod, httpMethod);
         Assert.assertEquals(testHandler.invocation.getRestMethodMetadata().returnType, resultClass);
+
+        if (paramAnn != null) {
+            Map<Pair<Class<? extends Annotation>, String>, Object> arguments = ImmutableMap.<Pair<Class<? extends Annotation>, String>, Object>builder().put(new Pair<Class<? extends Annotation>, String>(paramAnn, paramName), expectedParamValue).build();
+            for (Pair<Class<? extends Annotation>, String> param : arguments.keySet()) {
+                Object argValue = testHandler.invocation.getParameter(param.first(), param.second());
+                Assert.assertEquals(argValue, arguments.get(param), "Wrong param value for " + param + ": " + argValue);
+            }
+        }
         Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
         Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
         if (headers != null) {
@@ -104,7 +123,7 @@ public class RestInvocationHandlerTest {
         RootPathService proxy = RestProxyFactory.createProxy(RootPathService.class, testHandler);
 
         proxy.cancel("424");
-        assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", "");
+        assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", "", QueryParam.class, "id", "424");
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

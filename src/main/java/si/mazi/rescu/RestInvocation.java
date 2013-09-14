@@ -224,4 +224,18 @@ public class RestInvocation implements Serializable {
     public RestMethodMetadata getRestMethodMetadata() {
         return restMethodMetadata;
     }
+
+    /**
+     * @param paramAnnotation One of {@link javax.ws.rs.QueryParam}.class, {@link javax.ws.rs.PathParam}.class,
+     *                         {@link javax.ws.rs.FormParam}.class, {@link javax.ws.rs.HeaderParam}.class
+     * @param paramName       The name of the parameter, ie. the value of the value() element in the annotation.
+     * @return                The actual value that was passed as the argument in the method call; null if either no
+     *                        parameter with the given name exists or null was passed as argument.
+     */
+    public Object getParameter(Class<? extends Annotation> paramAnnotation, String paramName) {
+        if (!PARAM_ANNOTATION_CLASSES.contains(paramAnnotation)) {
+            throw new IllegalArgumentException("Unsupported annotation type: " + paramAnnotation + ". Should be one of " + PARAM_ANNOTATION_CLASSES);
+        }
+        return paramsMap.get(paramAnnotation).getParamValue(paramName);
+    }
 }

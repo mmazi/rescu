@@ -83,7 +83,7 @@ public class Params implements Serializable {
                 if (b.length() > 0) {
                     b.append('&');
                 }
-                b.append(param).append('=').append(encode(getParamValue(param), encode));
+                b.append(param).append('=').append(encode(getParamValueAsString(param), encode));
             }
         }
         return b.toString();
@@ -114,7 +114,7 @@ public class Params implements Serializable {
             if (!isParamSet(paramName)) {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
             }
-            path = path.replace("{" + paramName + "}", getParamValue(paramName));
+            path = path.replace("{" + paramName + "}", getParamValueAsString(paramName));
         }
         return path;
     }
@@ -123,28 +123,32 @@ public class Params implements Serializable {
         Map<String, String> stringMap = new LinkedHashMap<String, String>();
         for (String key : data.keySet()) {
             if (isParamSet(key)) {
-                stringMap.put(key, getParamValue(key));
+                stringMap.put(key, getParamValueAsString(key));
             }
         }
         return stringMap;
     }
 
-    private String getParamValue(String key) {
-        Object paramValue = data.get(key);
+    private String getParamValueAsString(String key) {
+        Object paramValue = getParamValue(key);
         return paramValue.toString();
     }
 
     public void digestAll(RestInvocation invocationParams) {
         for (String paramName : data.keySet()) {
-            Object paramValue = data.get(paramName);
+            Object paramValue = getParamValue(paramName);
             if (paramValue instanceof ParamsDigest) {
                 data.put(paramName, ((ParamsDigest) paramValue).digestParams(invocationParams));
             }
         }
     }
 
-    private boolean isParamSet(String key) {
-        return data.containsKey(key) && data.get(key) != null;
+    public boolean isParamSet(String paramName) {
+        return data.containsKey(paramName) && getParamValue(paramName) != null;
+    }
+
+    public Object getParamValue(String paramName) {
+        return data.get(paramName);
     }
 
     @Override
