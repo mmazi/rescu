@@ -232,7 +232,7 @@ public class RestInvocation implements Serializable {
      * @return                The actual value that was passed as the argument in the method call; null if either no
      *                        parameter with the given name exists or null was passed as argument.
      */
-    public Object getParameter(Class<? extends Annotation> paramAnnotation, String paramName) {
+    public Object getParamValue(Class<? extends Annotation> paramAnnotation, String paramName) {
         if (!PARAM_ANNOTATION_CLASSES.contains(paramAnnotation)) {
             throw new IllegalArgumentException("Unsupported annotation type: " + paramAnnotation + ". Should be one of " + PARAM_ANNOTATION_CLASSES);
         }

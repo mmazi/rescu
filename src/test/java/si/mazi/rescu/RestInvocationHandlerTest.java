@@ -94,7 +94,7 @@ public class RestInvocationHandlerTest {
         if (paramAnn != null) {
             Map<Pair<Class<? extends Annotation>, String>, Object> arguments = ImmutableMap.<Pair<Class<? extends Annotation>, String>, Object>builder().put(new Pair<Class<? extends Annotation>, String>(paramAnn, paramName), expectedParamValue).build();
             for (Pair<Class<? extends Annotation>, String> param : arguments.keySet()) {
-                Object argValue = testHandler.invocation.getParameter(param.first(), param.second());
+                Object argValue = testHandler.invocation.getParamValue(param.first(), param.second());
                 Assert.assertEquals(argValue, arguments.get(param), "Wrong param value for " + param + ": " + argValue);
             }
         }
