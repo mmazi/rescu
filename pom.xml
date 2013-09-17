@@ -42,7 +42,7 @@
     </scm>
 
     <ciManagement>
-        <url>http://ci.xeiam.com/</url>
+        <url>https://travis-ci.org/mmazi/rescu</url>
     </ciManagement>
 
     <distributionManagement>
@@ -78,7 +78,6 @@
         </plugins>
     </build>
 
-    <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -101,11 +100,6 @@
                 <version>1.7.2</version>
             </dependency>
             <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.0.9</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>jsr311-api</artifactId>
                 <version>1.1.1</version>
@@ -116,72 +110,33 @@
                 <artifactId>jsr305</artifactId>
                 <version>2.0.1</version>
             </dependency>
+            <!--  test dependencies -->
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.8</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.0.9</version>
+                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>r09</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-core</artifactId>
                 <version>1.3</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
-    </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <profiles>
         <profile>
