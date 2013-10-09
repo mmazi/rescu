@@ -88,7 +88,8 @@ class HttpTemplate {
      * @param exceptionType
      * @return String - the fetched JSON String
      */
-    public <T> T executeRequest(String urlString, Class<T> returnType, String requestBody, Map<String, String> httpHeaders, HttpMethod method, String contentType, Class<? extends RuntimeException> exceptionType) {
+    public <T> T executeRequest(String urlString, Class<T> returnType, String requestBody, Map<String, String> httpHeaders, HttpMethod method, String contentType, Class<? extends RuntimeException> exceptionType)
+            throws IOException {
 
         log.debug("Executing {} request at {}", method, urlString);
         log.trace("Request body = {}", requestBody);
@@ -102,43 +103,36 @@ class HttpTemplate {
             httpHeaders.put("Content-Type", contentType);
         }
 
-        try {
-            int contentLength = requestBody == null ? 0 : requestBody.length();
-            HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
+        int contentLength = requestBody == null ? 0 : requestBody.length();
+        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
 
-            if (contentLength > 0) {
-                // Write the request body
-                connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
-            }
-
-            String responseEncoding = getResponseEncoding(connection);
-
-            int httpStatus = connection.getResponseCode();
-            log.debug("Request http status = {}", httpStatus);
-
-            if (httpStatus != 200) {
-                String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
-                log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
-                if (exceptionType != null) {
-                    throw JSONUtils.getJsonObject(httpBody, exceptionType, objectMapper);
-                } else {
-                    throw new HttpStatusException("HTTP status code not 200", httpStatus, httpBody);
-                }
-            }
-
-            InputStream inputStream = connection.getInputStream();
-
-            // Get the data
-            String responseString = readInputStreamAsEncodedString(inputStream, responseEncoding);
-            log.trace("Response body: {}", responseString);
-
-            return JSONUtils.getJsonObject(responseString, returnType, objectMapper);
-
-        } catch (MalformedURLException e) {
-            throw new HttpException("Problem " + method + "ing -- malformed URL: " + urlString, e);
-        } catch (IOException e) {
-            throw new HttpException("Problem " + method + "ing (IO)", e);
+        if (contentLength > 0) {
+            // Write the request body
+            connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
         }
+
+        String responseEncoding = getResponseEncoding(connection);
+
+        int httpStatus = connection.getResponseCode();
+        log.debug("Request http status = {}", httpStatus);
+
+        if (httpStatus != 200) {
+            String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
+            log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
+            if (exceptionType != null) {
+                throw JSONUtils.getJsonObject(httpBody, exceptionType, objectMapper);
+            } else {
+                throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
+            }
+        }
+
+        InputStream inputStream = connection.getInputStream();
+
+        // Get the data
+        String responseString = readInputStreamAsEncodedString(inputStream, responseEncoding);
+        log.trace("Response body: {}", responseString);
+
+        return JSONUtils.getJsonObject(responseString, returnType, objectMapper);
     }
 
     /**

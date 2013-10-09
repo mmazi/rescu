@@ -22,6 +22,7 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -94,15 +95,11 @@ public class JSONUtils {
      * @param objectMapper
      * @return
      */
-    public static String getJSONString(Object object, ObjectMapper objectMapper) {
+    public static String getJSONString(Object object, ObjectMapper objectMapper) throws JsonProcessingException {
 
         AssertUtil.notNull(object, "object cannot be null");
         AssertUtil.notNull(objectMapper, "objectMapper cannot be null");
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (IOException e) {
-            throw new RestJsonException("Problem getting JSON String", e);
-        }
+        return objectMapper.writeValueAsString(object);
     }
 
 }

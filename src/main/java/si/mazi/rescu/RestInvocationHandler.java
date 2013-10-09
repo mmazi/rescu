@@ -22,6 +22,7 @@
 package si.mazi.rescu;
 
 import javax.ws.rs.Path;
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ public class RestInvocationHandler implements InvocationHandler {
         return metadata;
     }
 
-    protected Object invokeHttp(RestInvocation invocation) {
+    protected Object invokeHttp(RestInvocation invocation) throws IOException {
         RestMethodMetadata methodMetadata = invocation.getRestMethodMetadata();
         return httpTemplate.executeRequest(invocation.getInvocationUrl(), methodMetadata.returnType,
                 invocation.getRequestBody(), invocation.getHttpHeaders(), methodMetadata.httpMethod, invocation.getContentType(),

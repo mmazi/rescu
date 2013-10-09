@@ -97,7 +97,7 @@ public class JSONUtilsTest {
     }
 
     // @Test
-    public void testSerialization1() {
+    public void testSerialization1() throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -112,7 +112,7 @@ public class JSONUtilsTest {
     }
 
     @Test
-    public void testSerialization2() {
+    public void testSerialization2() throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
