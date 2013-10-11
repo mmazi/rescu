@@ -120,7 +120,7 @@ class HttpTemplate {
             String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
             if (exceptionType != null) {
-                throw JSONUtils.getJsonObject(httpBody, exceptionType, objectMapper);
+                throw objectMapper.readValue(httpBody, exceptionType);
             } else {
                 throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
             }
@@ -132,7 +132,7 @@ class HttpTemplate {
         String responseString = readInputStreamAsEncodedString(inputStream, responseEncoding);
         log.trace("Response body: {}", responseString);
 
-        return JSONUtils.getJsonObject(responseString, returnType, objectMapper);
+        return objectMapper.readValue(responseString, returnType);
     }
 
     /**
