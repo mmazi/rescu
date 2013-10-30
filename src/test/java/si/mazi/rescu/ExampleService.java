@@ -26,6 +26,7 @@ import si.mazi.rescu.dto.Order;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.math.BigDecimal;
 
 /**
@@ -60,4 +61,10 @@ public interface ExampleService {
     @Path("json")
     @Consumes(MediaType.APPLICATION_JSON)
     Object testJsonBody(DummyAccountInfo ticker);
+
+    @POST
+    @Path("error")
+    @Consumes(MediaType.APPLICATION_JSON)
+    Object io() throws IOException;
+
 }

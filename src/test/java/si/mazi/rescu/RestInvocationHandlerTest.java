@@ -22,6 +22,8 @@
 package si.mazi.rescu;
 
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.internal.collections.Pair;
@@ -31,7 +33,9 @@ import si.mazi.rescu.dto.Order;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +45,7 @@ import java.util.Map;
  * @author Matija Mazi
  */
 public class RestInvocationHandlerTest {
+    private static final Logger log = LoggerFactory.getLogger(RestInvocationHandlerTest.class);
 
     @Test
     public void testInvoke() throws Exception {
@@ -124,6 +129,25 @@ public class RestInvocationHandlerTest {
 
         proxy.cancel("424");
         assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", "", QueryParam.class, "id", "424");
+    }
+
+    @Test
+    public void testCheckedException() throws Exception {
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class) {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                throw new IOException("A simulated I/O problem.");
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        try {
+            proxy.io();
+            assert false : "Expected an IOException.";
+        } catch (IOException expected) {
+            log.info("Got expected exception: " + expected);
+        }
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

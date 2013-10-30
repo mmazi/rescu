@@ -23,10 +23,10 @@ package si.mazi.rescu;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -74,15 +74,18 @@ public class RestMethodMetadata implements Serializable {
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
-        Type[] thrownExceptions = method.getGenericExceptionTypes();
+        Class[] thrownExceptions = method.getExceptionTypes();
         Class<? extends RuntimeException> exceptionType = null;
-        if (thrownExceptions.length > 1) {
-            throw new IllegalArgumentException("At most one exception is supported on an API method; this method has more: " + method);
-        } else if (thrownExceptions.length == 1) {
-            //noinspection unchecked
-            exceptionType = (Class<? extends RuntimeException>) thrownExceptions[0];
-            if (!RuntimeException.class.isAssignableFrom(exceptionType)) {
-                throw new IllegalArgumentException("Only RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
+        for (Class thrownException : thrownExceptions) {
+            if (!IOException.class.isAssignableFrom(thrownException)) {
+                if (!RuntimeException.class.isAssignableFrom(thrownException)) {
+                    throw new IllegalArgumentException("Only IOExceptions and RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
+                }
+                if (exceptionType != null) {
+                    throw new IllegalArgumentException("At most one RuntimeException is supported on an API method; this method has more: " + method);
+                }
+                //noinspection unchecked
+                exceptionType = (Class<? extends RuntimeException>) thrownException;
             }
         }
         return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType, contentType, methodName, methodAnnotationMap, parameterAnnotations);
