@@ -120,10 +120,17 @@ class HttpTemplate {
             String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
             if (exceptionType != null) {
-                throw objectMapper.readValue(httpBody, exceptionType);
-            } else {
-                throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
+                RuntimeException exception = null;
+                try {
+                    exception = objectMapper.readValue(httpBody, exceptionType);
+                } catch (IOException e) {
+                    log.warn("Error parsing error output: " + e.toString());
+                }
+                if (exception != null) {
+                    throw exception;
+                }
             }
+            throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
         }
 
         InputStream inputStream = connection.getInputStream();
