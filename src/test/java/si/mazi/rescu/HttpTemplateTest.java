@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -52,9 +53,12 @@ public class HttpTemplateTest {
 
     @Test
     public void testReadInputStreamAsEncodedString() throws Exception {
-        HttpTemplate testObject = new HttpTemplate();
+        HttpTemplate testObject = new HttpTemplate() {
+            @Override String getResponseEncoding(URLConnection connection) { return "UTF-8"; }
+            @Override boolean izGzipped(HttpURLConnection connection) { return false; }
+        };
         InputStream inputStream = HttpTemplateTest.class.getResourceAsStream("/example-httpdata.txt");
-        assertEquals("Test data", testObject.readInputStreamAsEncodedString(inputStream, "UTF-8"));
+        assertEquals("Test data", testObject.readInputStreamAsEncodedString(inputStream, null));
     }
 
     @Test

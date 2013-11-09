@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Various HTTP utility methods
@@ -114,13 +115,11 @@ class HttpTemplate {
             connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
         }
 
-        String responseEncoding = getResponseEncoding(connection);
-
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
         if (httpStatus != 200) {
-            String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), responseEncoding);
+            String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
             if (exceptionType != null) {
                 RuntimeException exception = null;
@@ -139,7 +138,7 @@ class HttpTemplate {
         InputStream inputStream = connection.getInputStream();
 
         // Get the data
-        String responseString = readInputStreamAsEncodedString(inputStream, responseEncoding);
+        String responseString = readInputStreamAsEncodedString(inputStream, connection);
         log.trace("Response body: {}", responseString);
 
         return objectMapper.readValue(responseString, returnType);
@@ -207,27 +206,34 @@ class HttpTemplate {
      * </p>
      *
      * @param inputStream      The input stream
-     * @param responseEncoding The encoding to use when converting to a String
+     * @param connection     The HTTP connection object
      * @return A String representation of the input stream
      * @throws IOException If something goes wrong
      */
-    String readInputStreamAsEncodedString(InputStream inputStream, String responseEncoding) throws IOException {
+    String readInputStreamAsEncodedString(InputStream inputStream, HttpURLConnection connection) throws IOException {
         if (inputStream == null) {
             return null;
         }
 
-        StringBuilder sb;
         try {
-            sb = new StringBuilder();
+            String responseEncoding = getResponseEncoding(connection);
+            if (izGzipped(connection)) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
             final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding) : new InputStreamReader(inputStream);
             BufferedReader reader = new BufferedReader(in);
+            StringBuilder sb = new StringBuilder();
             for (String line; (line = reader.readLine()) != null; ) {
                 sb.append(line);
             }
+            return sb.toString();
         } finally {
             inputStream.close();
         }
-        return sb.toString();
+    }
+
+    boolean izGzipped(HttpURLConnection connection) {
+        return "gzip".equalsIgnoreCase(connection.getHeaderField("Content-Encoding"));
     }
 
     /**
@@ -236,7 +242,7 @@ class HttpTemplate {
      * @param connection The HTTP connection
      * @return The response encoding as a string (taken from "Content-Type")
      */
-    private String getResponseEncoding(URLConnection connection) {
+    String getResponseEncoding(URLConnection connection) {
 
         String charset = null;
 
