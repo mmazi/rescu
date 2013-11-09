@@ -28,7 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.AssertUtil;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -200,7 +203,7 @@ class HttpTemplate {
 
     /**
      * <p>
-     * Reads an InputStream as a String allowing for different encoding types
+     * Reads an InputStream as a String allowing for different encoding types. This closes the stream at the end.
      * </p>
      *
      * @param inputStream      The input stream
@@ -209,42 +212,22 @@ class HttpTemplate {
      * @throws IOException If something goes wrong
      */
     String readInputStreamAsEncodedString(InputStream inputStream, String responseEncoding) throws IOException {
-
         if (inputStream == null) {
             return null;
         }
 
-        String responseString;
-
-        if (responseEncoding != null) {
-            // Have an encoding so use it
-            StringBuilder sb = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, responseEncoding));
+        StringBuilder sb;
+        try {
+            sb = new StringBuilder();
+            final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding) : new InputStreamReader(inputStream);
+            BufferedReader reader = new BufferedReader(in);
             for (String line; (line = reader.readLine()) != null; ) {
                 sb.append(line);
             }
-
-            responseString = sb.toString();
-
-        } else {
-            // No encoding specified so use a BufferedInputStream
-            StringBuilder sb = new StringBuilder();
-            BufferedInputStream bis = new BufferedInputStream(inputStream);
-            byte[] byteContents = new byte[4096];
-
-            int bytesRead;
-            String strContents;
-            while ((bytesRead = bis.read(byteContents)) != -1) {
-                strContents = new String(byteContents, 0, bytesRead);
-                sb.append(strContents);
-            }
-
-            responseString = sb.toString();
+        } finally {
+            inputStream.close();
         }
-
-        // System.out.println("responseString: " + responseString);
-
-        return responseString;
+        return sb.toString();
     }
 
     /**
