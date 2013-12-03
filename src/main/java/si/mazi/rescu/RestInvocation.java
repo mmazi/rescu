@@ -161,7 +161,7 @@ public class RestInvocation implements Serializable {
             if (!paramsMap.get(FormParam.class).isEmpty()) {
                 throw new IllegalArgumentException("@FormParams are not allowed with " + MediaType.APPLICATION_JSON);
             } else if (unannanotatedParams.size() > 1) {
-                throw new IllegalArgumentException("Can only have a single unnanotated parameter with " + MediaType.APPLICATION_JSON);
+                throw new IllegalArgumentException("Can only have a single unannotated parameter with " + MediaType.APPLICATION_JSON);
             }
             if (unannanotatedParams.size() == 0) {
                 return null;
