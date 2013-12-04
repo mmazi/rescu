@@ -62,12 +62,9 @@ class HttpTemplate {
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        // Always use UTF8
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
-        // Assume form encoding by default (typically becomes application/json or application/xml)
         defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-        // Accept text/plain by default (typically becomes application/json or application/xml)
-        defaultHttpHeaders.put("Accept", "text/plain");
+        defaultHttpHeaders.put("Accept", "application/json");
         // User agent provides statistics for servers, but some use it for content negotiation so fake good agents
         defaultHttpHeaders.put("User-Agent", "ResCU JDK/6 AppleWebKit/535.7 Chrome/16.0.912.36 Safari/535.7"); // custom User-Agent
 
@@ -102,7 +99,6 @@ class HttpTemplate {
         AssertUtil.notNull(urlString, "urlString cannot be null");
         AssertUtil.notNull(httpHeaders, "httpHeaders should not be null");
 
-        httpHeaders.put("Accept", "application/json");
         if (contentType != null) {
             httpHeaders.put("Content-Type", contentType);
         }
