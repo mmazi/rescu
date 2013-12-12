@@ -34,7 +34,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  */
 public class AnnotationUtilsTest {
 

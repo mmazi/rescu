@@ -10,7 +10,7 @@ package si.mazi.rescu.utils;
  * <p>
  * Example:
  * </p>
- * <code>String encoded = Base64.encode( myByteArray );</code> <br />
+ * <code>String encoded = Base64.encode( myByteArray );</code> <br >
  * <code>byte[] myByteArray = Base64.decode( encoded );</code>
  * <p>
  * The <tt>options</tt> parameter, which appears in a few places, is used to pass several pieces of information to the encoder. In the "higher level" methods such as encodeBytes( bytes, options ) the
@@ -505,18 +505,22 @@ public class Base64 {
      * As of v 2.3, if the object cannot be serialized or there is another error, the method will throw an java.io.IOException. <b>This is new to v2.3!</b> In earlier versions, it just returned a null
      * value, but in retrospect that's a pretty poor way to handle it.
      * </p>
+     * <p>
      * The object is not GZip-compressed before being encoded.
-     * <p/>
+     * </p>
+     * <p>
      * Example options:
-     * <p/>
+     * </p>
      * <pre>
      *   GZIP: gzip-compresses object before encoding it.
      *   DO_BREAK_LINES: break lines at 76 characters
      * </pre>
-     * <p/>
+     * <p>
      * Example: <code>encodeObject( myObj, Base64.GZIP )</code> or
-     * <p/>
+     * </p>
+     * <p>
      * Example: <code>encodeObject( myObj, Base64.GZIP | Base64.DO_BREAK_LINES )</code>
+     * </p>
      *
      * @param serializableObject The object to encode
      * @param options            Specified options
@@ -614,7 +618,7 @@ public class Base64 {
      * Encodes a byte array into Base64 notation.
      * <p>
      * Example options:
-     * <p/>
+     * </p>
      * <pre>
      *   GZIP: gzip-compresses object before encoding it.
      *   DO_BREAK_LINES: break lines at 76 characters
@@ -622,12 +626,15 @@ public class Base64 {
      * </pre>
      * <p>
      * Example: <code>encodeBytes( myData, Base64.GZIP )</code> or
+     * </p>
      * <p>
      * Example: <code>encodeBytes( myData, Base64.GZIP | Base64.DO_BREAK_LINES )</code>
+     * </p>
      * <p>
      * As of v 2.3, if there is an error with the GZIP stream, the method will throw an java.io.IOException. <b>This is new to v2.3!</b> In earlier versions, it just returned a null value, but in
      * retrospect that's a pretty poor way to handle it.
      * </p>
+     * <p>
      *
      * @param source  The data to convert
      * @param options Specified options
@@ -677,7 +684,7 @@ public class Base64 {
      * Encodes a byte array into Base64 notation.
      * <p>
      * Example options:
-     * <p/>
+     * <br><br>
      * <pre>
      *   GZIP: gzip-compresses object before encoding it.
      *   DO_BREAK_LINES: break lines at 76 characters
@@ -953,6 +960,7 @@ public class Base64 {
      * @param source The Base64 encoded data
      * @return decoded data
      * @since 2.3.1
+     * @throws java.io.IOException
      */
     public static byte[] decode(byte[] source) throws java.io.IOException {
 
@@ -1471,15 +1479,15 @@ public class Base64 {
 
         /**
          * Constructs a {@link Base64.InputStream} in either ENCODE or DECODE mode.
-         * <p/>
+         * <br><br>
          * Valid options:
-         * <p/>
+         * <br><br>
          * <pre>
          *   ENCODE or DECODE: Encode or Decode as data is read.
          *   DO_BREAK_LINES: break lines at 76 characters
-         *     (only meaningful when encoding)</i>
+         *     (only meaningful when encoding)
          * </pre>
-         * <p/>
+         * <br><br>
          * Example: <code>new Base64.InputStream( in, Base64.DECODE )</code>
          *
          * @param in      the <tt>java.io.InputStream</tt> from which to read data.
@@ -1669,15 +1677,15 @@ public class Base64 {
 
         /**
          * Constructs a {@link Base64.OutputStream} in either ENCODE or DECODE mode.
-         * <p/>
+         * <br><br>
          * Valid options:
-         * <p/>
+         * <br><br>
          * <pre>
          *   ENCODE or DECODE: Encode or Decode as data is read.
          *   DO_BREAK_LINES: don't break lines at 76 characters
-         *     (only meaningful when encoding)</i>
+         *     (only meaningful when encoding)
          * </pre>
-         * <p/>
+         * <br><br>
          * Example: <code>new Base64.OutputStream( out, Base64.ENCODE )</code>
          *
          * @param out     the <tt>java.io.OutputStream</tt> to which data will be written.

@@ -33,7 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  */
 public class SqlTimeDeserializer extends JsonDeserializer<Date> {
 

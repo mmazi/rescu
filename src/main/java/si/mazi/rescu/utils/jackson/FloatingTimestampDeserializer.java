@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  */
 public class FloatingTimestampDeserializer extends JsonDeserializer<Date> {
 

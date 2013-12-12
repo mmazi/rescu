@@ -28,15 +28,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
+ * <p>
  * This class provides support for various types of HTTP params, especially in the context of RESTful web services, but may be also used to construct urls in other contexts.
- * <p/>
+ * </p>
+ * <p>
  * Eg. this can be used to produce a URL query string:
+ * </p>
  * <p>
  * Params.of("username", "john", "score", 2, "answer", "yes/no").asQueryString()
  * </p>
- * will produce:
  * <p>
- * username=john&score=2&answer=yes%2Fno
+ * will produce:
+ * </p>
+ * <p>
+ * username=john&amp;score=2&amp;answer=yes%2Fno
  * </p>
  *
  * @author Matija Mazi

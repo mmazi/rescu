@@ -22,9 +22,9 @@
 package si.mazi.rescu.utils.jackson;
 
 /**
- * @author Matija Mazi <br/>
- *         <p/>
- *         1-based enum deserializer. This wil deserialize 1 as the first enum constant, 2 as the second etc.
+ * @author Matija Mazi
+ *
+ * 1-based enum deserializer. This wil deserialize 1 as the first enum constant, 2 as the second etc.
  */
 public class EnumIntDeserializerOneBased<E extends Enum<E>> extends EnumIntDeserializer<E> {
 

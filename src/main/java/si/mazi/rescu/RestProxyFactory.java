@@ -42,6 +42,7 @@ public class RestProxyFactory {
      *
      * @param restInterface The interface to implement
      * @param baseUrl       The service base baseUrl
+     * @param <I>           The interface to implement
      * @return a proxy implementation of restInterface
      */
     public static <I> I createProxy(Class<I> restInterface, String baseUrl) {

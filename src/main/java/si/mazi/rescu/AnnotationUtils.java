@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  * @created 1/19/13 7:46 AM
  */
 public class AnnotationUtils {

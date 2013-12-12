@@ -215,7 +215,7 @@ public class RestInvocation implements Serializable {
     }
 
     /**
-     * @return The part of the invocation url that follows the '?' charater, ie. the &-separated name=value parameter pairs.
+     * @return The part of the invocation url that follows the '?' charater, ie. the &amp;-separated name=value parameter pairs.
      */
     public String getQueryString() {
         return queryString;

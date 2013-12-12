@@ -26,7 +26,7 @@ import si.mazi.rescu.utils.Base64;
 import java.io.UnsupportedEncodingException;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  *         This is used as support for HTTP Basic access authentication. Should be used a parameter of a REST interface method, annotated with @HeaderParam("Authorization"), eg: Result
  *         getResult(@HeaderParam("Authorization") BasicAuthCredentials credentials);
  */

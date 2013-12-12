@@ -3,7 +3,7 @@ package si.mazi.rescu;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * @author Matija Mazi <br/>
+ * @author Matija Mazi <br>
  * @created 5/24/13 9:04 PM
  */
 public class ExampleException extends RuntimeException {
