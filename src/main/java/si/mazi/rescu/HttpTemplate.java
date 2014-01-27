@@ -113,31 +113,35 @@ class HttpTemplate {
 
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
-       
-        switch(httpStatus) {
-        case 200:
-        case 201:
-        	InputStream inputStream = connection.getInputStream();
-        	String responseString = readInputStreamAsEncodedString(inputStream, connection);
-            log.trace("Response body: {}", responseString);           
-            return objectMapper.readValue(responseString, returnType);
-        case 204:      	
-        	return null;       	
-        	default:
-        		String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
-                log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
-                if (exceptionType != null) {
-                    RuntimeException exception = null;
-                    try {
-                        exception = objectMapper.readValue(httpBody, exceptionType);
-                    } catch (IOException e) {
-                        log.warn("Error parsing error output: " + e.toString());
-                    }
-                    if (exception != null) {
-                        throw exception;
-                    }
+
+        if (httpStatus / 100 != 2) {
+            // not a 2xx response code
+            String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
+            log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
+            if (exceptionType != null) {
+                RuntimeException exception = null;
+                try {
+                    exception = objectMapper.readValue(httpBody, exceptionType);
+                } catch (IOException e) {
+                    log.warn("Error parsing error output: " + e.toString());
                 }
-                throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));    	
+                if (exception != null) {
+                    throw exception;
+                }
+            }
+            throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
+        } else {
+            InputStream inputStream = connection.getInputStream();
+
+            // Get the data
+            String responseString = readInputStreamAsEncodedString(inputStream, connection);
+            log.trace("Response body: {}", responseString);
+
+            if (responseString == null || responseString.isEmpty()) {
+                return null;
+            } else {
+                return objectMapper.readValue(responseString, returnType);
+            }
         }
     }
 
@@ -227,8 +231,9 @@ class HttpTemplate {
             return sb.toString();
         } finally {
             inputStream.close();
-            if (reader != null) 
-            	reader.close();
+            if (reader != null) {
+                try { reader.close(); } catch (IOException ignore) { }
+            }
         }
     }
 
