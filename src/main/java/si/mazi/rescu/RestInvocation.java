@@ -220,6 +220,13 @@ public class RestInvocation implements Serializable {
     public String getQueryString() {
         return queryString;
     }
+    
+    /**
+     * @return The HTTP method used in this invocation e.g. GET or POST
+     */
+    public String getHttpMethod() {
+        return restMethodMetadata.httpMethod.toString();
+    }
 
     public RestMethodMetadata getRestMethodMetadata() {
         return restMethodMetadata;
