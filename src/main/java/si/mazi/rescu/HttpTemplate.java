@@ -63,8 +63,8 @@ class HttpTemplate {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
-        defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
-        defaultHttpHeaders.put("Accept", "application/json");
+        // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
+//        defaultHttpHeaders.put("Accept", "application/json");
         // User agent provides statistics for servers, but some use it for content negotiation so fake good agents
         defaultHttpHeaders.put("User-Agent", "ResCU JDK/6 AppleWebKit/535.7 Chrome/16.0.912.36 Safari/535.7"); // custom User-Agent
 

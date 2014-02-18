@@ -22,7 +22,6 @@
 package si.mazi.rescu;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -70,7 +69,7 @@ public class RestMethodMetadata implements Serializable {
         Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, RestInvocation.PARAM_ANNOTATION_CLASSES);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
-        String contentType = consumes != null ? consumes.value()[0] : MediaType.APPLICATION_FORM_URLENCODED;
+        String contentType = consumes != null ? consumes.value()[0] : null;
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);

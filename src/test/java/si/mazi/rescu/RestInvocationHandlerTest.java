@@ -80,7 +80,7 @@ public class RestInvocationHandlerTest {
         proxy.testBasicAuth(credentials, 23);
         HashMap<String, String> authHeaders = new HashMap<String, String>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", "");
+        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", null);
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
@@ -103,8 +103,9 @@ public class RestInvocationHandlerTest {
                 Assert.assertEquals(argValue, arguments.get(param), "Wrong param value for " + param + ": " + argValue);
             }
         }
-        Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
-        Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
+        if (postBody != null) {
+            Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
+        }
         if (headers != null) {
             Assert.assertEquals(headers, testHandler.invocation.getHttpHeaders());
         }
@@ -128,7 +129,7 @@ public class RestInvocationHandlerTest {
         RootPathService proxy = RestProxyFactory.createProxy(RootPathService.class, testHandler);
 
         proxy.cancel("424");
-        assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", "", QueryParam.class, "id", "424");
+        assertRequestData(testHandler, Double.class, null, "https://example.com/cancel?id=424", HttpMethod.DELETE, "https://example.com", "/cancel", "cancel", "id=424", null, QueryParam.class, "id", "424");
     }
 
     @Test

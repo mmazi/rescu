@@ -38,19 +38,23 @@ public interface ExampleService {
     @POST
     @Path("buy/")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Order buy(@FormParam("user") String user, @FormParam("password") String password, @FormParam("amount") BigDecimal amount, @FormParam("price") BigDecimal price);
 
     @POST
     @Path("bitcoin_withdrawal/{user}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object withdrawBitcoin(@PathParam("user") String user, @FormParam("password") String password, @QueryParam("amount") BigDecimal amount, @QueryParam("address") String address);
 
     @GET
     @Path("{ident}_{currency}/ticker")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object getTicker(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency);
 
     @POST
     @FormParam("method")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object getInfo(Long from, Long count) throws ExampleException;
 
     @GET

@@ -62,8 +62,9 @@ public class RestInvocationHandler implements InvocationHandler {
 
     protected Object invokeHttp(RestInvocation invocation) throws IOException {
         RestMethodMetadata methodMetadata = invocation.getRestMethodMetadata();
+        final String requestBody = invocation.getContentType() == null ? null : invocation.getRequestBody();
         return httpTemplate.executeRequest(invocation.getInvocationUrl(), methodMetadata.returnType,
-                invocation.getRequestBody(), invocation.getHttpHeaders(), methodMetadata.httpMethod, invocation.getContentType(),
+                requestBody, invocation.getHttpHeaders(), methodMetadata.httpMethod, invocation.getContentType(),
                 methodMetadata.exceptionType);
     }
 

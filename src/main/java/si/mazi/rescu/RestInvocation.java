@@ -155,6 +155,10 @@ public class RestInvocation implements Serializable {
 
     public String getRequestBody() {
 
+        if (contentType == null) {
+            throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
+        }
+
         if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
             return paramsMap.get(FormParam.class).asFormEncodedRequestBody();
         } else if (MediaType.APPLICATION_JSON.equals(contentType)) {
