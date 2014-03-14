@@ -21,10 +21,6 @@
  */
 package si.mazi.rescu;
 
-import si.mazi.rescu.utils.Base64;
-
-import java.io.UnsupportedEncodingException;
-
 /**
  * @author Matija Mazi <br>
  *         This is used as support for HTTP Basic access authentication. Should be used a parameter of a REST interface method, annotated with @HeaderParam("Authorization"), eg: Result
@@ -35,19 +31,12 @@ public class BasicAuthCredentials implements ParamsDigest {
     private final String username, password;
 
     public BasicAuthCredentials(String username, String password) {
-
         this.username = username;
         this.password = password;
     }
 
     public String digestParams(RestInvocation restInvocation) {
-
         // ignore restInvocation, just need username & password
-        try {
-            byte[] inputBytes = (username + ":" + password).getBytes("ISO-8859-1");
-            return "Basic " + Base64.encodeBytes(inputBytes);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Unsupported encoding, fix the code.", e);
-        }
+        return ClientConfigUtil.digestForBasicAuth(username, password);
     }
 }

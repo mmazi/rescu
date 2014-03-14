@@ -45,9 +45,12 @@ public class RestProxyFactory {
      * @param <I>           The interface to implement
      * @return a proxy implementation of restInterface
      */
-    public static <I> I createProxy(Class<I> restInterface, String baseUrl) {
+    public static <I> I createProxy(Class<I> restInterface, String baseUrl, ClientConfig config) {
+        return createProxy(restInterface, new RestInvocationHandler(restInterface, baseUrl, config));
+    }
 
-        return createProxy(restInterface, new RestInvocationHandler(restInterface, baseUrl));
+    public static <I> I createProxy(Class<I> restInterface, String baseUrl) {
+        return createProxy(restInterface, baseUrl, null);
     }
 
     static <I> I createProxy(Class<I> restInterface, RestInvocationHandler restInvocationHandler) {

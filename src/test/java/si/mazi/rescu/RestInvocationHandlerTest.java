@@ -50,7 +50,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testInvoke() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class);
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
@@ -73,7 +73,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testHttpBasicAuth() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class);
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         BasicAuthCredentials credentials = new BasicAuthCredentials("Aladdin", "open sesame");
@@ -81,6 +81,18 @@ public class RestInvocationHandlerTest {
         HashMap<String, String> authHeaders = new HashMap<String, String>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", null);
+    }
+
+    @Test
+    public void testHttpBasicAuthWithConfig() throws Exception {
+        ClientConfig config = ClientConfigUtil.addBasicAuthCredentials(new ClientConfig(), "Aladdin", "open sesame");
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        proxy.getInfo(2L, 5L);
+        HashMap<String, String> authHeaders = new HashMap<String, String>();
+        authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
@@ -114,7 +126,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testJsonBody() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class);
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.testJsonBody(new DummyAccountInfo("mm", "USD", 3));
@@ -125,7 +137,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testRootPathService() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(RootPathService.class);
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(RootPathService.class, null);
         RootPathService proxy = RestProxyFactory.createProxy(RootPathService.class, testHandler);
 
         proxy.cancel("424");
@@ -135,7 +147,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testCheckedException() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class) {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null) {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 throw new IOException("A simulated I/O problem.");
@@ -155,8 +167,8 @@ public class RestInvocationHandlerTest {
 
         private RestInvocation invocation;
 
-        public TestRestInvocationHandler(Class<?> restInterface) {
-            super(restInterface, "https://example.com");
+        public TestRestInvocationHandler(Class<?> restInterface, ClientConfig config) {
+            super(restInterface, "https://example.com", config);
         }
 
         @Override

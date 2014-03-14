@@ -36,10 +36,12 @@ public class RestInvocationHandler implements InvocationHandler {
     private final HttpTemplate httpTemplate;
     private final String intfacePath;
     private final String baseUrl;
+    private final ClientConfig config;
 
     private final Map<Method, RestMethodMetadata> cache = new HashMap<Method, RestMethodMetadata>();
 
-    public RestInvocationHandler(Class<?> restInterface, String url) {
+    public RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
+        this.config = config;
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
         this.httpTemplate = new HttpTemplate();
@@ -47,7 +49,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RestMethodMetadata restMethodMetadata = getMetadata(method);
-        RestInvocation params = new RestInvocation(restMethodMetadata, args);
+        RestInvocation params = new RestInvocation(restMethodMetadata, args, config.getParamsMap());
         return invokeHttp(params);
     }
 

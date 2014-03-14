@@ -58,12 +58,15 @@ public class RestInvocation implements Serializable {
 
     private RestMethodMetadata restMethodMetadata;
 
-    RestInvocation(RestMethodMetadata restMethodMetadata, Object[] args) {
+    RestInvocation(RestMethodMetadata restMethodMetadata, Object[] args, Map<Class<? extends Annotation>, Params> defaultParamsMap) {
         this.restMethodMetadata = restMethodMetadata;
 
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
-            paramsMap.put(annotationClass, Params.of());
+            this.paramsMap.put(annotationClass, Params.of());
+        }
+        if (defaultParamsMap != null) {
+            paramsMap.putAll(defaultParamsMap);
         }
 
         Annotation[][] paramAnnotations = restMethodMetadata.parameterAnnotations;
@@ -95,7 +98,7 @@ public class RestInvocation implements Serializable {
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
         path = restMethodMetadata.intfacePath;
         path = appendIfNotEmpty(path, methodPath, "/");
-        queryString = paramsMap.get(QueryParam.class).asQueryString();
+        queryString = this.paramsMap.get(QueryParam.class).asQueryString();
 
         invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, path, queryString);
 
@@ -105,7 +108,7 @@ public class RestInvocation implements Serializable {
                 unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
             }
         }
-        for (Params params : paramsMap.values()) {
+        for (Params params : this.paramsMap.values()) {
             params.digestAll(this);
         }
     }
