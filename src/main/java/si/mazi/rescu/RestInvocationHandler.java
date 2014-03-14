@@ -49,7 +49,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RestMethodMetadata restMethodMetadata = getMetadata(method);
-        RestInvocation params = new RestInvocation(restMethodMetadata, args, config.getParamsMap());
+        RestInvocation params = new RestInvocation(restMethodMetadata, args, config == null ? null : config.getParamsMap());
         return invokeHttp(params);
     }
 
