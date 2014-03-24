@@ -114,7 +114,7 @@ class HttpTemplate {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
-        if (httpStatus / 100 != 2) {
+        if (!Config.isIgnoreHttpErrorCodes() && httpStatus / 100 != 2) {
             // not a 2xx response code
             String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);

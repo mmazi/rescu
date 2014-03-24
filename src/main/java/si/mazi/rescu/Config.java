@@ -22,11 +22,15 @@ class Config {
 
     private static final String PROXY_PORT = "rescu.http.readProxyPort";
 
+    private static final String IGNORE_HTTP_ERROR_CODES = "rescu.http.ignoreErrorCodes";
+
     private static final int httpReadTimeout;
 
     private static final String proxyHost;
 
     private static final Integer proxyPort;
+
+    private static final boolean ignoreHttpErrorCodes;
 
     static {
         Properties dfts = new Properties();
@@ -47,11 +51,14 @@ class Config {
         proxyHost = properties.getProperty(PROXY_HOST);
         String proxyPortStr = properties.getProperty(PROXY_PORT);
         proxyPort = proxyPortStr == null ? null : Integer.parseInt(proxyPortStr);
+        final String ignoreErrorCodes = properties.getProperty(IGNORE_HTTP_ERROR_CODES);
+        ignoreHttpErrorCodes = ignoreErrorCodes == null ? false : Boolean.parseBoolean(ignoreErrorCodes);
 
         log.debug("Configuration from rescu.properties:");
         log.debug("httpReadTimeout = {}", httpReadTimeout);
         log.debug("proxyHost = {}", proxyHost);
         log.debug("proxyPort = {}", proxyPort);
+        log.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
     }
 
     public static int getHttpReadTimeout() {
@@ -64,5 +71,9 @@ class Config {
 
     public static Integer getProxyPort() {
         return proxyPort;
+    }
+
+    public static boolean isIgnoreHttpErrorCodes() {
+        return ignoreHttpErrorCodes;
     }
 }
