@@ -96,8 +96,11 @@ public class RestInvocation implements Serializable {
 
         contentType = restMethodMetadata.contentType;
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
+        
         path = restMethodMetadata.intfacePath;
         path = appendIfNotEmpty(path, methodPath, "/");
+        path = getPath(path);
+        
         queryString = this.paramsMap.get(QueryParam.class).asQueryString();
 
         invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, path, queryString);
@@ -151,8 +154,7 @@ public class RestInvocation implements Serializable {
         return url;
     }
 
-    public String getPath(String methodPath) {
-
+    public final String getPath(String methodPath) {
         return paramsMap.get(PathParam.class).applyToPath(methodPath);
     }
 

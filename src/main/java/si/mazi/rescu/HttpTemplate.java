@@ -36,6 +36,9 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Various HTTP utility methods
@@ -52,26 +55,41 @@ class HttpTemplate {
      * Default request header fields
      */
     private Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
-    private final int readTimeout = Config.getHttpReadTimeout();
+    private final int readTimeout;
+    private final boolean ignoreHttpErrorCodes;
     private final Proxy proxy;
+    private final SSLSocketFactory sslSocketFactory;
+    private final HostnameVerifier hostnameVerifier;
 
     /**
      * Constructor
      */
-    public HttpTemplate() {
+    public HttpTemplate(JacksonConfigureListener jacksonConfigureListener,
+            int readTimeout, boolean ignoreHttpErrorCodes,
+            String proxyHost, Integer proxyPort,
+            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
+        this.readTimeout = readTimeout;
+        this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
+        this.sslSocketFactory = sslSocketFactory;
+        this.hostnameVerifier = hostnameVerifier;
+        
         objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+        if (jacksonConfigureListener != null) {
+            jacksonConfigureListener.configureObjectMapper(objectMapper);
+        }
+        
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
         defaultHttpHeaders.put("Accept", "application/json");
         // User agent provides statistics for servers, but some use it for content negotiation so fake good agents
         defaultHttpHeaders.put("User-Agent", "ResCU JDK/6 AppleWebKit/535.7 Chrome/16.0.912.36 Safari/535.7"); // custom User-Agent
 
-        if (Config.getProxyPort() == null || Config.getProxyHost() == null) {
+        if (proxyHost == null || proxyPort == null) {
             proxy = Proxy.NO_PROXY;
         } else {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(Config.getProxyHost(), Config.getProxyPort()));
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
             log.info("Using proxy {}", proxy);
         }
     }
@@ -114,7 +132,7 @@ class HttpTemplate {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
-        if (!Config.isIgnoreHttpErrorCodes() && httpStatus / 100 != 2) {
+        if (!ignoreHttpErrorCodes && httpStatus / 100 != 2) {
             // not a 2xx response code
             String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
@@ -195,9 +213,23 @@ class HttpTemplate {
      */
     protected HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection(proxy);
+        
         if (readTimeout > 0) {
             connection.setReadTimeout(readTimeout);
         }
+        
+        if (connection instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsConnection = (HttpsURLConnection)connection;
+            
+            if (sslSocketFactory != null) {
+                httpsConnection.setSSLSocketFactory(sslSocketFactory);
+            }
+            
+            if (hostnameVerifier != null) {
+                httpsConnection.setHostnameVerifier(hostnameVerifier);
+            }
+        }
+        
         return connection;
     }
 
