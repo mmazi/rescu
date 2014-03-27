@@ -50,9 +50,12 @@ public class RestInvocationHandlerTest {
     @Test
     public void testInvoke() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null);
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.add(PathParam.class, "version", 2);
+        
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
-
+        
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
         assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00", FormParam.class, "user", "john");
 
@@ -73,19 +76,24 @@ public class RestInvocationHandlerTest {
     @Test
     public void testHttpBasicAuth() throws Exception {
 
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null);
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.add(PathParam.class, "version", 0);
+        
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         BasicAuthCredentials credentials = new BasicAuthCredentials("Aladdin", "open sesame");
         proxy.testBasicAuth(credentials, 23);
         HashMap<String, String> authHeaders = new HashMap<String, String>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2/auth?param=23", HttpMethod.GET, "https://example.com", "api/2/auth", "auth", "param=23", null);
+        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/0/auth?param=23", HttpMethod.GET, "https://example.com", "api/0/auth", "auth", "param=23", null);
     }
 
     @Test
     public void testHttpBasicAuthWithConfig() throws Exception {
         ClientConfig config = ClientConfigUtil.addBasicAuthCredentials(new ClientConfig(), "Aladdin", "open sesame");
+        config.add(PathParam.class, "version", 2);
+        
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 

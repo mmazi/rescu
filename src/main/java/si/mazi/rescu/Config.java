@@ -13,6 +13,8 @@ import java.util.Properties;
  */
 class Config {
     public static final String RESCU_PROPERTIES = "rescu.properties";
+    
+    
 
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 

@@ -97,9 +97,8 @@ public class RestInvocation implements Serializable {
         contentType = restMethodMetadata.contentType;
         methodPath = getPath(restMethodMetadata.methodPathTemplate);
         
-        path = restMethodMetadata.intfacePath;
+        path = getPath(restMethodMetadata.intfacePath);
         path = appendIfNotEmpty(path, methodPath, "/");
-        path = getPath(path);
         
         queryString = this.paramsMap.get(QueryParam.class).asQueryString();
 

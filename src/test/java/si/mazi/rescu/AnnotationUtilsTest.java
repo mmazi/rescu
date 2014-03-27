@@ -41,10 +41,10 @@ public class AnnotationUtilsTest {
     @Test
     public void testGetFromMethodOrClass() throws Exception {
         Path path = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getTicker", String.class, String.class), Path.class);
-        assertThat("Wrong path.", path.value(), equalTo("{ident}_{currency}/ticker"));
+        assertThat("Wrong path.", path.value(), equalTo("{ident: [a-Z]+}_{currency}/ticker"));
 
         Path pathFromIntf = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getInfo", Long.class, Long.class), Path.class);
-        assertThat("Wrong path.", pathFromIntf.value(), equalTo("api/2"));
+        assertThat("Wrong path.", pathFromIntf.value(), equalTo("api/{version}"));
     }
 
     @SuppressWarnings("unchecked")
