@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -119,7 +121,8 @@ public class Params implements Serializable {
             if (!isParamSet(paramName)) {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
             }
-            path = path.replace("{" + paramName + "}", getParamValueAsString(paramName));
+            path = Pattern.compile("\\{" + paramName + "(:.+?)?\\}".toString()).matcher(
+                path).replaceAll(Matcher.quoteReplacement(getParamValueAsString(paramName).toString()));
         }
         return path;
     }

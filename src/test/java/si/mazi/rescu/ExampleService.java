@@ -32,7 +32,7 @@ import java.math.BigDecimal;
 /**
  * @author Matija Mazi
  */
-@Path("api/2")
+@Path("api/{version}")
 public interface ExampleService {
 
     @POST
@@ -48,7 +48,7 @@ public interface ExampleService {
     Object withdrawBitcoin(@PathParam("user") String user, @FormParam("password") String password, @QueryParam("amount") BigDecimal amount, @QueryParam("address") String address);
 
     @GET
-    @Path("{ident}_{currency}/ticker")
+    @Path("{ident: [a-Z]+}_{currency}/ticker")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object getTicker(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency);
 

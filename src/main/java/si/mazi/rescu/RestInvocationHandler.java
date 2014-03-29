@@ -41,10 +41,21 @@ public class RestInvocationHandler implements InvocationHandler {
     private final Map<Method, RestMethodMetadata> cache = new HashMap<Method, RestMethodMetadata>();
 
     public RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
-        this.config = config;
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
-        this.httpTemplate = new HttpTemplate();
+        
+        if (config != null) {
+            this.config = config;
+        }
+        else {
+            this.config = new ClientConfig(); //default config
+        }
+        
+        this.httpTemplate = new HttpTemplate(this.config.getJacksonConfigureListener(),
+                this.config.getHttpReadTimeout(),
+                this.config.isIgnoreHttpErrorCodes(),
+                this.config.getProxyHost(), this.config.getProxyPort(),
+                this.config.getSslSocketFactory(), this.config.getHostnameVerifier());
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
