@@ -132,7 +132,9 @@ class HttpTemplate {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
-        if (!ignoreHttpErrorCodes && httpStatus / 100 != 2) {
+        boolean errorStatusCode = httpStatus / 100 != 2;
+        
+        if (!ignoreHttpErrorCodes && errorStatusCode) {
             // not a 2xx response code
             String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
             log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
@@ -149,7 +151,8 @@ class HttpTemplate {
             }
             throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
         } else {
-            InputStream inputStream = connection.getInputStream();
+            InputStream inputStream = !errorStatusCode ?
+                    connection.getInputStream() : connection.getErrorStream();
 
             // Get the data
             String responseString = readInputStreamAsEncodedString(inputStream, connection);
