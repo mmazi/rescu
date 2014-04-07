@@ -49,7 +49,7 @@ class HttpTemplate {
 
     private final Logger log = LoggerFactory.getLogger(HttpTemplate.class);
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     /**
      * Default request header fields
@@ -64,7 +64,7 @@ class HttpTemplate {
     /**
      * Constructor
      */
-    public HttpTemplate(JacksonConfigureListener jacksonConfigureListener,
+    public HttpTemplate(ObjectMapper objectMapper,
             int readTimeout, boolean ignoreHttpErrorCodes,
             String proxyHost, Integer proxyPort,
             SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
@@ -72,14 +72,14 @@ class HttpTemplate {
         this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
-        
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        if (jacksonConfigureListener != null) {
-            jacksonConfigureListener.configureObjectMapper(objectMapper);
+        if(objectMapper != null) {
+            this.objectMapper = objectMapper;
+        } else {
+            this.objectMapper = new ObjectMapper();
+            this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         }
-        
+
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
         defaultHttpHeaders.put("Accept", "application/json");
