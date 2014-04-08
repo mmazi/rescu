@@ -54,17 +54,23 @@ public class RestInvocationHandler implements InvocationHandler {
         else {
             this.config = new ClientConfig(); //default config
         }
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper = createObjectMapper();
         if (this.config.getJacksonConfigureListener() != null) {
             this.config.getJacksonConfigureListener().configureObjectMapper(objectMapper);
         }
 
-        this.httpTemplate = new HttpTemplate(objectMapper,
+        this.httpTemplate = new HttpTemplate(
+                this.objectMapper,
                 this.config.getHttpReadTimeout(),
                 this.config.isIgnoreHttpErrorCodes(),
                 this.config.getProxyHost(), this.config.getProxyPort(),
                 this.config.getSslSocketFactory(), this.config.getHostnameVerifier());
+    }
+
+    static ObjectMapper createObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {

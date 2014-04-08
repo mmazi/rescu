@@ -58,11 +58,7 @@ public class RestInvocation implements Serializable {
     private RestMethodMetadata restMethodMetadata;
 
     RestInvocation(ObjectMapper objectMapper, RestMethodMetadata restMethodMetadata, Object[] args, Map<Class<? extends Annotation>, Params> defaultParamsMap) {
-        if(objectMapper != null) {
-            this.objectMapper = objectMapper;
-        } else {
-            this.objectMapper = new ObjectMapper();
-        }
+        this.objectMapper = objectMapper;
         this.restMethodMetadata = restMethodMetadata;
 
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
@@ -121,12 +117,7 @@ public class RestInvocation implements Serializable {
 
     // todo: this is needed only for testing
     public RestInvocation(ObjectMapper objectMapper, Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
-
-        if(objectMapper != null) {
-            this.objectMapper = objectMapper;
-        } else {
-            this.objectMapper = new ObjectMapper();
-        }
+        this.objectMapper = objectMapper;
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
     }

@@ -22,12 +22,14 @@
  */
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.AssertUtil;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,9 +38,6 @@ import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Various HTTP utility methods
@@ -72,13 +71,7 @@ class HttpTemplate {
         this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
-
-        if(objectMapper != null) {
-            this.objectMapper = objectMapper;
-        } else {
-            this.objectMapper = new ObjectMapper();
-            this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        }
+        this.objectMapper = objectMapper;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
