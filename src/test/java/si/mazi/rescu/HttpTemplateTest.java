@@ -53,7 +53,7 @@ public class HttpTemplateTest {
 
     @Test
     public void testReadInputStreamAsEncodedString() throws Exception {
-        HttpTemplate testObject = new HttpTemplate(null, 30000, false, null, null, null, null) {
+        HttpTemplate testObject = new HttpTemplate(RestInvocationHandler.createObjectMapper(), 30000, false, null, null, null, null) {
             @Override String getResponseEncoding(URLConnection connection) { return "UTF-8"; }
             @Override boolean izGzipped(HttpURLConnection connection) { return false; }
         };
@@ -90,7 +90,7 @@ public class HttpTemplateTest {
         private final HttpURLConnection mockHttpURLConnection;
 
         public MockHttpTemplate(HttpURLConnection mockHttpURLConnection) {
-            super(null, 30000, false, null, null, null, null);
+            super(RestInvocationHandler.createObjectMapper(), 30000, false, null, null, null, null);
             this.mockHttpURLConnection = mockHttpURLConnection;
         }
 

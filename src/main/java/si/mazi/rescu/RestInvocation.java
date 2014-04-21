@@ -45,8 +45,7 @@ public class RestInvocation implements Serializable {
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
+    private final ObjectMapper objectMapper;
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams = new ArrayList<Object>();
 
@@ -58,7 +57,8 @@ public class RestInvocation implements Serializable {
 
     private RestMethodMetadata restMethodMetadata;
 
-    RestInvocation(RestMethodMetadata restMethodMetadata, Object[] args, Map<Class<? extends Annotation>, Params> defaultParamsMap) {
+    RestInvocation(ObjectMapper objectMapper, RestMethodMetadata restMethodMetadata, Object[] args, Map<Class<? extends Annotation>, Params> defaultParamsMap) {
+        this.objectMapper = objectMapper;
         this.restMethodMetadata = restMethodMetadata;
 
         paramsMap = new HashMap<Class<? extends Annotation>, Params>();
@@ -116,8 +116,8 @@ public class RestInvocation implements Serializable {
     }
 
     // todo: this is needed only for testing
-    public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
-
+    public RestInvocation(ObjectMapper objectMapper, Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
+        this.objectMapper = objectMapper;
         this.contentType = contentType;
         this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
     }

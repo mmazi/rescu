@@ -21,6 +21,9 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import javax.ws.rs.Path;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
@@ -33,6 +36,7 @@ import java.util.Map;
  */
 public class RestInvocationHandler implements InvocationHandler {
 
+    private final ObjectMapper objectMapper;
     private final HttpTemplate httpTemplate;
     private final String intfacePath;
     private final String baseUrl;
@@ -50,17 +54,28 @@ public class RestInvocationHandler implements InvocationHandler {
         else {
             this.config = new ClientConfig(); //default config
         }
-        
-        this.httpTemplate = new HttpTemplate(this.config.getJacksonConfigureListener(),
+        this.objectMapper = createObjectMapper();
+        if (this.config.getJacksonConfigureListener() != null) {
+            this.config.getJacksonConfigureListener().configureObjectMapper(objectMapper);
+        }
+
+        this.httpTemplate = new HttpTemplate(
+                this.objectMapper,
                 this.config.getHttpReadTimeout(),
                 this.config.isIgnoreHttpErrorCodes(),
                 this.config.getProxyHost(), this.config.getProxyPort(),
                 this.config.getSslSocketFactory(), this.config.getHostnameVerifier());
     }
 
+    static ObjectMapper createObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
+    }
+
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RestMethodMetadata restMethodMetadata = getMetadata(method);
-        RestInvocation params = new RestInvocation(restMethodMetadata, args, config == null ? null : config.getParamsMap());
+        RestInvocation params = new RestInvocation(objectMapper, restMethodMetadata, args, config == null ? null : config.getParamsMap());
         return invokeHttp(params);
     }
 
