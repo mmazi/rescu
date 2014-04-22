@@ -22,7 +22,7 @@
  */
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import si.mazi.rescu.utils.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.AssertUtil;
@@ -48,14 +48,11 @@ class HttpTemplate {
 
     private final Logger log = LoggerFactory.getLogger(HttpTemplate.class);
 
-    private final ObjectMapper objectMapper;
-
     /**
      * Default request header fields
      */
-    private Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
+    private final Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
     private final int readTimeout;
-    private final boolean ignoreHttpErrorCodes;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
@@ -63,15 +60,11 @@ class HttpTemplate {
     /**
      * Constructor
      */
-    public HttpTemplate(ObjectMapper objectMapper,
-            int readTimeout, boolean ignoreHttpErrorCodes,
-            String proxyHost, Integer proxyPort,
+    public HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
             SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
         this.readTimeout = readTimeout;
-        this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
-        this.objectMapper = objectMapper;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -90,7 +83,6 @@ class HttpTemplate {
     /**
      * Requests JSON via an HTTP POST
      *
-     *
      * @param urlString   A string representation of a URL
      * @param returnType  The required return type
      * @param requestBody The contents of the request body
@@ -100,7 +92,8 @@ class HttpTemplate {
      * @param exceptionType
      * @return String - the fetched JSON String
      */
-    public <T> T executeRequest(String urlString, Class<T> returnType, String requestBody, Map<String, String> httpHeaders, HttpMethod method, String contentType, Class<? extends RuntimeException> exceptionType)
+    public InvocationResult executeRequest(String urlString, String requestBody,
+            Map<String, String> httpHeaders, HttpMethod method, String contentType)
             throws IOException {
 
         log.debug("Executing {} request at {}", method, urlString);
@@ -125,38 +118,12 @@ class HttpTemplate {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
-        boolean errorStatusCode = httpStatus / 100 != 2;
+        InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
+            connection.getInputStream() : connection.getErrorStream();
+        String responseString = readInputStreamAsEncodedString(inputStream, connection);
+        log.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
         
-        if (!ignoreHttpErrorCodes && errorStatusCode) {
-            // not a 2xx response code
-            String httpBody = readInputStreamAsEncodedString(connection.getErrorStream(), connection);
-            log.trace("Http call returned {}; response body:\n{}", httpStatus, httpBody);
-            if (exceptionType != null) {
-                RuntimeException exception = null;
-                try {
-                    exception = objectMapper.readValue(httpBody, exceptionType);
-                } catch (IOException e) {
-                    log.warn("Error parsing error output: " + e.toString());
-                }
-                if (exception != null) {
-                    throw exception;
-                }
-            }
-            throw new IOException(String.format("HTTP status code was %d; response body: %s", httpStatus, httpBody));
-        } else {
-            InputStream inputStream = !errorStatusCode ?
-                    connection.getInputStream() : connection.getErrorStream();
-
-            // Get the data
-            String responseString = readInputStreamAsEncodedString(inputStream, connection);
-            log.trace("Response body: {}", responseString);
-
-            if (responseString == null || responseString.isEmpty()) {
-                return null;
-            } else {
-                return objectMapper.readValue(responseString, returnType);
-            }
-        }
+        return new InvocationResult(responseString, httpStatus);
     }
 
     /**

@@ -21,14 +21,15 @@
  */
 package si.mazi.rescu;
 
-import javax.ws.rs.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.*;
 
 /**
  * @author Matija Mazi
@@ -38,20 +39,26 @@ import java.util.Map;
 public class RestMethodMetadata implements Serializable {
 
     @SuppressWarnings("unchecked")
-    private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
+    private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS
+            = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
 
-    protected final Class<?> returnType;
-    protected final HttpMethod httpMethod;
-    protected final String baseUrl;
-    protected final String intfacePath;
-    protected final String methodPathTemplate;
-    protected final Class<? extends RuntimeException> exceptionType;
-    protected final String contentType;
-    protected final String methodName;
-    protected final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
-    protected final Annotation[][] parameterAnnotations;
+    private final Type returnType;
+    private final HttpMethod httpMethod;
+    private final String baseUrl;
+    private final String intfacePath;
+    private final String methodPathTemplate;
+    private final Class<? extends RuntimeException> exceptionType;
+    private final String contentType;
+    private final String methodName;
+    private final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
+    private final Annotation[][] parameterAnnotations;
 
-    private RestMethodMetadata(Class<?> returnType, HttpMethod httpMethod, String baseUrl, String intfacePath, String methodPathTemplate, Class<? extends RuntimeException> exceptionType, String contentType, String methodName, Map<Class<? extends Annotation>, Annotation> methodAnnotationMap, Annotation[][] parameterAnnotations) {
+    public RestMethodMetadata(Type returnType, HttpMethod httpMethod,
+            String baseUrl, String intfacePath, String methodPathTemplate,
+            Class<? extends RuntimeException> exceptionType, String contentType,
+            String methodName,
+            Map<Class<? extends Annotation>, Annotation> methodAnnotationMap,
+            Annotation[][] parameterAnnotations) {
         this.returnType = returnType;
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
@@ -66,7 +73,9 @@ public class RestMethodMetadata implements Serializable {
 
     static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
         String methodName = method.getName();
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = AnnotationUtils.getMethodAnnotationMap(method, RestInvocation.PARAM_ANNOTATION_CLASSES);
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap
+                = AnnotationUtils.getMethodAnnotationMap(method,
+                        RestInvocation.PARAM_ANNOTATION_CLASSES);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
         String contentType = consumes != null ? consumes.value()[0] : null;
@@ -87,7 +96,9 @@ public class RestMethodMetadata implements Serializable {
                 exceptionType = (Class<? extends RuntimeException>) thrownException;
             }
         }
-        return new RestMethodMetadata(method.getReturnType(), httpMethod, baseUrl, intfacePath, methodPathTemplate, exceptionType, contentType, methodName, methodAnnotationMap, parameterAnnotations);
+        return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
+                baseUrl, intfacePath, methodPathTemplate, exceptionType,
+                contentType, methodName, methodAnnotationMap, parameterAnnotations);
     }
 
     static HttpMethod getHttpMethod(Method method) {
@@ -105,5 +116,75 @@ public class RestMethodMetadata implements Serializable {
             throw new IllegalArgumentException("Method must be annotated with a HTTP-method annotation: " + method);
         }
         return httpMethod;
+    }
+
+    /**
+     * @return the returnType
+     */
+    public Type getReturnType() {
+        return returnType;
+    }
+
+    /**
+     * @return the httpMethod
+     */
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    /**
+     * @return the baseUrl
+     */
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    /**
+     * @return the intfacePath
+     */
+    public String getIntfacePath() {
+        return intfacePath;
+    }
+
+    /**
+     * @return the methodPathTemplate
+     */
+    public String getMethodPathTemplate() {
+        return methodPathTemplate;
+    }
+
+    /**
+     * @return the exceptionType
+     */
+    public Class<? extends RuntimeException> getExceptionType() {
+        return exceptionType;
+    }
+
+    /**
+     * @return the contentType
+     */
+    public String getContentType() {
+        return contentType;
+    }
+
+    /**
+     * @return the methodName
+     */
+    public String getMethodName() {
+        return methodName;
+    }
+
+    /**
+     * @return the methodAnnotationMap
+     */
+    public Map<Class<? extends Annotation>,Annotation> getMethodAnnotationMap() {
+        return methodAnnotationMap;
+    }
+
+    /**
+     * @return the parameterAnnotations
+     */
+    public Annotation[][] getParameterAnnotations() {
+        return parameterAnnotations;
     }
 }

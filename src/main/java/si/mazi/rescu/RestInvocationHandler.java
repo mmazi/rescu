@@ -21,79 +21,99 @@
  */
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.ws.rs.Path;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import si.mazi.rescu.jackson.JacksonMapper;
+import si.mazi.rescu.jackson.JacksonRequestWriter;
+import si.mazi.rescu.jackson.JacksonResponseReader;
 
 /**
  * @author Matija Mazi
  */
 public class RestInvocationHandler implements InvocationHandler {
 
-    private final ObjectMapper objectMapper;
+    private final ResponseReader responseReader;
+    private final RequestWriterResolver requestWriterResolver;
+    
     private final HttpTemplate httpTemplate;
     private final String intfacePath;
     private final String baseUrl;
     private final ClientConfig config;
 
-    private final Map<Method, RestMethodMetadata> cache = new HashMap<Method, RestMethodMetadata>();
+    private final Map<Method, RestMethodMetadata> methodMetadataCache = new HashMap<Method, RestMethodMetadata>();
 
     public RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
         
-        if (config != null) {
-            this.config = config;
+        if (config == null) {
+            config = new ClientConfig(); //default config
         }
-        else {
-            this.config = new ClientConfig(); //default config
-        }
-        this.objectMapper = createObjectMapper();
-        if (this.config.getJacksonConfigureListener() != null) {
-            this.config.getJacksonConfigureListener().configureObjectMapper(objectMapper);
-        }
+        
+        this.config = config;
+        
+        //setup default readers/writers
+        JacksonMapper jacksonMapper = new JacksonMapper(config.getJacksonConfigureListener());
 
+        requestWriterResolver = new RequestWriterResolver();
+        /*requestWriterResolver.addWriter(null,
+                new NullRequestWriter());*/
+        requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED,
+                new FormUrlEncodedRequestWriter());
+        requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,
+                new JacksonRequestWriter(jacksonMapper));
+        
+        responseReader = new JacksonResponseReader(jacksonMapper,
+            this.config.isIgnoreHttpErrorCodes());
+        
+        //setup http client
         this.httpTemplate = new HttpTemplate(
-                this.objectMapper,
                 this.config.getHttpReadTimeout(),
-                this.config.isIgnoreHttpErrorCodes(),
                 this.config.getProxyHost(), this.config.getProxyPort(),
                 this.config.getSslSocketFactory(), this.config.getHostnameVerifier());
     }
 
-    static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objectMapper;
-    }
-
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        RestMethodMetadata restMethodMetadata = getMetadata(method);
-        RestInvocation params = new RestInvocation(objectMapper, restMethodMetadata, args, config == null ? null : config.getParamsMap());
-        return invokeHttp(params);
+        RestMethodMetadata methodMetadata = getMetadata(method);
+        
+        RestInvocation invocation = RestInvocation.create(
+                requestWriterResolver,
+                methodMetadata, args,
+                config == null ? null : config.getParamsMap());
+        
+        InvocationResult invocationResult = invokeHttp(invocation);
+        return mapInvocationResult(invocationResult, methodMetadata);
     }
 
+    protected InvocationResult invokeHttp(RestInvocation invocation) throws IOException {
+        RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
+        
+        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation);
+        final String requestBody = requestWriter.writeBody(invocation);
+        
+        return httpTemplate.executeRequest(invocation.getInvocationUrl(),
+                requestBody,
+                invocation.getHttpHeaders(),
+                methodMetadata.getHttpMethod(),
+                invocation.getContentType());
+    }
+    
+    protected Object mapInvocationResult(InvocationResult invocationResult,
+            RestMethodMetadata methodMetadata) throws IOException {
+        return responseReader.read(invocationResult, methodMetadata);
+    }
+    
     private RestMethodMetadata getMetadata(Method method) {
-        RestMethodMetadata metadata = cache.get(method);
+        RestMethodMetadata metadata = methodMetadataCache.get(method);
         if (metadata == null) {
             metadata = RestMethodMetadata.create(method, baseUrl, intfacePath);
-            cache.put(method, metadata);
+            methodMetadataCache.put(method, metadata);
         }
         return metadata;
     }
-
-    protected Object invokeHttp(RestInvocation invocation) throws IOException {
-        RestMethodMetadata methodMetadata = invocation.getRestMethodMetadata();
-        final String requestBody = invocation.getContentType() == null ? null : invocation.getRequestBody();
-        return httpTemplate.executeRequest(invocation.getInvocationUrl(), methodMetadata.returnType,
-                requestBody, invocation.getHttpHeaders(), methodMetadata.httpMethod, invocation.getContentType(),
-                methodMetadata.exceptionType);
-    }
-
 }

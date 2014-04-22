@@ -1,5 +1,6 @@
 package si.mazi.rescu;
 
+import si.mazi.rescu.jackson.JacksonConfigureListener;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;

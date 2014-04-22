@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 Martin Zima (reddragcz).
+ * Copyright 2014 RedDragCZ.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
+import si.mazi.rescu.jackson.JacksonResponseReaderTest;
 
 /**
- * Provides hooks for additional configuration of the internally used
- * JSON converter of Jackson library.
- * 
- * @author Martin Zima (reddragcz)
+ *
+ * @author Martin ZIMA
  */
-public interface JacksonConfigureListener {
-    
-    /**
-     * Called during the construction of each REST proxy object,
-     * after setting the default or implied ObjectMapper properties.
-     * For example, the users might want to register modules with
-     * nonstandard (de)serializers now.
-     * 
-     * @param objectMapper
-     */
-    void configureObjectMapper(ObjectMapper objectMapper);
+public class ResourceUtils {
+
+    public static String getResourceAsString(String resourcePath) throws IOException {
+        InputStream resStream = JacksonResponseReaderTest.class
+                .getResourceAsStream(resourcePath);
+        try {
+            return new Scanner(resStream, "UTF-8").useDelimiter("\\A").next();
+        } finally {
+            resStream.close();
+        }
+    }
 }
