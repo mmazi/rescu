@@ -21,13 +21,15 @@
  */
 package si.mazi.rescu;
 
-import si.mazi.rescu.dto.DummyAccountInfo;
-import si.mazi.rescu.dto.Order;
+import java.io.IOException;
+import java.math.BigDecimal;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.math.BigDecimal;
+import si.mazi.rescu.dto.DummyAccountInfo;
+import si.mazi.rescu.dto.DummyTicker;
+import si.mazi.rescu.dto.GenericResult;
+import si.mazi.rescu.dto.Order;
 
 /**
  * @author Matija Mazi
@@ -50,7 +52,7 @@ public interface ExampleService {
     @GET
     @Path("{ident: [a-Z]+}_{currency}/ticker")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    Object getTicker(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency);
+    DummyTicker getTicker(@PathParam("ident") String tradeableIdentifier, @PathParam("currency") String currency);
 
     @POST
     @FormParam("method")
@@ -71,4 +73,8 @@ public interface ExampleService {
     @Consumes(MediaType.APPLICATION_JSON)
     Object io() throws IOException;
 
+    @GET
+    @Path("generic")
+    @Produces(MediaType.APPLICATION_JSON)
+    GenericResult<DummyTicker[]> getGeneric();
 }

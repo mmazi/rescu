@@ -32,12 +32,14 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * <p>
- * This may be used as the value of a @HeaderParam, @QueryParam or @PathParam to create a digest of the post body (composed of @FormParam's). Don't use as the value of a @FormParam, it will probably
- * cause an infinite loop.
+ * This may be used as the value of a @HeaderParam, @QueryParam or @PathParam to create
+ * a digest of the post body (composed of @FormParam's).
+ * Don't use as the value of a @FormParam, it will probably cause an infinite loop.
  * </p>
  * <p>
- * This may be used for REST APIs where some parameters' values must be digests of other parameters. An example is the MtGox API v1, where the Rest-Sign header parameter must be a digest of the
- * request body (which is composed of @FormParams).
+ * This may be used for REST APIs where some parameters' values must be digests of other
+ * parameters. An example is the MtGox API v1, where the Rest-Sign header parameter must
+ * be a digest of the request body (which is composed of @FormParams).
  * </p>
  */
 public class HmacPostBodyDigest implements ParamsDigest {
@@ -51,7 +53,6 @@ public class HmacPostBodyDigest implements ParamsDigest {
      * @throws IllegalArgumentException if key is invalid (cannot be base-64-decoded or the decoded key is invalid).
      */
     private HmacPostBodyDigest(String secretKeyBase64) throws IllegalArgumentException {
-
         try {
             SecretKey secretKey = new SecretKeySpec(Base64.decode(secretKeyBase64.getBytes()), HMAC_SHA_512);
             mac = Mac.getInstance(HMAC_SHA_512);
@@ -66,12 +67,10 @@ public class HmacPostBodyDigest implements ParamsDigest {
     }
 
     public static HmacPostBodyDigest createInstance(String secretKeyBase64) throws IllegalArgumentException {
-
         return secretKeyBase64 == null ? null : new HmacPostBodyDigest(secretKeyBase64);
     }
 
     public String digestParams(RestInvocation restInvocation) {
-
         mac.update(restInvocation.getRequestBody().getBytes());
         return Base64.encodeBytes(mac.doFinal()).trim();
     }
