@@ -21,14 +21,16 @@
  */
 package si.mazi.rescu;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import javax.ws.rs.FormParam;
+import javax.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +46,20 @@ public class HmacPostBodyDigestTest {
         Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         paramsMap.put(FormParam.class, Params.of("nonce", 1328626350245256L));
 
-        String restSign = HmacPostBodyDigest.createInstance(secretKey).digestParams(new RestInvocation(RestInvocationHandler.createObjectMapper(), paramsMap, "application/x-www-form-urlencoded"));
+        RequestWriterResolver requestWriterResolver = new RequestWriterResolver();
+        requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED, new FormUrlEncodedRequestWriter());
+        
+        RestInvocation invocation = new RestInvocation(
+                paramsMap,
+                new ArrayList<Object>(),
+                new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
+                        RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, null, null, null),
+                null, null, null, null, requestWriterResolver
+            );
+        
+        String restSign = HmacPostBodyDigest.createInstance(secretKey)
+                .digestParams(invocation);
+        
         log.debug("Rest-Sign    : " + restSign);
         String expectedResult = "eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==";
         log.debug("Expected-Sign: " + expectedResult);

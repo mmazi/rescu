@@ -21,10 +21,7 @@
  */
 package si.mazi.rescu;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
-import si.mazi.rescu.dto.DummyAccountInfo;
-import si.mazi.rescu.dto.DummyTicker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,16 +41,17 @@ import static org.junit.Assert.assertEquals;
 public class HttpTemplateTest {
 
     @Test
-    public void testGetForJsonObject() throws Exception {
-        final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-ticker.json");
+    public void testGet() throws Exception {
+        final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-httpdata.txt");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        DummyTicker ticker = testObject.executeRequest("http://example.com/ticker", DummyTicker.class, null, new HashMap<String, String>(), HttpMethod.GET, null, null);
-        assertEquals(34567L, ticker.getVolume());
+        InvocationResult executeResult = testObject.executeRequest("http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET, null);
+        assertEquals(200, executeResult.getStatusCode());
+        assertEquals("Test data", executeResult.getHttpBody());
     }
 
     @Test
     public void testReadInputStreamAsEncodedString() throws Exception {
-        HttpTemplate testObject = new HttpTemplate(RestInvocationHandler.createObjectMapper(), 30000, false, null, null, null, null) {
+        HttpTemplate testObject = new HttpTemplate(30000, null, null, null, null) {
             @Override String getResponseEncoding(URLConnection connection) { return "UTF-8"; }
             @Override boolean izGzipped(HttpURLConnection connection) { return false; }
         };
@@ -62,35 +60,22 @@ public class HttpTemplateTest {
     }
 
     @Test
-    public void testPostForJsonObject() throws Exception {
-        final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-accountinfo-data.json");
-        HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        DummyAccountInfo accountInfo = testObject.executeRequest("http://example.org/accountinfo", DummyAccountInfo.class, "Example", new HashMap<String, String>(), HttpMethod.POST, null, null);
-        assertEquals("test", accountInfo.getUsername());
-    }
-
-    @Test
     public void testPostWithError() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockErrorHttpURLConnection("/error.json");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        try {
-            testObject.executeRequest("http://example.org/accountinfo", DummyAccountInfo.class, "Example", new HashMap<String, String>(), HttpMethod.POST, null, ExampleException.class);
-            Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (ExampleException e) {
-            Assert.assertEquals(e.getError(), "Order not found");
-            Assert.assertEquals(e.getToken(), "unknown_error");
-            Assert.assertEquals(e.getResult(), "error");
-        } catch (Exception e) {
-            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
-        }
+        InvocationResult executeResult = testObject.executeRequest("http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST, null);
+        assertEquals(500, executeResult.getStatusCode());
+        assertEquals("{\"result\":\"error\",\"error\":\"Order not found\",\"token\":\"unknown_error\"}", executeResult.getHttpBody());
     }
+    
+    //TODO: test sent body data and headers
 
     private static class MockHttpTemplate extends HttpTemplate {
 
         private final HttpURLConnection mockHttpURLConnection;
 
         public MockHttpTemplate(HttpURLConnection mockHttpURLConnection) {
-            super(RestInvocationHandler.createObjectMapper(), 30000, false, null, null, null, null);
+            super(30000, null, null, null, null);
             this.mockHttpURLConnection = mockHttpURLConnection;
         }
 

@@ -21,14 +21,11 @@
  */
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -45,31 +42,51 @@ public class RestInvocation implements Serializable {
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
 
-    private final ObjectMapper objectMapper;
     private final Map<Class<? extends Annotation>, Params> paramsMap;
-    private final List<Object> unannanotatedParams = new ArrayList<Object>();
+    private final List<Object> unannanotatedParams;
+    private final RestMethodMetadata methodMetadata;
+    private final String methodPath;
+    private final String invocationUrl;
+    private final String queryString;
+    private final String path;
+    private final RequestWriterResolver requestWriterResolver;
 
-    private String contentType;
-    private String methodPath;
-    private String invocationUrl;
-    private String queryString;
-    private String path;
+    public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
+            List<Object> unannanotatedParams,
+            RestMethodMetadata methodMetadata,
+            String methodPath,
+            String invocationUrl,
+            String queryString,
+            String path,
+            RequestWriterResolver requestWriterResolver) {
+        this.paramsMap = paramsMap;
+        this.unannanotatedParams = unannanotatedParams;
+        this.methodMetadata = methodMetadata;
+        this.methodPath = methodPath;
+        this.invocationUrl = invocationUrl;
+        this.queryString = queryString;
+        this.path = path;
+        this.requestWriterResolver = requestWriterResolver;
+    }
 
-    private RestMethodMetadata restMethodMetadata;
-
-    RestInvocation(ObjectMapper objectMapper, RestMethodMetadata restMethodMetadata, Object[] args, Map<Class<? extends Annotation>, Params> defaultParamsMap) {
-        this.objectMapper = objectMapper;
-        this.restMethodMetadata = restMethodMetadata;
-
-        paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+    static RestInvocation create(RequestWriterResolver requestWriterResolver,
+            RestMethodMetadata methodMetadata,
+            Object[] args,
+            Map<Class<? extends Annotation>, Params> defaultParamsMap) {
+        
+        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
-            this.paramsMap.put(annotationClass, Params.of());
+            paramsMap.put(annotationClass, Params.of());
         }
+        
         if (defaultParamsMap != null) {
             paramsMap.putAll(defaultParamsMap);
         }
 
-        Annotation[][] paramAnnotations = restMethodMetadata.parameterAnnotations;
+        List<Object> unannanotatedParams = new ArrayList<Object>();
+        
+        Annotation[][] paramAnnotations = methodMetadata.getParameterAnnotations();
         for (int i = 0; i < paramAnnotations.length; i++) {
             Annotation[] paramAnns = paramAnnotations[i];
             if (paramAnns.length == 0) {
@@ -78,48 +95,52 @@ public class RestInvocation implements Serializable {
             for (Annotation paramAnn : paramAnns) {
                 String paramName = getParamName(paramAnn);
                 if (paramName != null) {
-                    this.paramsMap.get(paramAnn.annotationType()).add(paramName, args[i]);
+                    paramsMap.get(paramAnn.annotationType()).add(paramName, args[i]);
                 }
             }
         }
 
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = restMethodMetadata.methodAnnotationMap;
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = methodMetadata.getMethodAnnotationMap();
 
         // Support using method name as a parameter.
         for (Class<? extends Annotation> paramAnnotationClass : methodAnnotationMap.keySet()) {
             Annotation annotation = methodAnnotationMap.get(paramAnnotationClass);
             if (annotation != null) {
                 String paramName = getParamName(annotation);
-                this.paramsMap.get(paramAnnotationClass).add(paramName, restMethodMetadata.methodName);
+                paramsMap.get(paramAnnotationClass).add(paramName, methodMetadata.getMethodName());
             }
         }
 
-        contentType = restMethodMetadata.contentType;
-        methodPath = getPath(restMethodMetadata.methodPathTemplate);
+        String methodPath = getPath(paramsMap, methodMetadata.getMethodPathTemplate());
         
-        path = getPath(restMethodMetadata.intfacePath);
+        String path = getPath(paramsMap, methodMetadata.getIntfacePath());
         path = appendIfNotEmpty(path, methodPath, "/");
         
-        queryString = this.paramsMap.get(QueryParam.class).asQueryString();
+        String queryString = paramsMap.get(QueryParam.class).asQueryString();
+        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
 
-        invocationUrl = getInvocationUrl(restMethodMetadata.baseUrl, path, queryString);
-
+        RestInvocation invocation = new RestInvocation(
+                paramsMap,
+                unannanotatedParams,
+                methodMetadata,
+                methodPath,
+                invocationUrl,
+                queryString,
+                path,
+                requestWriterResolver);
+        
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
             if (param instanceof ParamsDigest) {
-                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
+                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(invocation));
             }
         }
-        for (Params params : this.paramsMap.values()) {
-            params.digestAll(this);
+        
+        for (Params params : paramsMap.values()) {
+            params.digestAll(invocation);
         }
-    }
-
-    // todo: this is needed only for testing
-    public RestInvocation(ObjectMapper objectMapper, Map<Class<? extends Annotation>, Params> paramsMap, String contentType) {
-        this.objectMapper = objectMapper;
-        this.contentType = contentType;
-        this.paramsMap = new LinkedHashMap<Class<? extends Annotation>, Params>(paramsMap);
+        
+        return invocation;
     }
 
     private static String getParamName(Annotation queryParam) {
@@ -153,43 +174,23 @@ public class RestInvocation implements Serializable {
         return url;
     }
 
-    public final String getPath(String methodPath) {
+    static String getPath(
+            Map<Class<? extends Annotation>, Params> paramsMap, String methodPath) {
         return paramsMap.get(PathParam.class).applyToPath(methodPath);
     }
 
     public String getRequestBody() {
-
-        if (contentType == null) {
-            throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
-        }
-
-        if (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType)) {
-            return paramsMap.get(FormParam.class).asFormEncodedRequestBody();
-        } else if (MediaType.APPLICATION_JSON.equals(contentType)) {
-            if (!paramsMap.get(FormParam.class).isEmpty()) {
-                throw new IllegalArgumentException("@FormParams are not allowed with " + MediaType.APPLICATION_JSON);
-            } else if (unannanotatedParams.size() > 1) {
-                throw new IllegalArgumentException("Can only have a single unannotated parameter with " + MediaType.APPLICATION_JSON);
-            }
-            if (unannanotatedParams.size() == 0) {
-                return null;
-            }
-            try {
-                return objectMapper.writeValueAsString(unannanotatedParams.get(0));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Error writing json, probably a bug in rescu.", e);
-            }
-        }
-        throw new IllegalArgumentException("Unsupported media type: " + contentType);
+        return requestWriterResolver
+                .resolveWriter(this)
+                .writeBody(this);
     }
-
+    
     public Map<String, String> getHttpHeaders() {
-
-        return paramsMap.get(HeaderParam.class).asHttpHeaders();
+        return getParamsMap().get(HeaderParam.class).asHttpHeaders();
     }
 
     public String getContentType() {
-        return contentType;
+        return methodMetadata.getContentType();
     }
 
     /**
@@ -219,7 +220,7 @@ public class RestInvocation implements Serializable {
      * (eg. http://www.example.com/) but may be longer.
      */
     public String getBaseUrl() {
-        return restMethodMetadata.baseUrl;
+        return getMethodMetadata().getBaseUrl();
     }
 
     /**
@@ -233,11 +234,11 @@ public class RestInvocation implements Serializable {
      * @return The HTTP method used in this invocation e.g. GET or POST
      */
     public String getHttpMethod() {
-        return restMethodMetadata.httpMethod.toString();
+        return getMethodMetadata().getHttpMethod().toString();
     }
 
-    public RestMethodMetadata getRestMethodMetadata() {
-        return restMethodMetadata;
+    public RestMethodMetadata getMethodMetadata() {
+        return methodMetadata;
     }
 
     /**
@@ -251,6 +252,20 @@ public class RestInvocation implements Serializable {
         if (!PARAM_ANNOTATION_CLASSES.contains(paramAnnotation)) {
             throw new IllegalArgumentException("Unsupported annotation type: " + paramAnnotation + ". Should be one of " + PARAM_ANNOTATION_CLASSES);
         }
-        return paramsMap.get(paramAnnotation).getParamValue(paramName);
+        return getParamsMap().get(paramAnnotation).getParamValue(paramName);
+    }
+
+    /**
+     * @return the paramsMap
+     */
+    public Map<Class<? extends Annotation>, Params> getParamsMap() {
+        return paramsMap;
+    }
+
+    /**
+     * @return the unannanotatedParams
+     */
+    public List<Object> getUnannanotatedParams() {
+        return unannanotatedParams;
     }
 }

@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  */
 public class Params implements Serializable {
 
-    private Map<String, Object> data = new LinkedHashMap<String, Object>();
+    private final Map<String, Object> data = new LinkedHashMap<String, Object>();
 
     /**
      * private Constructor to prevent instantiation
@@ -109,7 +109,7 @@ public class Params implements Serializable {
     }
 
     public String asFormEncodedRequestBody() {
-        return toQueryString(false);
+        return toQueryString(true);
     }
 
     public boolean isEmpty() {
@@ -121,8 +121,8 @@ public class Params implements Serializable {
             if (!isParamSet(paramName)) {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
             }
-            path = Pattern.compile("\\{" + paramName + "(:.+?)?\\}".toString()).matcher(
-                path).replaceAll(Matcher.quoteReplacement(getParamValueAsString(paramName).toString()));
+            path = Pattern.compile("\\{" + paramName + "(:.+?)?\\}").matcher(
+                path).replaceAll(Matcher.quoteReplacement(getParamValueAsString(paramName)));
         }
         return path;
     }
