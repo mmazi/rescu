@@ -30,6 +30,7 @@ import si.mazi.rescu.*;
 import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -87,7 +88,29 @@ public class JacksonResponseReaderTest {
             Assert.assertTrue(false, "Wrong exception type thrown: " + e);
         }
     }
-    
+
+    @Test
+    public void testIOExceptionRead() throws Exception {
+        JacksonResponseReader reader = new JacksonResponseReader(new JacksonMapper(null), false);
+
+        InvocationResult invocationResult = new InvocationResult(
+                ResourceUtils.getResourceAsString("/error.json"), 500);
+
+        try {
+            Object result = reader.read(invocationResult,
+                new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
+                        null, null, null, null, null));
+
+            Assert.assertTrue(false, "An exception should have been thrown.");
+        } catch (IOException e) {
+            Assert.assertTrue(e.getMessage().contains("Order not found"));
+            Assert.assertTrue(e.getMessage().contains("unknown_error"));
+//            Assert.assertEquals(e.getHttpStatusCode(), 500);
+        } catch (Exception e) {
+            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
+        }
+    }
+
     @Test
     public void testGenericRead() throws Exception {
         JacksonResponseReader reader = new JacksonResponseReader(
