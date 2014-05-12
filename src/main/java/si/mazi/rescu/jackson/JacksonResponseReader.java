@@ -27,10 +27,7 @@ package si.mazi.rescu.jackson;
 import com.fasterxml.jackson.databind.JavaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import si.mazi.rescu.HttpStatusException;
-import si.mazi.rescu.InvocationResult;
-import si.mazi.rescu.ResponseReader;
-import si.mazi.rescu.RestMethodMetadata;
+import si.mazi.rescu.*;
 
 import java.io.IOException;
 
@@ -83,8 +80,7 @@ public class JacksonResponseReader implements ResponseReader {
                 }
             }
 
-            throw new IOException(String.format("HTTP status code was %d; response body: %s",
-                    invocationResult.getStatusCode(), invocationResult.getHttpBody()));
+            throw new HttpStatusIOException(invocationResult);
         }
 
     }
