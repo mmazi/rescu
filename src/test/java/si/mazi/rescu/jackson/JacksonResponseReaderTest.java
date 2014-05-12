@@ -82,6 +82,7 @@ public class JacksonResponseReaderTest {
             Assert.assertEquals(e.getError(), "Order not found");
             Assert.assertEquals(e.getToken(), "unknown_error");
             Assert.assertEquals(e.getResult(), "error");
+            Assert.assertEquals(e.getHttpStatusCode(), 500);
         } catch (Exception e) {
             Assert.assertTrue(false, "Wrong exception type thrown: " + e);
         }
