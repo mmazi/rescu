@@ -49,7 +49,7 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
     <dependency>
         <groupId>com.github.mmazi</groupId>
         <artifactId>rescu</artifactId>
-        <version>1.0.0</version>
+        <version>1.6.0</version>
     </dependency>
 
 #### Usage in code
@@ -58,7 +58,7 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
 2. Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
 3. That's it! Just use the `service` object you just got.
 
-For several working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitstampPollingTradeService.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitstamp/src/main/java/com/xeiam/xchange/bitstamp/service/trade/polling/BitstampPollingTradeService.java).
+For several working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitstampTradeServiceRaw.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitstamp/src/main/java/com/xeiam/xchange/bitstamp/service/polling/BitstampTradeServiceRaw.java).
 
 #### Settings
 
