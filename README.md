@@ -69,6 +69,7 @@ Supported settings with example values (copy this into your `rescu.properties` f
     rescu.http.readTimeoutMillis = 5000             # Read timeout in milliseconds when performing HTTP requests. The default is 30000 (30 seconds).
     rescu.http.readProxyHost = www.example.com      # HTTP proxy host. Both host and port must be set in order to use a proxy.
     rescu.http.readProxyPort = 80                   # HTTP proxy port. Both host and port must be set in order to use a proxy.
+    rescu.http.ignoreErrorCodes = true              # If set to true, the HTTP response body never be parsed as Exception but always as the method response type. Defaults to false.
 
 Important note:
 ---------------
