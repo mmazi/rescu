@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu;
+package si.mazi.rescu.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
