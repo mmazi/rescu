@@ -23,7 +23,7 @@ Benefits
 - lightweight, minimal dependencies.
 - JAX-RS-annotated server-side interfaces may be reused to create clients; basic support is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam, @HeaderParam, @PathParam.
 - Support for basic HTTP authentication and some common request signing paradigms.
-- Support for exceptions on API methods.
+- Support for custom exceptions on API methods: on a non-200 http response status, rescu can deserialize the response body as an exception.
 
 
 Limitations
