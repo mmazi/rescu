@@ -52,16 +52,27 @@ class HttpTemplate {
      * Default request header fields
      */
     private final Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
+    private final int connTimeout;
     private final int readTimeout;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
+
 
     /**
      * Constructor
      */
     public HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
             SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
+      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier);
+    }
+    
+    /**
+     * Constructor
+     */
+    public HttpTemplate(int connTimeout,int readTimeout, String proxyHost, Integer proxyPort,
+            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
+        this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
@@ -168,9 +179,12 @@ class HttpTemplate {
 
     protected HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(urlString).openConnection(proxy);
-        
+
         if (readTimeout > 0) {
             connection.setReadTimeout(readTimeout);
+        }
+        if (connTimeout > 0) {
+          connection.setConnectTimeout(connTimeout);
         }
         
         if (connection instanceof HttpsURLConnection) {
