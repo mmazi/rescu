@@ -14,12 +14,14 @@ public class ClientConfig {
     private SSLSocketFactory sslSocketFactory = null;
     private HostnameVerifier hostnameVerifier = null;
     private JacksonConfigureListener jacksonConfigureListener = null;
+    private int httpConnTimeout;
     private int httpReadTimeout;
     private Integer proxyPort;
     private String proxyHost;
     private boolean ignoreHttpErrorCodes;
     
     public ClientConfig() {
+        httpConnTimeout = Config.getHttpConnTimeout();
         httpReadTimeout = Config.getHttpReadTimeout();
         proxyPort = Config.getProxyPort();
         proxyHost = Config.getProxyHost();
@@ -78,6 +80,20 @@ public class ClientConfig {
      */
     public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
         this.hostnameVerifier = hostnameVerifier;
+    }
+
+    /**
+     * @return the httpConnTimeout
+     */
+    public int getHttpConnTimeout() {
+        return httpConnTimeout;
+    }
+
+    /**
+     * @param httpConnTimeout the httpConnTimeout to set
+     */
+    public void setHttpConnTimeout(int httpConnTimeout) {
+        this.httpConnTimeout = httpConnTimeout;
     }
 
     /**
