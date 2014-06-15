@@ -52,7 +52,7 @@ public class JacksonResponseReader implements ResponseReader {
     public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
             throws IOException {
         if (!invocationResult.isErrorStatusCode() || ignoreHttpErrorCodes) {
-            if (invocationResult.getHttpBody() == null || invocationResult.getHttpBody().isEmpty()) {
+            if (invocationResult.getHttpBody() == null || invocationResult.getHttpBody().length() == 0) {
                 return null;
             } else {
                 JavaType javaType = jacksonMapper.getObjectMapper()
