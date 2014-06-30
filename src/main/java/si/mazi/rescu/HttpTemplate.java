@@ -115,7 +115,7 @@ class HttpTemplate {
             httpHeaders.put("Content-Type", contentType);
         }
 
-        int contentLength = requestBody == null ? 0 : requestBody.length();
+        int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
         HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
 
         if (contentLength > 0) {
