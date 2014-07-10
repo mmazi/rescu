@@ -30,6 +30,7 @@ import si.mazi.rescu.*;
 import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 
+import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ public class JacksonResponseReaderTest {
 
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
         assertEquals(DummyTicker.class, result.getClass());
         assertEquals(34567L, ((DummyTicker)result).getVolume());
@@ -75,7 +76,7 @@ public class JacksonResponseReaderTest {
         try {
             Object result = reader.read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        ExampleException.class, null, null, null, null));
+                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null));
             
             Assert.assertTrue(false, "An exception should have been thrown.");
         } catch (ExampleException e) {
@@ -98,7 +99,7 @@ public class JacksonResponseReaderTest {
         try {
             Object result = reader.read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        null, null, null, null, null));
+                        null, null, MediaType.APPLICATION_JSON, null, null, null));
 
             Assert.assertTrue(false, "An exception should have been thrown.");
         } catch (HttpStatusIOException e) {
@@ -122,7 +123,7 @@ public class JacksonResponseReaderTest {
 
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(resType, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
         assertEquals(GenericResult.class, result.getClass());
         assertNotNull(((GenericResult)result).getResult());
@@ -145,7 +146,7 @@ public class JacksonResponseReaderTest {
         
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(Map.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
         assert(Map.class.isAssignableFrom(result.getClass()));
         Map map = (Map)result;

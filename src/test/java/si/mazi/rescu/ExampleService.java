@@ -77,4 +77,9 @@ public interface ExampleService {
     @Path("generic")
     @Produces(MediaType.APPLICATION_JSON)
     GenericResult<DummyTicker[]> getGeneric();
+
+    @GET
+    @Path("string")
+    @Produces(MediaType.TEXT_PLAIN)
+    String getString();
 }

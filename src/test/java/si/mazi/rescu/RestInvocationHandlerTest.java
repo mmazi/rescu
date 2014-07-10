@@ -203,7 +203,18 @@ public class RestInvocationHandlerTest {
         assertEquals(12345, generic.getResult()[0].getLast());
         assertEquals(8910, generic.getResult()[1].getVolume());
     }
-    
+
+    @Test
+    public void testGetTextPlain() throws Exception {
+        ClientConfig clientConfig = new ClientConfig();
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, "Hello World in plain text!", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final String string = proxy.getString();
+        assertEquals(string, "Hello World in plain text!");
+    }
+
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
         private RestInvocation invocation;

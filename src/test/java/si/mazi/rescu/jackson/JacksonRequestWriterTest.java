@@ -63,7 +63,7 @@ public class JacksonRequestWriterTest {
                 new HashMap<Class<? extends Annotation>, Params>(),
                 unannotatedParams,
                 new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, MediaType.APPLICATION_JSON, null, null, null),
+                        RuntimeException.class, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, null, null, null),
                 null, null, null, null, null
             );
         

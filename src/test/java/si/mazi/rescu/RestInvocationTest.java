@@ -58,7 +58,7 @@ public class RestInvocationTest {
         RestInvocation invocation = RestInvocation.create(requestWriterResolver,
                 new RestMethodMetadata(String.class, HttpMethod.GET,
                         "http://example.com", "/api", null,
-                        RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, null,
+                        RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, null,
                         new HashMap<Class<? extends Annotation>, Annotation>(), 
                         new Annotation[][] {}),
                 new Object[] {}, paramsMap);

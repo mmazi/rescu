@@ -24,6 +24,7 @@ package si.mazi.rescu;
 import si.mazi.rescu.jackson.JacksonMapper;
 import si.mazi.rescu.jackson.JacksonRequestWriter;
 import si.mazi.rescu.jackson.JacksonResponseReader;
+import si.mazi.rescu.jackson.PlainTextResponseReader;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -38,7 +39,7 @@ import java.util.Map;
  */
 public class RestInvocationHandler implements InvocationHandler {
 
-    private final ResponseReader responseReader;
+    private final ResponseReaderResolver responseReaderResolver;
     private final RequestWriterResolver requestWriterResolver;
     
     private final HttpTemplate httpTemplate;
@@ -68,11 +69,14 @@ public class RestInvocationHandler implements InvocationHandler {
                 new FormUrlEncodedRequestWriter());
         requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,
                 new JacksonRequestWriter(jacksonMapper));
-        
-        responseReader = new JacksonResponseReader(jacksonMapper,
-            this.config.isIgnoreHttpErrorCodes());
-        
-        //setup http client
+
+        responseReaderResolver = new ResponseReaderResolver();
+        responseReaderResolver.addReader(MediaType.APPLICATION_JSON,
+                new JacksonResponseReader(jacksonMapper, this.config.isIgnoreHttpErrorCodes()));
+        responseReaderResolver.addReader(MediaType.TEXT_PLAIN,
+                new PlainTextResponseReader(this.config.isIgnoreHttpErrorCodes()));
+
+                //setup http client
         this.httpTemplate = new HttpTemplate(
                 this.config.getHttpConnTimeout(),
                 this.config.getHttpReadTimeout(),
@@ -105,7 +109,7 @@ public class RestInvocationHandler implements InvocationHandler {
     
     protected Object mapInvocationResult(InvocationResult invocationResult,
             RestMethodMetadata methodMetadata) throws IOException {
-        return responseReader.read(invocationResult, methodMetadata);
+        return responseReaderResolver.resolveReader(methodMetadata).read(invocationResult, methodMetadata);
     }
     
     private RestMethodMetadata getMetadata(Method method) {
