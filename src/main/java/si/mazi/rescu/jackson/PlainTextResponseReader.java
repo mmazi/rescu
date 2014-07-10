@@ -24,6 +24,8 @@
 
 package si.mazi.rescu.jackson;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import si.mazi.rescu.InvocationResult;
 import si.mazi.rescu.ResponseReader;
 
@@ -31,17 +33,39 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * Reads the JSON responses into POJO object using Jackson.
- *
- * @author Martin ZIMA
+ * Returns the response body as a string.
  */
 public class PlainTextResponseReader extends ResponseReader {
+    private static final Logger log = LoggerFactory.getLogger(PlainTextResponseReader.class);
+
     public PlainTextResponseReader(boolean ignoreHttpErrorCodes) {
         super(ignoreHttpErrorCodes);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String read(InvocationResult invocationResult, Type returnType) throws IOException {
         return invocationResult.getHttpBody();
+    }
+
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    @Override
+    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
+        final String message = read(invocationResult, exceptionType);
+        RuntimeException constructedException;
+        try {
+            // try constructng the exception with message
+            constructedException = exceptionType.getConstructor(String.class).newInstance(message);
+        } catch (ReflectiveOperationException e) {
+            try {
+                // fallback to no-parameter constructor
+                constructedException = exceptionType.newInstance();
+                log.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
+            } catch (ReflectiveOperationException e1) {
+                log.warn("Cannot construct a {}. Throwing a RuntimeException instead. Main cause: {}", exceptionType, e.toString());
+                throw new RuntimeException(message);
+            }
+        }
+        return constructedException;
     }
 }

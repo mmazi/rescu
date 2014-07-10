@@ -81,5 +81,5 @@ public interface ExampleService {
     @GET
     @Path("string")
     @Produces(MediaType.TEXT_PLAIN)
-    String getString();
+    String getString() throws MessageException;
 }

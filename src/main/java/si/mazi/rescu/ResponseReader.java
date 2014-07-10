@@ -44,8 +44,6 @@ public abstract class ResponseReader {
         this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
     }
 
-    public abstract <T> T read(InvocationResult invocationResult, Type returnType) throws IOException;
-
     public boolean isIgnoreHttpErrorCodes() {
         return ignoreHttpErrorCodes;
     }
@@ -62,7 +60,7 @@ public abstract class ResponseReader {
             if (methodMetadata.getExceptionType() != null) {
                 RuntimeException exception = null;
                 try {
-                    exception = read(invocationResult, methodMetadata.getExceptionType());
+                    exception = readException(invocationResult, methodMetadata.getExceptionType());
                 } catch (IOException e) {
                     log.warn("Error parsing error output: " + e.toString());
                 }
@@ -79,4 +77,8 @@ public abstract class ResponseReader {
         }
 
     }
+
+    protected abstract <T> T read(InvocationResult invocationResult, Type returnType) throws IOException;
+
+    protected abstract RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException;
 }

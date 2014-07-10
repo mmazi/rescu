@@ -54,4 +54,9 @@ public class JacksonResponseReader extends ResponseReader {
                 invocationResult.getHttpBody(), javaType);
     }
 
+    @Override
+    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
+        return read(invocationResult, exceptionType);
+    }
+
 }

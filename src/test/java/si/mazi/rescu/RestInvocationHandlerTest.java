@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Matija Mazi
@@ -213,6 +214,21 @@ public class RestInvocationHandlerTest {
 
         final String string = proxy.getString();
         assertEquals(string, "Hello World in plain text!");
+    }
+
+    @Test
+    public void testGetTextPlainError() throws Exception {
+        ClientConfig clientConfig = new ClientConfig();
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, "Error message.", 400);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        try {
+            proxy.getString();
+            assertTrue(false, "Expected a MessageException.");
+        } catch (MessageException e) {
+            assertEquals(e.getMessage(), "Error message.");
+        }
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {
