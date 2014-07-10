@@ -17,10 +17,10 @@ Dependencies
 - jsr-305 (a set of annotations)
 
 
-Benefits
+Features and benefits
 ---------------
 
-- lightweight, minimal dependencies.
+- Lightweight, minimal dependencies.
 - JAX-RS-annotated server-side interfaces may be reused to create clients; basic support is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam, @HeaderParam, @PathParam.
 - Support for basic HTTP authentication and some common request signing paradigms.
 - Support for custom exceptions on API methods: on a non-200 http response status, rescu can deserialize the response body as an exception.
@@ -29,7 +29,7 @@ Benefits
 Limitations
 ---------------
 
-- This is meant mostly for json-based REST services. The response body is always interpreted as json or plain text. No XML, and no plans to add it.
+- Rescu is meant mostly for json-based REST services. The response body is always interpreted as json or plain text. No XML, and no plans to add it.
 - JAX-RS: No support for @MatrixParam.
 
 
@@ -80,4 +80,5 @@ Important note:
 ---------------
 
 I am very open to new suggestions, change requests etc. If ResCU seems almost right for you, but not quite,
-do write me a note, eg. by [opening an issue](https://github.com/mmazi/rescu/issues/new).
+do write me a note, eg. by [opening an issue](https://github.com/mmazi/rescu/issues/new). Documentation and
+clarification requests are welcome too!
