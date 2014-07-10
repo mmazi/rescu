@@ -33,11 +33,6 @@ import javax.ws.rs.FormParam;
 public class NullRequestWriter implements RequestWriter {
 
     public String writeBody(RestInvocation invocation) {
-        if (invocation.getReqContentType() != null
-                && invocation.getReqContentType().length() > 0) {
-            throw new IllegalArgumentException("NullRequestWriter supports requests without content type and body only!");
-        }
-        
         //just safety checks
         if (!invocation.getParamsMap().get(FormParam.class).isEmpty()
                 || invocation.getUnannanotatedParams().isEmpty()) {

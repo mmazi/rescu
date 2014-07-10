@@ -50,7 +50,7 @@ public class FormUrlEncodedRequestWriterTest {
     public void testWriteBody() {
         FormUrlEncodedRequestWriter writer = new FormUrlEncodedRequestWriter();
         
-        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        HashMap<Class<? extends Annotation>, Params> paramsMap = RestInvocation.createEmptyParamsMap(null);
         paramsMap.put(FormParam.class,
                 Params
                     .of("test1", "value& 1")

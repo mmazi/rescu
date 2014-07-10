@@ -31,7 +31,6 @@ import javax.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HmacPostBodyDigestTest {
@@ -43,7 +42,7 @@ public class HmacPostBodyDigestTest {
 
         String secretKey = "9WkB3zUil6h5pXrqUX7XT57c+g2rxxemeGYv3aBSW4hlkwSIgmul+mC3yxwU8fPtQsR8jTpyI2xo7WznjhTf4g==";
 
-        Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        Map<Class<? extends Annotation>, Params> paramsMap = RestInvocation.createEmptyParamsMap(null);
         paramsMap.put(FormParam.class, Params.of("nonce", 1328626350245256L));
 
         RequestWriterResolver requestWriterResolver = new RequestWriterResolver();

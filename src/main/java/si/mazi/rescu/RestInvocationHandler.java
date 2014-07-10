@@ -102,9 +102,9 @@ public class RestInvocationHandler implements InvocationHandler {
         
         return httpTemplate.executeRequest(invocation.getInvocationUrl(),
                 requestBody,
-                invocation.getHttpHeaders(),
-                methodMetadata.getHttpMethod(),
-                invocation.getReqContentType());
+                invocation.getAllHttpHeaders(),
+                methodMetadata.getHttpMethod()
+        );
     }
     
     protected Object mapInvocationResult(InvocationResult invocationResult,

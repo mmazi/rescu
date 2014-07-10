@@ -44,7 +44,7 @@ public class HttpTemplateTest {
     public void testGet() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-httpdata.txt");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        InvocationResult executeResult = testObject.executeRequest("http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET, null);
+        InvocationResult executeResult = testObject.executeRequest("http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET);
         assertEquals(200, executeResult.getStatusCode());
         assertEquals("Test data", executeResult.getHttpBody());
     }
@@ -63,7 +63,7 @@ public class HttpTemplateTest {
     public void testPostWithError() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockErrorHttpURLConnection("/error.json");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        InvocationResult executeResult = testObject.executeRequest("http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST, null);
+        InvocationResult executeResult = testObject.executeRequest("http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST);
         assertEquals(500, executeResult.getStatusCode());
         assertEquals("{\"result\":\"error\",\"error\":\"Order not found\",\"token\":\"unknown_error\"}", executeResult.getHttpBody());
     }

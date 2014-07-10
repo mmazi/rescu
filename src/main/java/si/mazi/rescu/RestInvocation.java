@@ -51,6 +51,8 @@ public class RestInvocation implements Serializable {
     private final String path;
     private final RequestWriter requestWriter;
 
+    private Map<String, String> allHttpHeaders;
+
     public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
             List<Object> unannanotatedParams,
             RestMethodMetadata methodMetadata,
@@ -73,16 +75,8 @@ public class RestInvocation implements Serializable {
             RestMethodMetadata methodMetadata,
             Object[] args,
             Map<Class<? extends Annotation>, Params> defaultParamsMap) {
-        
-        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
-        
-        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
-            paramsMap.put(annotationClass, Params.of());
-        }
-        
-        if (defaultParamsMap != null) {
-            paramsMap.putAll(defaultParamsMap);
-        }
+
+        HashMap<Class<? extends Annotation>, Params> paramsMap = createEmptyParamsMap(defaultParamsMap);
 
         List<Object> unannanotatedParams = new ArrayList<Object>();
         
@@ -143,6 +137,19 @@ public class RestInvocation implements Serializable {
         return invocation;
     }
 
+    public static HashMap<Class<? extends Annotation>, Params> createEmptyParamsMap(Map<Class<? extends Annotation>, Params> defaultParamsMap) {
+        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+
+        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
+            paramsMap.put(annotationClass, Params.of());
+        }
+
+        if (defaultParamsMap != null) {
+            paramsMap.putAll(defaultParamsMap);
+        }
+        return paramsMap;
+    }
+
     private static String getParamName(Annotation queryParam) {
 
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
@@ -183,7 +190,21 @@ public class RestInvocation implements Serializable {
         return requestWriter.writeBody(this);
     }
     
-    public Map<String, String> getHttpHeaders() {
+    public Map<String, String> getAllHttpHeaders() {
+        if (allHttpHeaders == null) {
+            allHttpHeaders = new HashMap<String, String>();
+            allHttpHeaders.putAll(getHttpHeadersFromParams());
+            if (methodMetadata.getReqContentType() != null) {
+                allHttpHeaders.put("Content-Type", methodMetadata.getReqContentType());
+            }
+            if (methodMetadata.getResContentType() != null) {
+                allHttpHeaders.put("Accept", methodMetadata.getResContentType());
+            }
+        }
+        return allHttpHeaders;
+    }
+
+    public Map<String, String> getHttpHeadersFromParams() {
         return getParamsMap().get(HeaderParam.class).asHttpHeaders();
     }
 

@@ -36,6 +36,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -65,7 +66,7 @@ public class RestInvocationHandlerTest {
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
         assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00", FormParam.class, "user", "john");
-        assertEquals("lorem", testHandler.invocation.getHttpHeaders().get("testHeader"));
+        assertEquals("lorem", testHandler.invocation.getAllHttpHeaders().get("testHeader"));
         
         BigDecimal amount = new BigDecimal("3.14");
         proxy.buy("john", "secret", amount, null);
@@ -106,9 +107,10 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.getInfo(2L, 5L);
-        HashMap<String, String> authHeaders = new HashMap<String, String>();
-        authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        assertRequestData(testHandler, Object.class, headers, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
@@ -135,7 +137,7 @@ public class RestInvocationHandlerTest {
             Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
         }
         if (headers != null) {
-            Assert.assertEquals(headers, testHandler.invocation.getHttpHeaders());
+            Assert.assertEquals(headers, testHandler.invocation.getAllHttpHeaders());
         }
     }
 
@@ -214,6 +216,9 @@ public class RestInvocationHandlerTest {
 
         final String string = proxy.getString();
         assertEquals(string, "Hello World in plain text!");
+        final Map<String, String> httpHeaders = testHandler.invocation.getAllHttpHeaders();
+        assertEquals(httpHeaders.get("Content-Type"), null);
+        assertEquals(httpHeaders.get("Accept"), MediaType.TEXT_PLAIN);
     }
 
     @Test
@@ -250,6 +255,25 @@ public class RestInvocationHandlerTest {
             this.invocation = invocation;
             return new InvocationResult(responseBody, responseStatusCode);
         }
+    }
 
+    private static class MockHttpTemplate extends HttpTemplate {
+        String urlString;
+        String requestBody;
+        Map<String, String> httpHeaders;
+        HttpMethod method;
+
+        public MockHttpTemplate() {
+            super(0, null, null, null, null);
+        }
+
+        @Override
+        public InvocationResult executeRequest(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
+            this.urlString = urlString;
+            this.requestBody = requestBody;
+            this.httpHeaders = httpHeaders;
+            this.method = method;
+            return null;
+        }
     }
 }

@@ -98,10 +98,9 @@ class HttpTemplate {
      * @param requestBody The contents of the request body
      * @param httpHeaders Any custom header values (application/json is provided automatically)
      * @param method      Http method (usually GET or POST)
-     * @param contentType the mime type to be set as the value of the Content-Type header
      */
     public InvocationResult executeRequest(String urlString, String requestBody,
-            Map<String, String> httpHeaders, HttpMethod method, String contentType)
+                                           Map<String, String> httpHeaders, HttpMethod method)
             throws IOException {
 
         log.debug("Executing {} request at {}", method, urlString);
@@ -110,10 +109,6 @@ class HttpTemplate {
 
         AssertUtil.notNull(urlString, "urlString cannot be null");
         AssertUtil.notNull(httpHeaders, "httpHeaders should not be null");
-
-        if (contentType != null) {
-            httpHeaders.put("Content-Type", contentType);
-        }
 
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
         HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
