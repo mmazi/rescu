@@ -189,8 +189,8 @@ public class RestInvocation implements Serializable {
         return getParamsMap().get(HeaderParam.class).asHttpHeaders();
     }
 
-    public String getContentType() {
-        return methodMetadata.getContentType();
+    public String getReqContentType() {
+        return methodMetadata.getReqContentType();
     }
 
     /**

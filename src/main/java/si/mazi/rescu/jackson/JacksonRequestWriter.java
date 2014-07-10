@@ -43,7 +43,7 @@ public class JacksonRequestWriter implements RequestWriter {
     }
 
     public String writeBody(RestInvocation invocation) {
-        if (!MediaType.APPLICATION_JSON.equals(invocation.getMethodMetadata().getContentType())) {
+        if (!MediaType.APPLICATION_JSON.equals(invocation.getMethodMetadata().getReqContentType())) {
             throw new IllegalArgumentException("JsonRequestWriter supports application/json content type only!");
         }
         

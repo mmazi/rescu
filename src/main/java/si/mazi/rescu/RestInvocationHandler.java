@@ -100,7 +100,7 @@ public class RestInvocationHandler implements InvocationHandler {
                 requestBody,
                 invocation.getHttpHeaders(),
                 methodMetadata.getHttpMethod(),
-                invocation.getContentType());
+                invocation.getReqContentType());
     }
     
     protected Object mapInvocationResult(InvocationResult invocationResult,

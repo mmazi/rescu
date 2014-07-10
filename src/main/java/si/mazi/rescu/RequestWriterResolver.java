@@ -56,15 +56,15 @@ public class RequestWriterResolver {
     public RequestWriter resolveWriter(RestInvocation invocation) {
         RequestWriter writer;
         
-        if (invocation.getContentType() == null) {
+        if (invocation.getReqContentType() == null) {
             //throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
             writer = writers.get(MediaType.APPLICATION_FORM_URLENCODED);
         } else {
-            writer = writers.get(invocation.getContentType());
+            writer = writers.get(invocation.getReqContentType());
         }
         
         if (writer == null) {
-            throw new IllegalArgumentException("Unsupported media type: " + invocation.getContentType());
+            throw new IllegalArgumentException("Unsupported media type: " + invocation.getReqContentType());
         }
         
         return writer;

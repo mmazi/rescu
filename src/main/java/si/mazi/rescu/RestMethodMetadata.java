@@ -48,14 +48,14 @@ public class RestMethodMetadata implements Serializable {
     private final String intfacePath;
     private final String methodPathTemplate;
     private final Class<? extends RuntimeException> exceptionType;
-    private final String contentType;
+    private final String reqContentType;
     private final String methodName;
     private final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
     private final Annotation[][] parameterAnnotations;
 
     public RestMethodMetadata(Type returnType, HttpMethod httpMethod,
             String baseUrl, String intfacePath, String methodPathTemplate,
-            Class<? extends RuntimeException> exceptionType, String contentType,
+            Class<? extends RuntimeException> exceptionType, String reqContentType,
             String methodName,
             Map<Class<? extends Annotation>, Annotation> methodAnnotationMap,
             Annotation[][] parameterAnnotations) {
@@ -63,7 +63,7 @@ public class RestMethodMetadata implements Serializable {
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
-        this.contentType = contentType;
+        this.reqContentType = reqContentType;
         this.methodName = methodName;
         this.methodAnnotationMap = methodAnnotationMap;
         this.parameterAnnotations = parameterAnnotations;
@@ -78,7 +78,7 @@ public class RestMethodMetadata implements Serializable {
                         RestInvocation.PARAM_ANNOTATION_CLASSES);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
-        String contentType = consumes != null ? consumes.value()[0] : null;
+        String reqContentType = consumes != null ? consumes.value()[0] : null;
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
@@ -98,7 +98,7 @@ public class RestMethodMetadata implements Serializable {
         }
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
                 baseUrl, intfacePath, methodPathTemplate, exceptionType,
-                contentType, methodName, methodAnnotationMap, parameterAnnotations);
+                reqContentType, methodName, methodAnnotationMap, parameterAnnotations);
     }
 
     static HttpMethod getHttpMethod(Method method) {
@@ -163,8 +163,8 @@ public class RestMethodMetadata implements Serializable {
     /**
      * @return the contentType
      */
-    public String getContentType() {
-        return contentType;
+    public String getReqContentType() {
+        return reqContentType;
     }
 
     /**
