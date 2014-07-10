@@ -60,7 +60,7 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
 
 #### Examples
 
-See the [tests](/mmazi/rescu/tree/develop/src/test) for some examples. [ExampleService](/mmazi/rescu/blob/develop/src/test/java/si/mazi/rescu/ExampleService.java)
+See the [tests](/src/test) for some examples. [ExampleService](/src/test/java/si/mazi/rescu/ExampleService.java)
 is an example of a JAX-RS-annotated interface.
 
 For more working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitstampTradeServiceRaw.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitstamp/src/main/java/com/xeiam/xchange/bitstamp/service/polling/BitstampTradeServiceRaw.java).
