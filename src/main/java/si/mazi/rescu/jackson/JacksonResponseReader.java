@@ -25,64 +25,33 @@
 package si.mazi.rescu.jackson;
 
 import com.fasterxml.jackson.databind.JavaType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import si.mazi.rescu.*;
+import si.mazi.rescu.InvocationResult;
+import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
  * Reads the JSON responses into POJO object using Jackson.
  *
  * @author Martin ZIMA
  */
-public class JacksonResponseReader implements ResponseReader {
-
-    private final Logger logger = LoggerFactory.getLogger(JacksonResponseReader.class);
+public class JacksonResponseReader extends ResponseReader {
 
     private final JacksonMapper jacksonMapper;
 
-    private final boolean ignoreHttpErrorCodes;
-
     public JacksonResponseReader(JacksonMapper jacksonMapper, boolean ignoreHttpErrorCodes) {
+        super(ignoreHttpErrorCodes);
         this.jacksonMapper = jacksonMapper;
-        this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
     }
 
-    public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
-            throws IOException {
-        if (!invocationResult.isErrorStatusCode() || ignoreHttpErrorCodes) {
-            if (invocationResult.getHttpBody() == null || invocationResult.getHttpBody().length() == 0) {
-                return null;
-            } else {
-                JavaType javaType = jacksonMapper.getObjectMapper()
-                        .getTypeFactory()
-                        .constructType(methodMetadata.getReturnType());
+    public <T> T read(InvocationResult invocationResult, Type returnType) throws IOException {
+        JavaType javaType = jacksonMapper.getObjectMapper()
+                .getTypeFactory()
+                .constructType(returnType);
 
-                return jacksonMapper.getObjectMapper().readValue(
-                        invocationResult.getHttpBody(), javaType);
-            }
-        } else {
-            if (methodMetadata.getExceptionType() != null) {
-                RuntimeException exception = null;
-                try {
-                    exception = jacksonMapper.getObjectMapper().readValue(invocationResult.getHttpBody(),
-                            methodMetadata.getExceptionType());
-                } catch (IOException e) {
-                    logger.warn("Error parsing error output: " + e.toString());
-                }
-
-                if (exception != null) {
-                    if (exception instanceof HttpStatusException) {
-                        ((HttpStatusException) exception).setHttpStatusCode(invocationResult.getStatusCode());
-                    }
-                    throw exception;
-                }
-            }
-
-            throw new HttpStatusIOException(invocationResult);
-        }
-
+        return jacksonMapper.getObjectMapper().readValue(
+                invocationResult.getHttpBody(), javaType);
     }
 
 }

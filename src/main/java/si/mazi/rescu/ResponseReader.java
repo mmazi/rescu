@@ -24,14 +24,59 @@
 
 package si.mazi.rescu;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
  * Interface for deserializing of REST returned data.
  * 
  * @author Martin ZIMA
  */
-public interface ResponseReader {
+public abstract class ResponseReader {
+    private static final Logger log = LoggerFactory.getLogger(ResponseReader.class);
 
-    Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata) throws IOException;
+    private final boolean ignoreHttpErrorCodes;
+
+    public ResponseReader(boolean ignoreHttpErrorCodes) {
+        this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
+    }
+
+    public abstract <T> T read(InvocationResult invocationResult, Type returnType) throws IOException;
+
+    public boolean isIgnoreHttpErrorCodes() {
+        return ignoreHttpErrorCodes;
+    }
+
+    public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
+            throws IOException {
+        if (!invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes()) {
+            if (invocationResult.getHttpBody() == null || invocationResult.getHttpBody().length() == 0) {
+                return null;
+            } else {
+                return read(invocationResult, methodMetadata.getReturnType());
+            }
+        } else {
+            if (methodMetadata.getExceptionType() != null) {
+                RuntimeException exception = null;
+                try {
+                    exception = read(invocationResult, methodMetadata.getExceptionType());
+                } catch (IOException e) {
+                    log.warn("Error parsing error output: " + e.toString());
+                }
+
+                if (exception != null) {
+                    if (exception instanceof HttpStatusException) {
+                        ((HttpStatusException) exception).setHttpStatusCode(invocationResult.getStatusCode());
+                    }
+                    throw exception;
+                }
+            }
+
+            throw new HttpStatusIOException(invocationResult);
+        }
+
+    }
 }
