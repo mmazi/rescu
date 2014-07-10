@@ -49,7 +49,7 @@ public class RestInvocation implements Serializable {
     private final String invocationUrl;
     private final String queryString;
     private final String path;
-    private final RequestWriterResolver requestWriterResolver;
+    private final RequestWriter requestWriter;
 
     public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
             List<Object> unannanotatedParams,
@@ -66,7 +66,7 @@ public class RestInvocation implements Serializable {
         this.invocationUrl = invocationUrl;
         this.queryString = queryString;
         this.path = path;
-        this.requestWriterResolver = requestWriterResolver;
+        this.requestWriter = requestWriterResolver == null ? null : requestWriterResolver.resolveWriter(this.getMethodMetadata());
     }
 
     static RestInvocation create(RequestWriterResolver requestWriterResolver,
@@ -180,9 +180,7 @@ public class RestInvocation implements Serializable {
     }
 
     public String getRequestBody() {
-        return requestWriterResolver
-                .resolveWriter(this)
-                .writeBody(this);
+        return requestWriter.writeBody(this);
     }
     
     public Map<String, String> getHttpHeaders() {

@@ -93,7 +93,7 @@ public class RestInvocationHandler implements InvocationHandler {
     protected InvocationResult invokeHttp(RestInvocation invocation) throws IOException {
         RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
         
-        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation);
+        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
         final String requestBody = requestWriter.writeBody(invocation);
         
         return httpTemplate.executeRequest(invocation.getInvocationUrl(),
