@@ -29,7 +29,7 @@ Benefits
 Limitations
 ---------------
 
-- This is meant mostly for json-based REST services, ie. the response body is always interpreted as json. No XML.
+- This is meant mostly for json-based REST services. The response body is always interpreted as json or plain text. No XML, and no plans to add it.
 - JAX-RS: No support for @MatrixParam.
 
 
@@ -37,7 +37,7 @@ Logging
 ---------------
 
 ResCU uses slf4j for logging. For best results, a supported logging implementation (eg. log4j, JUL, logback, ...)
-should be provided in runtime. See slf4j's documentation for more info.
+should be provided in runtime, though this is not required. See slf4j's documentation for more info.
 
 Usage
 ---------------
@@ -58,7 +58,12 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
 2. Call `ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://www.example.com/")`.
 3. That's it! Just use the `service` object you just got.
 
-For several working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitstampTradeServiceRaw.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitstamp/src/main/java/com/xeiam/xchange/bitstamp/service/polling/BitstampTradeServiceRaw.java).
+#### Examples
+
+See the [tests](/mmazi/rescu/tree/develop/src/test) for some examples. [ExampleService](/mmazi/rescu/blob/develop/src/test/java/si/mazi/rescu/ExampleService.java)
+is an example of a JAX-RS-annotated interface.
+
+For more working examples, see [XChange](https://github.com/timmolter/XChange), eg. [BitstampTradeServiceRaw.java](https://github.com/timmolter/XChange/blob/develop/xchange-bitstamp/src/main/java/com/xeiam/xchange/bitstamp/service/polling/BitstampTradeServiceRaw.java).
 
 #### Settings
 
