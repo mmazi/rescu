@@ -24,7 +24,7 @@
 
 package si.mazi.rescu;
 
-import si.mazi.rescu.jackson.JacksonResponseReaderTest;
+import si.mazi.rescu.serialization.jackson.JacksonResponseReaderTest;
 
 import java.io.IOException;
 import java.io.InputStream;

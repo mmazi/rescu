@@ -22,48 +22,41 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.testng.annotations.Test;
+import com.fasterxml.jackson.databind.JavaType;
+import si.mazi.rescu.InvocationResult;
+import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
+ * Reads the JSON responses into POJO object using Jackson.
  *
  * @author Martin ZIMA
  */
-public class JacksonMapperTest {
-    
-    private boolean testConfigured;
-    
-    public JacksonMapperTest() {
+public class JacksonResponseReader extends ResponseReader {
+
+    private final JacksonMapper jacksonMapper;
+
+    public JacksonResponseReader(JacksonMapper jacksonMapper, boolean ignoreHttpErrorCodes) {
+        super(ignoreHttpErrorCodes);
+        this.jacksonMapper = jacksonMapper;
     }
 
-    /**
-     * Test of createObjectMapper method, of class JacksonMapper.
-     */
-    @Test
-    public void testCreateObjectMapper() {
-        ObjectMapper objectMapper = JacksonMapper.createObjectMapper();
-        //assert(objectMapper.)
-        //TODO: test default config (i.e. not fail on unknown properties)
+    public <T> T read(InvocationResult invocationResult, Type returnType) throws IOException {
+        JavaType javaType = jacksonMapper.getObjectMapper()
+                .getTypeFactory()
+                .constructType(returnType);
+
+        return jacksonMapper.getObjectMapper().readValue(
+                invocationResult.getHttpBody(), javaType);
     }
 
-    @Test
-    public void testConfigurator() throws IOException {
-        testConfigured = false;
-        
-        JacksonMapper jacksonMapper = new JacksonMapper(new JacksonConfigureListener() {
-            
-            public void configureObjectMapper(ObjectMapper objectMapper) {
-                testConfigured = true;
-            }
-        });
-        
-        JsonNode testRead = jacksonMapper.getObjectMapper().readTree("{}");
-        assert(testConfigured); //configurator ran
+    @Override
+    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
+        return read(invocationResult, exceptionType);
     }
-    
+
 }

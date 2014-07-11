@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

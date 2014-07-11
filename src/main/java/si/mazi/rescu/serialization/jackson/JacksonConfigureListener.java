@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 RedDragCZ.
+ * Copyright 2014 Martin Zima (reddragcz).
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package si.mazi.rescu.serialization.jackson;
 
-package si.mazi.rescu.jackson;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Provides Jackson object mapping services.
+ * Provides hooks for additional configuration of the internally used
+ * JSON converter of Jackson library.
  * 
- * @author Martin ZIMA
+ * @author Martin Zima (reddragcz)
  */
-public class JacksonMapper {
-
-    private final JacksonConfigureListener jacksonConfigureListener;
-    private final ObjectMapper objectMapper;
+public interface JacksonConfigureListener {
     
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this.jacksonConfigureListener = jacksonConfigureListener;
-        
-        this.objectMapper = createObjectMapper();
-        if (this.jacksonConfigureListener != null) {
-            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
-    }
-    
-    static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objectMapper;
-    }
-    
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
+    /**
+     * Called during the construction of each REST proxy object,
+     * after setting the default or implied ObjectMapper properties.
+     * For example, the users might want to register modules with
+     * nonstandard (de)serializers now.
+     * 
+     * @param objectMapper
+     */
+    void configureObjectMapper(ObjectMapper objectMapper);
 }

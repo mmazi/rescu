@@ -19,16 +19,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package si.mazi.rescu.jackson.serializers;
+package si.mazi.rescu.serialization.jackson.serializers;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+
+import java.io.IOException;
+import java.util.Date;
 
 /**
  * @author Matija Mazi <br>
- * @created 2/19/13 9:27 PM
  */
-public class YesNoBooleanDeserializerImpl extends BooleanDeserializer {
+public class FloatingTimestampDeserializer extends JsonDeserializer<Date> {
 
-    protected YesNoBooleanDeserializerImpl() {
+    @Override
+    public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 
-        super("Yes", "No");
+        return new Date(Math.round(jp.getValueAsDouble() * 1000));
     }
 }

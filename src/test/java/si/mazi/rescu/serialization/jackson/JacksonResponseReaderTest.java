@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.testng.Assert;

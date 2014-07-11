@@ -22,41 +22,37 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.JavaType;
-import si.mazi.rescu.InvocationResult;
-import si.mazi.rescu.ResponseReader;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Reads the JSON responses into POJO object using Jackson.
- *
+ * Provides Jackson object mapping services.
+ * 
  * @author Martin ZIMA
  */
-public class JacksonResponseReader extends ResponseReader {
+public class JacksonMapper {
 
-    private final JacksonMapper jacksonMapper;
-
-    public JacksonResponseReader(JacksonMapper jacksonMapper, boolean ignoreHttpErrorCodes) {
-        super(ignoreHttpErrorCodes);
-        this.jacksonMapper = jacksonMapper;
+    private final JacksonConfigureListener jacksonConfigureListener;
+    private final ObjectMapper objectMapper;
+    
+    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
+        this.jacksonConfigureListener = jacksonConfigureListener;
+        
+        this.objectMapper = createObjectMapper();
+        if (this.jacksonConfigureListener != null) {
+            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
+        }
     }
-
-    public <T> T read(InvocationResult invocationResult, Type returnType) throws IOException {
-        JavaType javaType = jacksonMapper.getObjectMapper()
-                .getTypeFactory()
-                .constructType(returnType);
-
-        return jacksonMapper.getObjectMapper().readValue(
-                invocationResult.getHttpBody(), javaType);
+    
+    static ObjectMapper createObjectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return objectMapper;
     }
-
-    @Override
-    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
-        return read(invocationResult, exceptionType);
+    
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
-
 }

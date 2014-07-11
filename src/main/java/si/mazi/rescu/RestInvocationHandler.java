@@ -21,10 +21,11 @@
  */
 package si.mazi.rescu;
 
-import si.mazi.rescu.jackson.JacksonMapper;
-import si.mazi.rescu.jackson.JacksonRequestWriter;
-import si.mazi.rescu.jackson.JacksonResponseReader;
-import si.mazi.rescu.jackson.PlainTextResponseReader;
+import si.mazi.rescu.serialization.PlainTextResponseReader;
+import si.mazi.rescu.serialization.ToStringRequestWriter;
+import si.mazi.rescu.serialization.jackson.JacksonMapper;
+import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
+import si.mazi.rescu.serialization.jackson.JacksonResponseReader;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
@@ -69,6 +70,8 @@ public class RestInvocationHandler implements InvocationHandler {
                 new FormUrlEncodedRequestWriter());
         requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,
                 new JacksonRequestWriter(jacksonMapper));
+        requestWriterResolver.addWriter(MediaType.TEXT_PLAIN,
+                new ToStringRequestWriter());
 
         responseReaderResolver = new ResponseReaderResolver();
         responseReaderResolver.addReader(MediaType.APPLICATION_JSON,

@@ -223,9 +223,7 @@ public class RestInvocationHandlerTest {
 
     @Test
     public void testGetTextPlainError() throws Exception {
-        ClientConfig clientConfig = new ClientConfig();
-
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, "Error message.", 400);
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "Error message.", 400);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         try {
@@ -234,6 +232,14 @@ public class RestInvocationHandlerTest {
         } catch (MessageException e) {
             assertEquals(e.getMessage(), "Error message.");
         }
+    }
+
+    @Test
+    public void testPutTextPlain() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.putNumber(123456);
+        assertEquals(testHandler.invocation.getRequestBody(), "123456");
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

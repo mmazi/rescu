@@ -82,4 +82,10 @@ public interface ExampleService {
     @Path("string")
     @Produces(MediaType.TEXT_PLAIN)
     String getString() throws MessageException;
+
+    @PUT
+    @Path("number")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String putNumber(int number);
 }

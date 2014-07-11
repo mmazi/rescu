@@ -1,6 +1,6 @@
 package si.mazi.rescu;
 
-import si.mazi.rescu.jackson.JacksonConfigureListener;
+import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;

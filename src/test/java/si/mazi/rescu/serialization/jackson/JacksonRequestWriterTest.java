@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import org.testng.annotations.Test;
 import si.mazi.rescu.HttpMethod;

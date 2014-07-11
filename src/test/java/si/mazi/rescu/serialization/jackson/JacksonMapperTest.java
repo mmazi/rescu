@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 Martin Zima (reddragcz).
+ * Copyright 2014 RedDragCZ.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu.jackson;
 
+package si.mazi.rescu.serialization.jackson;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
 
 /**
- * Provides hooks for additional configuration of the internally used
- * JSON converter of Jackson library.
- * 
- * @author Martin Zima (reddragcz)
+ *
+ * @author Martin ZIMA
  */
-public interface JacksonConfigureListener {
+public class JacksonMapperTest {
     
+    private boolean testConfigured;
+    
+    public JacksonMapperTest() {
+    }
+
     /**
-     * Called during the construction of each REST proxy object,
-     * after setting the default or implied ObjectMapper properties.
-     * For example, the users might want to register modules with
-     * nonstandard (de)serializers now.
-     * 
-     * @param objectMapper
+     * Test of createObjectMapper method, of class JacksonMapper.
      */
-    void configureObjectMapper(ObjectMapper objectMapper);
+    @Test
+    public void testCreateObjectMapper() {
+        ObjectMapper objectMapper = JacksonMapper.createObjectMapper();
+        //assert(objectMapper.)
+        //TODO: test default config (i.e. not fail on unknown properties)
+    }
+
+    @Test
+    public void testConfigurator() throws IOException {
+        testConfigured = false;
+        
+        JacksonMapper jacksonMapper = new JacksonMapper(new JacksonConfigureListener() {
+            
+            public void configureObjectMapper(ObjectMapper objectMapper) {
+                testConfigured = true;
+            }
+        });
+        
+        JsonNode testRead = jacksonMapper.getObjectMapper().readTree("{}");
+        assert(testConfigured); //configurator ran
+    }
+    
 }
