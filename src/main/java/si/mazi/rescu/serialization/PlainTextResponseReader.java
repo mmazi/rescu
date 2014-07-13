@@ -26,10 +26,12 @@ package si.mazi.rescu.serialization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import si.mazi.rescu.InvocationResult;
 import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 /**
@@ -52,17 +54,37 @@ public class PlainTextResponseReader extends ResponseReader {
     @Override
     protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
         final String message = read(invocationResult, exceptionType);
-        RuntimeException constructedException;
+        RuntimeException constructedException = null;
+
+        Exception reflectiveOperationException = null;
         try {
             // try constructng the exception with message
             constructedException = exceptionType.getConstructor(String.class).newInstance(message);
-        } catch (ReflectiveOperationException e) {
+        } catch (IllegalAccessException e) {
+            reflectiveOperationException = e;
+        } catch (InstantiationException e) {
+            reflectiveOperationException = e;
+        } catch (InvocationTargetException e) {
+            reflectiveOperationException = e;
+        } catch (NoSuchMethodException e) {
+            reflectiveOperationException = e;
+        }
+
+        if (reflectiveOperationException != null) {
+            reflectiveOperationException = null;
+
             try {
                 // fallback to no-parameter constructor
                 constructedException = exceptionType.newInstance();
                 log.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
-            } catch (ReflectiveOperationException e1) {
-                log.warn("Cannot construct a {}. Throwing a RuntimeException instead. Main cause: {}", exceptionType, e.toString());
+            } catch (IllegalAccessException e) {
+                reflectiveOperationException = e;
+            } catch (InstantiationException e) {
+                reflectiveOperationException = e;
+            }
+
+            if (reflectiveOperationException != null) {
+                log.warn("Cannot construct a {}. Throwing a RuntimeException instead. Main cause: {}", exceptionType, reflectiveOperationException.toString());
                 throw new RuntimeException(message);
             }
         }
