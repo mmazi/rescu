@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,17 +100,44 @@ public class RestInvocationHandler implements InvocationHandler {
 
     protected InvocationResult invokeHttp(RestInvocation invocation) throws IOException {
         RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
-        
+      int nonceParam = getNonceGenerator(invocation);
+
+      HttpURLConnection connection;
+      if (nonceParam >= 0) {
+        synchronized (this) {
+          applyNonce(invocation, nonceParam);
         RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
         final String requestBody = requestWriter.writeBody(invocation);
-        
-        return httpTemplate.executeRequest(invocation.getInvocationUrl(),
-                requestBody,
-                invocation.getAllHttpHeaders(),
-                methodMetadata.getHttpMethod()
-        );
+
+          connection = httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
+        }
+      } else {
+        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
+        final String requestBody = requestWriter.writeBody(invocation);
+
+        connection = httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
+      }
+
+      return httpTemplate.receive(connection);
     }
-    
+
+  private void applyNonce(RestInvocation invocation, int nonceParam) {
+    java.util.List<Object> unannanotatedParams = invocation.getUnannanotatedParams();
+    unannanotatedParams.set(nonceParam, ((NonceGenerator)unannanotatedParams.get(nonceParam)).nextNonce());
+  }
+
+  private int getNonceGenerator(RestInvocation invocation){
+    java.util.List<Object> unannanotatedParams = invocation.getUnannanotatedParams();
+    for (int i = 0; i < unannanotatedParams.size(); i++) {
+      Object o = unannanotatedParams.get(i);
+      if (o instanceof NonceGenerator) {
+        invocation.getUnannanotatedParams().set(i, ((NonceGenerator) o).nextNonce());
+        return i;
+      }
+    }
+    return -1;
+    }
+
     protected Object mapInvocationResult(InvocationResult invocationResult,
             RestMethodMetadata methodMetadata) throws IOException {
         return responseReaderResolver.resolveReader(methodMetadata).read(invocationResult, methodMetadata);

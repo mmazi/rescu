@@ -103,6 +103,12 @@ class HttpTemplate {
                                            Map<String, String> httpHeaders, HttpMethod method)
             throws IOException {
 
+      HttpURLConnection connection = send(urlString, requestBody, httpHeaders, method);
+
+      return receive(connection);
+    }
+
+  public HttpURLConnection send(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
         log.debug("Executing {} request at {}", method, urlString);
         log.trace("Request body = {}", requestBody);
         log.trace("Request headers = {}", httpHeaders);
@@ -117,7 +123,10 @@ class HttpTemplate {
             // Write the request body
             connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
         }
+    return connection;
+  }
 
+  public InvocationResult receive(HttpURLConnection connection) throws IOException {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
@@ -125,7 +134,7 @@ class HttpTemplate {
             connection.getInputStream() : connection.getErrorStream();
         String responseString = readInputStreamAsEncodedString(inputStream, connection);
         log.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
-        
+
         return new InvocationResult(responseString, httpStatus);
     }
 
