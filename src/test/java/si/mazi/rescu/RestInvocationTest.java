@@ -66,5 +66,26 @@ public class RestInvocationTest {
         assertEquals("eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==",
                 invocation.getParamValue(HeaderParam.class, "digest"));
     }
-    
+
+    Long nonce = 1328626350245256L;
+
+    @Test
+    public void testCreateWithValueGenerator() {
+        Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        paramsMap.put(FormParam.class, Params.of("nonce", new SimpleValueFactory<Long>(nonce)));
+
+        RequestWriterResolver requestWriterResolver = new RequestWriterResolver();
+        requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED, new FormUrlEncodedRequestWriter());
+
+        RestInvocation invocation = RestInvocation.create(requestWriterResolver,
+                new RestMethodMetadata(String.class, HttpMethod.GET,
+                        "http://example.com", "/api", null,
+                        RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, null,
+                        new HashMap<Class<? extends Annotation>, Annotation>(),
+                        new Annotation[][] {}),
+                new Object[] {}, paramsMap);
+
+        assertEquals(invocation.getParamValue(FormParam.class, "nonce"), nonce);
+    }
+
 }

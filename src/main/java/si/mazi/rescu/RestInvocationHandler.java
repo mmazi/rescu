@@ -90,52 +90,46 @@ public class RestInvocationHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RestMethodMetadata methodMetadata = getMetadata(method);
-        
+
+        HttpURLConnection connection;
+        if (hasValueGenerator(args)) {
+            synchronized (this) {
+                System.out.println("synchronized");
+                connection = prepareAndInvoke(args, methodMetadata);
+            }
+        } else {
+            connection = prepareAndInvoke(args, methodMetadata);
+        }
+
+        return receiveAndMap(methodMetadata, connection);
+    }
+
+    protected HttpURLConnection prepareAndInvoke(Object[] args, RestMethodMetadata _methodMetadata) throws IOException {
         RestInvocation invocation = RestInvocation.create(
-                requestWriterResolver, methodMetadata, args, config.getParamsMap());
-        
-        InvocationResult invocationResult = invokeHttp(invocation);
+                requestWriterResolver, _methodMetadata, args, config.getParamsMap());
+
+        return invokeHttp(invocation);
+    }
+
+    protected HttpURLConnection invokeHttp(RestInvocation invocation) throws IOException {
+        RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
+
+        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
+        final String requestBody = requestWriter.writeBody(invocation);
+
+        return httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
+    }
+
+    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws IOException {
+        InvocationResult invocationResult = httpTemplate.receive(connection);
         return mapInvocationResult(invocationResult, methodMetadata);
     }
 
-    protected InvocationResult invokeHttp(RestInvocation invocation) throws IOException {
-        RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
-      int nonceParam = getNonceGenerator(invocation);
-
-      HttpURLConnection connection;
-      if (nonceParam >= 0) {
-        synchronized (this) {
-          applyNonce(invocation, nonceParam);
-        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
-        final String requestBody = requestWriter.writeBody(invocation);
-
-          connection = httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
-        }
-      } else {
-        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
-        final String requestBody = requestWriter.writeBody(invocation);
-
-        connection = httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
-      }
-
-      return httpTemplate.receive(connection);
-    }
-
-  private void applyNonce(RestInvocation invocation, int nonceParam) {
-    java.util.List<Object> unannanotatedParams = invocation.getUnannanotatedParams();
-    unannanotatedParams.set(nonceParam, ((NonceGenerator)unannanotatedParams.get(nonceParam)).nextNonce());
-  }
-
-  private int getNonceGenerator(RestInvocation invocation){
-    java.util.List<Object> unannanotatedParams = invocation.getUnannanotatedParams();
-    for (int i = 0; i < unannanotatedParams.size(); i++) {
-      Object o = unannanotatedParams.get(i);
-      if (o instanceof NonceGenerator) {
-        invocation.getUnannanotatedParams().set(i, ((NonceGenerator) o).nextNonce());
-        return i;
-      }
-    }
-    return -1;
+    private static boolean hasValueGenerator(Object[]args){
+        if (args != null) for (Object arg : args)
+            if (arg instanceof ValueFactory)
+                return true;
+        return false;
     }
 
     protected Object mapInvocationResult(InvocationResult invocationResult,
