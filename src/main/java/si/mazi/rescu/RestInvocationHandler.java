@@ -94,7 +94,6 @@ public class RestInvocationHandler implements InvocationHandler {
         HttpURLConnection connection;
         if (hasValueGenerator(args)) {
             synchronized (this) {
-                System.out.println("synchronized");
                 connection = prepareAndInvoke(args, methodMetadata);
             }
         } else {
