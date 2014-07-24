@@ -6,7 +6,7 @@ public class HttpStatusIOException extends IOException implements HttpStatusExce
     private final InvocationResult invocationResult;
 
     public HttpStatusIOException(InvocationResult invocationResult) {
-        super("HTTP status code was not OK.");
+        super("HTTP status code was not OK: " + invocationResult.getStatusCode());
         this.invocationResult = invocationResult;
     }
 
