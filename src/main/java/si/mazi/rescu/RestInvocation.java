@@ -123,17 +123,21 @@ public class RestInvocation implements Serializable {
                 path,
                 requestWriterResolver);
         
+        for (Params params : paramsMap.values()) {
+            params.replaceValueFactories();
+        }
+
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
             if (param instanceof ParamsDigest) {
                 unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(invocation));
             }
         }
-        
+
         for (Params params : paramsMap.values()) {
             params.digestAll(invocation);
         }
-        
+
         return invocation;
     }
 

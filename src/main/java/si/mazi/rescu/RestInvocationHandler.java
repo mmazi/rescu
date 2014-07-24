@@ -32,6 +32,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,27 +90,47 @@ public class RestInvocationHandler implements InvocationHandler {
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RestMethodMetadata methodMetadata = getMetadata(method);
-        
+
+        HttpURLConnection connection;
+        if (hasValueGenerator(args)) {
+            synchronized (this) {
+                connection = prepareAndInvoke(args, methodMetadata);
+            }
+        } else {
+            connection = prepareAndInvoke(args, methodMetadata);
+        }
+
+        return receiveAndMap(methodMetadata, connection);
+    }
+
+    protected HttpURLConnection prepareAndInvoke(Object[] args, RestMethodMetadata _methodMetadata) throws IOException {
         RestInvocation invocation = RestInvocation.create(
-                requestWriterResolver, methodMetadata, args, config.getParamsMap());
-        
-        InvocationResult invocationResult = invokeHttp(invocation);
+                requestWriterResolver, _methodMetadata, args, config.getParamsMap());
+
+        return invokeHttp(invocation);
+    }
+
+    protected HttpURLConnection invokeHttp(RestInvocation invocation) throws IOException {
+        RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
+
+        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
+        final String requestBody = requestWriter.writeBody(invocation);
+
+        return httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
+    }
+
+    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws IOException {
+        InvocationResult invocationResult = httpTemplate.receive(connection);
         return mapInvocationResult(invocationResult, methodMetadata);
     }
 
-    protected InvocationResult invokeHttp(RestInvocation invocation) throws IOException {
-        RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
-        
-        RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
-        final String requestBody = requestWriter.writeBody(invocation);
-        
-        return httpTemplate.executeRequest(invocation.getInvocationUrl(),
-                requestBody,
-                invocation.getAllHttpHeaders(),
-                methodMetadata.getHttpMethod()
-        );
+    private static boolean hasValueGenerator(Object[]args){
+        if (args != null) for (Object arg : args)
+            if (arg instanceof ValueFactory)
+                return true;
+        return false;
     }
-    
+
     protected Object mapInvocationResult(InvocationResult invocationResult,
             RestMethodMetadata methodMetadata) throws IOException {
         return responseReaderResolver.resolveReader(methodMetadata).read(invocationResult, methodMetadata);

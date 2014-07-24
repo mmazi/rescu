@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -242,6 +243,13 @@ public class RestInvocationHandlerTest {
         assertEquals(testHandler.invocation.getRequestBody(), "123456");
     }
 
+    @Test
+    public void testValueGenerator()  {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.getNonce(new SimpleValueFactory<Long>(1L));
+    }
+
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
         private RestInvocation invocation;
@@ -257,9 +265,15 @@ public class RestInvocationHandlerTest {
         }
 
         @Override
-        protected InvocationResult invokeHttp(RestInvocation invocation) {
+        protected HttpURLConnection invokeHttp(RestInvocation invocation) {
             this.invocation = invocation;
-            return new InvocationResult(responseBody, responseStatusCode);
+            return null;
+        }
+
+        @Override
+        protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws IOException {
+            InvocationResult invocationResult = new InvocationResult(responseBody, responseStatusCode);
+            return mapInvocationResult(invocationResult, methodMetadata);
         }
     }
 

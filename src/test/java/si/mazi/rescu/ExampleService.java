@@ -88,4 +88,10 @@ public interface ExampleService {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     String putNumber(int number);
+
+    @GET
+    @Path("nonce")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String getNonce(@FormParam("nonce") ValueFactory nonce);
 }

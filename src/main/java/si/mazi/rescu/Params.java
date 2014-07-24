@@ -159,6 +159,14 @@ public class Params implements Serializable {
         return data.get(paramName);
     }
 
+    public void replaceValueFactories(){
+        for (Map.Entry<String, Object> e : data.entrySet()) {
+            Object value = e.getValue();
+            if(value instanceof ValueFactory)
+                e.setValue(((ValueFactory) value).createValue());
+        }
+    }
+
     @Override
     public String toString() {
         return toQueryString(false);
