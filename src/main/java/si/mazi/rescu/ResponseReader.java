@@ -57,7 +57,7 @@ public abstract class ResponseReader {
                 return read(invocationResult, methodMetadata.getReturnType());
             }
         } else {
-            if (methodMetadata.getExceptionType() != null) {
+            if (methodMetadata.getExceptionType() != null && invocationResult.getHttpBody() != null) {
                 RuntimeException exception = null;
                 try {
                     exception = readException(invocationResult, methodMetadata.getExceptionType());
