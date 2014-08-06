@@ -105,6 +105,10 @@ public class RestInvocation implements Serializable {
             }
         }
 
+        for (Params params : paramsMap.values()) {
+            params.replaceValueFactories();
+        }
+
         String methodPath = getPath(paramsMap, methodMetadata.getMethodPathTemplate());
         
         String path = getPath(paramsMap, methodMetadata.getIntfacePath());
@@ -122,10 +126,6 @@ public class RestInvocation implements Serializable {
                 queryString,
                 path,
                 requestWriterResolver);
-        
-        for (Params params : paramsMap.values()) {
-            params.replaceValueFactories();
-        }
 
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
