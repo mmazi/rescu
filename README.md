@@ -25,7 +25,7 @@ Features and benefits
  is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam, @HeaderParam, @PathParam,
  @Consumes and @Produces (`application/json` and `text/plain` only).
 - Support for basic HTTP authentication and some common request signing paradigms.
-- Support for custom exceptions on API methods: on a non-200 http response status, rescu can deserialize the response body as an exception. See [Exception handling wiki](wiki/Exception-handling).
+- Support for custom exceptions on API methods: on a non-200 http response status, rescu can deserialize the response body as an exception. See [Exception handling wiki](/wiki/Exception-handling).
 
 
 Limitations
