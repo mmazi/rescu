@@ -92,8 +92,9 @@ public class RestInvocationHandler implements InvocationHandler {
         RestMethodMetadata methodMetadata = getMetadata(method);
 
         HttpURLConnection connection;
-        if (hasValueGenerator(args)) {
-            synchronized (this) {
+        ValueFactory vf;
+        if ((vf = getValueGenerator(args)) != null) {
+            synchronized (vf) {
                 connection = prepareAndInvoke(args, methodMetadata);
             }
         } else {
@@ -124,11 +125,11 @@ public class RestInvocationHandler implements InvocationHandler {
         return mapInvocationResult(invocationResult, methodMetadata);
     }
 
-    private static boolean hasValueGenerator(Object[]args){
+    private static ValueFactory getValueGenerator(Object[] args) {
         if (args != null) for (Object arg : args)
             if (arg instanceof ValueFactory)
-                return true;
-        return false;
+                return (ValueFactory) arg;
+        return null;
     }
 
     protected Object mapInvocationResult(InvocationResult invocationResult,
