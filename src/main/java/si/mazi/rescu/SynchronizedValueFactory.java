@@ -22,14 +22,12 @@
 package si.mazi.rescu;
 
 /**
- * Default implementation of {@link si.mazi.rescu.ValueFactory} that returns @{link System#currentTimeMillis}.
+ * Allows services to accept a placeholder that is replaced with generated value just before message is serialized and sent.
  *
- * Note that createValue is normally called in a synchronized block.
+ * If a method of a service accepts ValueFactory as a parameter, it's evaluated, the message is serialized and sent in a single synchronized block.
  *
  * @author Rafał Krupiński
  */
-public class NonceFactory implements ValueFactory<Long> {
-    public Long createValue() {
-        return System.currentTimeMillis();
-    }
+public interface SynchronizedValueFactory<T> {
+    T createValue();
 }

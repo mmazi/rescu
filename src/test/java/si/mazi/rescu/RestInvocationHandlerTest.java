@@ -247,7 +247,7 @@ public class RestInvocationHandlerTest {
     public void testValueGenerator()  {
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
-        proxy.getNonce(new SimpleValueFactory<Long>(1L));
+        proxy.getNonce(new ConstantValueFactory<Long>(1L));
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

@@ -22,12 +22,16 @@
 package si.mazi.rescu;
 
 /**
- * Allows services to accept a placeholder that is replaced with generated value just before message is serialized and sent.
- *
- * If a method of a service accepts ValueFactory as a parameter, it's evaluated, the message is serialized and sent in a single synchronized block.
- *
  * @author Rafał Krupiński
  */
-public interface ValueFactory<T> {
-    T createValue();
+public class ConstantValueFactory<T> implements SynchronizedValueFactory<T> {
+    private T value;
+
+    public ConstantValueFactory(T value) {
+        this.value = value;
+    }
+
+    public T createValue() {
+        return value;
+    }
 }

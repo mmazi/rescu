@@ -162,8 +162,8 @@ public class Params implements Serializable {
     public void replaceValueFactories(){
         for (Map.Entry<String, Object> e : data.entrySet()) {
             Object value = e.getValue();
-            if(value instanceof ValueFactory)
-                e.setValue(((ValueFactory) value).createValue());
+            if(value instanceof SynchronizedValueFactory)
+                e.setValue(((SynchronizedValueFactory) value).createValue());
         }
     }
 

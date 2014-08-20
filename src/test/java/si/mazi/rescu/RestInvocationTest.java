@@ -72,7 +72,7 @@ public class RestInvocationTest {
     @Test
     public void testCreateWithValueGenerator() {
         Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
-        paramsMap.put(FormParam.class, Params.of("nonce", new SimpleValueFactory<Long>(nonce)));
+        paramsMap.put(FormParam.class, Params.of("nonce", new ConstantValueFactory<Long>(nonce)));
 
         RequestWriterResolver requestWriterResolver = new RequestWriterResolver();
         requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED, new FormUrlEncodedRequestWriter());

@@ -92,7 +92,7 @@ public class RestInvocationHandler implements InvocationHandler {
         RestMethodMetadata methodMetadata = getMetadata(method);
 
         HttpURLConnection connection;
-        ValueFactory vf;
+        SynchronizedValueFactory vf;
         if ((vf = getValueGenerator(args)) != null) {
             synchronized (vf) {
                 connection = prepareAndInvoke(args, methodMetadata);
@@ -125,10 +125,10 @@ public class RestInvocationHandler implements InvocationHandler {
         return mapInvocationResult(invocationResult, methodMetadata);
     }
 
-    private static ValueFactory getValueGenerator(Object[] args) {
+    private static SynchronizedValueFactory getValueGenerator(Object[] args) {
         if (args != null) for (Object arg : args)
-            if (arg instanceof ValueFactory)
-                return (ValueFactory) arg;
+            if (arg instanceof SynchronizedValueFactory)
+                return (SynchronizedValueFactory) arg;
         return null;
     }
 

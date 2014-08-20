@@ -93,5 +93,5 @@ public interface ExampleService {
     @Path("nonce")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
-    String getNonce(@FormParam("nonce") ValueFactory nonce);
+    String getNonce(@FormParam("nonce") SynchronizedValueFactory nonce);
 }
