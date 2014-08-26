@@ -41,6 +41,12 @@ Logging
 ResCU uses slf4j for logging. For best results, a supported logging implementation (eg. log4j, JUL, logback, ...)
 should be provided in runtime, though this is not required. See slf4j's documentation for more info.
 
+See [logback.xml](/mmazi/rescu/blob/develop/src/test/resources/logback.xml) in test sources for example configuration.
+
+Set the logging level for rescu to `debug` or `trace` in `logback.xml` for debugging:
+
+    <logger name="si.mazi.rescu" level="trace"/>
+
 Usage
 ---------------
 
