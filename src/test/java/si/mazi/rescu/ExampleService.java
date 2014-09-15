@@ -94,4 +94,17 @@ public interface ExampleService {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     String getNonce(@FormParam("nonce") SynchronizedValueFactory nonce);
+
+    @GET
+    @Path("testSmallNumbers")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String testSmallNumbersQuery(@QueryParam("value") BigDecimal value);
+
+    @GET
+    @Path("testSmallNumbers")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    String testSmallNumbersJson(BigDecimal value);
+
 }

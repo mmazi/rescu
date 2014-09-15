@@ -23,6 +23,7 @@ package si.mazi.rescu;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -139,6 +140,9 @@ public class Params implements Serializable {
 
     private String getParamValueAsString(String key) {
         Object paramValue = getParamValue(key);
+        if (paramValue instanceof BigDecimal) {
+            return ((BigDecimal) paramValue).toPlainString();
+        }
         return paramValue.toString();
     }
 

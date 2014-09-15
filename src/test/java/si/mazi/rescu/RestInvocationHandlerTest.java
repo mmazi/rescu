@@ -250,6 +250,34 @@ public class RestInvocationHandlerTest {
         proxy.getNonce(new ConstantValueFactory<Long>(1L));
     }
 
+    @Test
+    public void testSciNotUrl() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        final String numberString = "0.00000043";
+        final BigDecimal smallNumber = new BigDecimal(numberString);
+        Assert.assertTrue(smallNumber.toString().toUpperCase().contains("E"));
+
+        proxy.testSmallNumbersQuery(smallNumber);
+
+        final String invocationUrl = testHandler.invocation.getInvocationUrl();
+        Assert.assertTrue(invocationUrl.contains(numberString), invocationUrl);
+    }
+
+    @Test
+    public void testSciNotJson() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        final String numberString = "0.00000043";
+        final BigDecimal smallNumber = new BigDecimal(numberString);
+        Assert.assertTrue(smallNumber.toString().toUpperCase().contains("E"));
+
+        proxy.testSmallNumbersJson(smallNumber);
+
+        final String requestBody = testHandler.invocation.getRequestBody();
+        Assert.assertTrue(requestBody.contains(numberString), requestBody);
+    }
+
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
         private RestInvocation invocation;
