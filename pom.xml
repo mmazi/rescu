@@ -4,7 +4,7 @@
 
     <groupId>com.github.mmazi</groupId>
     <artifactId>rescu</artifactId>
-    <version>1.7.1-SNAPSHOT</version>
+    <version>1.7.1</version>
     <packaging>jar</packaging>
 
     <name>ResCU</name>
