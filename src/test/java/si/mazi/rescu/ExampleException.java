@@ -1,13 +1,11 @@
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Matija Mazi <br>
- * @created 5/24/13 9:04 PM
  */
-public class ExampleException extends RuntimeException implements HttpStatusException {
+public class ExampleException extends HttpStatusExceptionSupport {
     @JsonProperty("error")
     private String error;
 
@@ -16,9 +14,6 @@ public class ExampleException extends RuntimeException implements HttpStatusExce
 
     @JsonProperty("token")
     private String token;
-
-    @JsonIgnore
-    private int __httpStatusCode;
 
     public ExampleException() { }
 
@@ -32,13 +27,5 @@ public class ExampleException extends RuntimeException implements HttpStatusExce
 
     public String getToken() {
         return token;
-    }
-
-    public int getHttpStatusCode() {
-        return __httpStatusCode;
-    }
-
-    public void setHttpStatusCode(int httpStatusCode) {
-        this.__httpStatusCode = httpStatusCode;
     }
 }
