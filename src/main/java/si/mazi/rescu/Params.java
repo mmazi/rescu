@@ -140,10 +140,27 @@ public class Params implements Serializable {
 
     private String getParamValueAsString(String key) {
         Object paramValue = getParamValue(key);
+        return toString(paramValue);
+    }
+
+    static String toString(Object paramValue) {
         if (paramValue instanceof BigDecimal) {
             return ((BigDecimal) paramValue).toPlainString();
+        } else if (paramValue instanceof Iterable) {
+            return collectionToString((Iterable) paramValue);
         }
         return paramValue.toString();
+    }
+
+    static String collectionToString(Iterable iterable) {
+        final StringBuilder sb = new StringBuilder();
+        for (Object o : iterable) {
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(toString(o));
+        }
+        return sb.toString();
     }
 
     public void digestAll(RestInvocation invocationParams) {
