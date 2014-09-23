@@ -24,7 +24,7 @@ Features and benefits
 - JAX-RS-annotated server-side interfaces may be reused to create clients; basic support 
  is provided for @GET, @POST, @PUT, @DELETE, @HEAD, @OPTIONS, @Path, @QueryParam, @FormParam, @HeaderParam, @PathParam,
  @Consumes and @Produces (`application/json` and `text/plain` only).
-- Support for basic HTTP authentication and some common request signing paradigms.
+- Support for basic HTTP authentication and some common request signing paradigms. See the [Basic HTTP Authentication wiki](https://github.com/mmazi/rescu/wiki/Basic-HTTP-Authentication).
 - Support for custom exceptions on API methods: on a non-200 http response status, rescu can deserialize the response body as an exception. See [Exception handling wiki](https://github.com/mmazi/rescu/wiki/Exception-handling).
 
 
