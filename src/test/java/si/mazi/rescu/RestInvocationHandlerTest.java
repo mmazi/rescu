@@ -80,7 +80,7 @@ public class RestInvocationHandlerTest {
         assertRequestData(testHandler, DummyTicker.class, null, "https://example.com/api/2/btc_usd/ticker", HttpMethod.GET, "https://example.com", "api/2/btc_usd/ticker", "btc_usd/ticker", "", "", PathParam.class, "ident", "btc");
 
         proxy.getInfo(1000L, 2000L);
-        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo", FormParam.class, "method", "getInfo");
+        assertRequestData(testHandler, DummyTicker.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo", FormParam.class, "method", "getInfo");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class RestInvocationHandlerTest {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-        assertRequestData(testHandler, Object.class, headers, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
+        assertRequestData(testHandler, DummyTicker.class, headers, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
@@ -276,6 +276,18 @@ public class RestInvocationHandlerTest {
 
         final String requestBody = testHandler.invocation.getRequestBody();
         Assert.assertTrue(requestBody.contains(numberString), requestBody);
+    }
+
+    @Test
+    public void testParseAsExceptionWhenReturnTypeParseFails() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), ResourceUtils.getResourceAsString("/error.json"), 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        try {
+            final DummyTicker info = proxy.getInfo(0L, 10L);
+            Assert.assertFalse(true, "Expected an exception.");
+        } catch (ExampleException e) {
+            Assert.assertTrue(e.getError().equals("Order not found"));
+        }
     }
 
     private static class TestRestInvocationHandler extends RestInvocationHandler {

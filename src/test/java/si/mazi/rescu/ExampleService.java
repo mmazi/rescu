@@ -57,7 +57,7 @@ public interface ExampleService {
     @POST
     @FormParam("method")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    Object getInfo(Long from, Long count) throws ExampleException;
+    DummyTicker getInfo(Long from, Long count) throws ExampleException;
 
     @GET
     @Path("auth")

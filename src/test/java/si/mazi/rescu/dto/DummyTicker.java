@@ -21,6 +21,9 @@
  */
 package si.mazi.rescu.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import si.mazi.rescu.ExceptionalReturnContentException;
+
 /**
  * A mutable Ticker class used for HttpTemplate testing.
  */
@@ -29,24 +32,30 @@ public class DummyTicker {
     long last;
     long volume;
 
-    public long getLast() {
+    public DummyTicker(
+          @JsonProperty("last") long last,
+          @JsonProperty("volume") long volume
+    ) {
+        if (last == 0 && volume == 0) {
+            throw new ExceptionalReturnContentException("last and volume required");
+        }
+        this.last = last;
+        this.volume = volume;
+    }
 
+    public long getLast() {
         return last;
     }
 
     public void setLast(long last) {
-
         this.last = last;
     }
 
     public long getVolume() {
-
         return volume;
     }
 
     public void setVolume(long volume) {
-
         this.volume = volume;
     }
-
 }

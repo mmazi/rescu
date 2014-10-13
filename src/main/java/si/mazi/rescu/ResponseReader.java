@@ -48,6 +48,7 @@ public abstract class ResponseReader {
         return ignoreHttpErrorCodes;
     }
 
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
             throws IOException {
         final String httpBody = invocationResult.getHttpBody();
@@ -55,31 +56,47 @@ public abstract class ResponseReader {
             if (httpBody == null || httpBody.length() == 0) {
                 return null;
             } else {
-                return read(httpBody, methodMetadata.getReturnType());
-            }
-        } else {
-            if (methodMetadata.getExceptionType() != null && httpBody != null) {
-                RuntimeException exception = null;
                 try {
-                    exception = readException(httpBody, methodMetadata.getExceptionType());
+                    return read(httpBody, methodMetadata.getReturnType());
                 } catch (IOException e) {
-                    log.warn("Error parsing error output: " + e.toString());
-                }
-
-                if (exception != null) {
-                    if (exception instanceof HttpStatusException) {
-                        ((HttpStatusException) exception).setHttpStatusCode(invocationResult.getStatusCode());
-                    }
-                    throw exception;
+                    if (findCause(e, ExceptionalReturnContentException.class) == null) throw e;
+                } catch (RuntimeException e) {
+                    if (findCause(e, ExceptionalReturnContentException.class) == null) throw e;
                 }
             }
+        }
+        if (methodMetadata.getExceptionType() != null && httpBody != null) {
+            RuntimeException exception = null;
+            try {
+                exception = readException(httpBody, methodMetadata.getExceptionType());
+            } catch (IOException e) {
+                log.warn("Error parsing error output: " + e.toString());
+            }
 
-            throw new HttpStatusIOException(invocationResult);
+            if (exception != null) {
+                if (exception instanceof HttpStatusException) {
+                    ((HttpStatusException) exception).setHttpStatusCode(invocationResult.getStatusCode());
+                }
+                throw exception;
+            }
         }
 
+        throw new HttpStatusIOException(invocationResult);
     }
 
-    protected abstract <T> T read(String httpBody, Type returnType) throws IOException;
+    protected abstract <T> T read(String httpBody, Type returnType) throws IOException, ExceptionalReturnContentException;
 
     protected abstract RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException;
+
+    /**
+     * @return the first throwable in the cause chain of <em>t</em> (starting from and including <em>t</em>)
+     * that is assignable to <em>ofClass</em>, or null if not found.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Throwable> T findCause(Throwable t, Class<T> ofClass) {
+        while (t != null && !ofClass.isInstance(t)) {
+            t = t.getCause();
+        }
+        return (T) t;
+    }
 }
