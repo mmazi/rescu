@@ -5,22 +5,41 @@ import org.testng.Assert;
 
 import java.io.IOException;
 
+import static si.mazi.rescu.ResponseReader.findCause;
+
 public class ResponseReaderTest extends TestCase {
 
+    @SuppressWarnings("unchecked")
     public void testFindCause() throws Exception {
-        Assert.assertEquals(ResponseReader.findCause(null, NullPointerException.class), null);
+        final NullPointerException cause = findCause(null, NullPointerException.class);
+        Assert.assertEquals(cause, null);
 
         final NullPointerException npe = new NullPointerException();
-        Assert.assertEquals(ResponseReader.findCause(npe, NullPointerException.class), npe);
-        Assert.assertEquals(ResponseReader.findCause(npe, IllegalArgumentException.class), null);
-        Assert.assertEquals(ResponseReader.findCause(npe, Throwable.class), npe);
+        Assert.assertEquals(findCause(npe, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(npe, IllegalArgumentException.class), null);
+        Assert.assertEquals(findCause(npe, Throwable.class), npe);
 
         final IOException ioe = new IOException(npe);
-        Assert.assertEquals(ResponseReader.findCause(ioe, NullPointerException.class), npe);
-        Assert.assertEquals(ResponseReader.findCause(ioe, IllegalArgumentException.class), null);
-        Assert.assertEquals(ResponseReader.findCause(ioe, IOException.class), ioe);
-        Assert.assertEquals(ResponseReader.findCause(ioe, Throwable.class), ioe);
-        Assert.assertEquals(ResponseReader.findCause(ioe, RuntimeException.class), npe);
-        Assert.assertEquals(ResponseReader.findCause(ioe, Exception.class), ioe);
+        Assert.assertEquals(findCause(ioe, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(ioe, IllegalArgumentException.class), null);
+        Assert.assertEquals(findCause(ioe, IOException.class), ioe);
+        Assert.assertEquals(findCause(ioe, Throwable.class), ioe);
+        Assert.assertEquals(findCause(ioe, RuntimeException.class), npe);
+        Assert.assertEquals(findCause(ioe, Exception.class), ioe);
+
+        ///////////// Several exception types
+
+        Assert.assertEquals(findCause(npe, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(npe, IllegalArgumentException.class), null);
+        Assert.assertEquals(findCause(npe, IllegalArgumentException.class, NullPointerException.class), npe);
+
+        Assert.assertEquals(findCause(ioe, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(ioe, IllegalArgumentException.class), null);
+        Assert.assertEquals(findCause(ioe, IOException.class, NullPointerException.class), ioe);
+        Assert.assertEquals(findCause(ioe, NullPointerException.class, IOException.class), ioe);
+        Assert.assertEquals(findCause(ioe, RuntimeException.class, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(ioe, RuntimeException.class, Throwable.class), ioe);
+        Assert.assertEquals(findCause(ioe, RuntimeException.class, NullPointerException.class), npe);
+        Assert.assertEquals(findCause(ioe, NullPointerException.class, RuntimeException.class), npe);
     }
 }

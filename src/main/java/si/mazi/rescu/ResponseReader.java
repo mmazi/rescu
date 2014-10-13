@@ -24,6 +24,7 @@
 
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,9 +60,9 @@ public abstract class ResponseReader {
                 try {
                     return read(httpBody, methodMetadata.getReturnType());
                 } catch (IOException e) {
-                    if (findCause(e, ExceptionalReturnContentException.class) == null) throw e;
+                    if (findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class) == null) throw e;
                 } catch (RuntimeException e) {
-                    if (findCause(e, ExceptionalReturnContentException.class) == null) throw e;
+                    if (findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class) == null) throw e;
                 }
             }
         }
@@ -90,13 +91,20 @@ public abstract class ResponseReader {
 
     /**
      * @return the first throwable in the cause chain of <em>t</em> (starting from and including <em>t</em>)
-     * that is assignable to <em>ofClass</em>, or null if not found.
+     * that is assignable to any of <em>ofClasses</em>, or null if not found.
+     *
+     * NOTE: Compiler will always issue warnings when calling this method. Nevertheless, it seems the compiler
+     * can still figure out the correct return type: the lowest common ancestor of <em>ofClasses</em>.
      */
-    @SuppressWarnings("unchecked")
-    public static <T extends Throwable> T findCause(Throwable t, Class<T> ofClass) {
-        while (t != null && !ofClass.isInstance(t)) {
+    public static <T extends Throwable, C extends Class<? extends T>> T findCause(Throwable t, C... ofClasses) {
+        while (t != null) {
+            for (C c : ofClasses) {
+                if (c.isInstance(t)) {
+                    return c.cast(t);
+                }
+            }
             t = t.getCause();
         }
-        return (T) t;
+        return null;
     }
 }

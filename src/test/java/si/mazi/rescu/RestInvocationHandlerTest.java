@@ -290,6 +290,23 @@ public class RestInvocationHandlerTest {
         }
     }
 
+    @Test
+    public void testExceptionOnArrayMethod() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "[{\"last\":300,\"volume\":1}]", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        DummyTicker[] result = proxy.testExceptionOnArrayMethod("");
+        Assert.assertEquals(result.length, 1);
+
+        testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{\"result\":\"error\",\"error\":\"Not good\"}", 200);
+        proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        try {
+            result = proxy.testExceptionOnArrayMethod("");
+            Assert.assertFalse(true, "Expected an exception.");
+        } catch (ExampleException e) {
+            Assert.assertTrue(e.getError().equals("Not good"));
+        }
+    }
+
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
         private RestInvocation invocation;

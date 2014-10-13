@@ -107,4 +107,8 @@ public interface ExampleService {
     @Produces(MediaType.TEXT_PLAIN)
     String testSmallNumbersJson(BigDecimal value);
 
+    @GET
+    @Path("testExceptionOnArrayMethod")
+    @Produces(MediaType.APPLICATION_JSON)
+    DummyTicker[] testExceptionOnArrayMethod(String param) throws ExampleException;
 }
