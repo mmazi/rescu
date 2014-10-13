@@ -50,17 +50,18 @@ public abstract class ResponseReader {
 
     public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
             throws IOException {
+        final String httpBody = invocationResult.getHttpBody();
         if (!invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes()) {
-            if (invocationResult.getHttpBody() == null || invocationResult.getHttpBody().length() == 0) {
+            if (httpBody == null || httpBody.length() == 0) {
                 return null;
             } else {
-                return read(invocationResult, methodMetadata.getReturnType());
+                return read(httpBody, methodMetadata.getReturnType());
             }
         } else {
-            if (methodMetadata.getExceptionType() != null && invocationResult.getHttpBody() != null) {
+            if (methodMetadata.getExceptionType() != null && httpBody != null) {
                 RuntimeException exception = null;
                 try {
-                    exception = readException(invocationResult, methodMetadata.getExceptionType());
+                    exception = readException(httpBody, methodMetadata.getExceptionType());
                 } catch (IOException e) {
                     log.warn("Error parsing error output: " + e.toString());
                 }
@@ -78,7 +79,7 @@ public abstract class ResponseReader {
 
     }
 
-    protected abstract <T> T read(InvocationResult invocationResult, Type returnType) throws IOException;
+    protected abstract <T> T read(String httpBody, Type returnType) throws IOException;
 
-    protected abstract RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException;
+    protected abstract RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException;
 }

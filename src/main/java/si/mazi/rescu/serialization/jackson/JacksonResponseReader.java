@@ -25,7 +25,6 @@
 package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.databind.JavaType;
-import si.mazi.rescu.InvocationResult;
 import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
@@ -45,18 +44,17 @@ public class JacksonResponseReader extends ResponseReader {
         this.jacksonMapper = jacksonMapper;
     }
 
-    public <T> T read(InvocationResult invocationResult, Type returnType) throws IOException {
+    public <T> T read(String httpBody, Type returnType) throws IOException {
         JavaType javaType = jacksonMapper.getObjectMapper()
                 .getTypeFactory()
                 .constructType(returnType);
 
-        return jacksonMapper.getObjectMapper().readValue(
-                invocationResult.getHttpBody(), javaType);
+        return jacksonMapper.getObjectMapper().readValue(httpBody, javaType);
     }
 
     @Override
-    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
-        return read(invocationResult, exceptionType);
+    protected RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException {
+        return read(httpBody, exceptionType);
     }
 
 }

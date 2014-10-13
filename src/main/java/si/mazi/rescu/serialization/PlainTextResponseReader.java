@@ -26,8 +26,6 @@ package si.mazi.rescu.serialization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import si.mazi.rescu.InvocationResult;
 import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
@@ -46,14 +44,14 @@ public class PlainTextResponseReader extends ResponseReader {
 
     @SuppressWarnings("unchecked")
     @Override
-    public String read(InvocationResult invocationResult, Type returnType) throws IOException {
-        return invocationResult.getHttpBody();
+    public String read(String httpBody, Type returnType) throws IOException {
+        return httpBody;
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     @Override
-    protected RuntimeException readException(InvocationResult invocationResult, Class<? extends RuntimeException> exceptionType) throws IOException {
-        final String message = read(invocationResult, exceptionType);
+    protected RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException {
+        final String message = read(httpBody, exceptionType);
         RuntimeException constructedException = null;
 
         Exception reflectiveOperationException = null;
