@@ -102,7 +102,7 @@ public class JacksonResponseReaderTest {
                         null, null, MediaType.APPLICATION_JSON, null, null, null));
 
             Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (ResponseException e) {
+        } catch (HttpStatusIOException e) {
             Assert.assertTrue(e.getHttpBody().contains("Order not found"));
             Assert.assertTrue(e.getHttpBody().contains("unknown_error"));
             Assert.assertEquals(e.getHttpStatusCode(), 500);

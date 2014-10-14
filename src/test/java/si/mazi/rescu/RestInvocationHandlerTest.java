@@ -298,7 +298,7 @@ public class RestInvocationHandlerTest {
         try {
             proxy.testIOExceptionDeclared(null);
             Assert.assertFalse(true, "Expected an exception.");
-        } catch (ResponseException e) {
+        } catch (HttpStatusIOException e) {
             Assert.assertEquals(e.getMessage(), "HTTP status code was not OK: 500", e.getMessage());
         }
     }
@@ -310,7 +310,7 @@ public class RestInvocationHandlerTest {
         try {
             proxy.testIOExceptionDeclared();
             Assert.assertFalse(true, "Expected an exception.");
-        } catch (ResponseException e) {
+        } catch (HttpStatusIOException e) {
             Assert.assertEquals(e.getMessage(), "Response body could not be parsed as method return type " + DummyTicker.class.toString(), e.getMessage());
         }
     }

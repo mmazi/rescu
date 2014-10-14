@@ -100,7 +100,7 @@ public abstract class ResponseReader {
                     ? normalParseFailCause.getMessage()
                     : "HTTP status code was not OK: " + invocationResult.getStatusCode();
 
-        throw new ResponseException(exceptionMessage, invocationResult);
+        throw new HttpStatusIOException(exceptionMessage, invocationResult);
     }
 
     protected abstract <T> T read(String httpBody, Type returnType) throws IOException, ExceptionalReturnContentException;
