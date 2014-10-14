@@ -53,20 +53,32 @@ public abstract class ResponseReader {
     public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
             throws IOException {
         final String httpBody = invocationResult.getHttpBody();
-        if (!invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes()) {
+        Exception normalParseFailCause = null;
+        final boolean isHttpStatusPass = !invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes();
+        if (isHttpStatusPass) {
             if (httpBody == null || httpBody.length() == 0) {
                 return null;
             } else {
                 try {
                     return read(httpBody, methodMetadata.getReturnType());
                 } catch (IOException e) {
-                    if (findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class) == null) throw e;
+                    normalParseFailCause = findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class);
+                    if (normalParseFailCause == null) {
+                        throw e;
+                    }
                 } catch (RuntimeException e) {
-                    if (findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class) == null) throw e;
+                    normalParseFailCause = findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class);
+                    if (normalParseFailCause == null) {
+                        throw e;
+                    }
                 }
             }
         }
+
+        // We shoud throw an exception now.
+
         if (methodMetadata.getExceptionType() != null && httpBody != null) {
+            // Try with the declared custom exception first (methodMetadata.getExceptionType()).
             RuntimeException exception = null;
             try {
                 exception = readException(httpBody, methodMetadata.getExceptionType());
@@ -82,7 +94,13 @@ public abstract class ResponseReader {
             }
         }
 
-        throw new HttpStatusIOException(invocationResult);
+        String exceptionMessage = normalParseFailCause instanceof ExceptionalReturnContentException
+                ? "Response body could not be parsed as method return type " + methodMetadata.getReturnType()
+                : isHttpStatusPass
+                    ? normalParseFailCause.getMessage()
+                    : "HTTP status code was not OK: " + invocationResult.getStatusCode();
+
+        throw new ResponseException(exceptionMessage, invocationResult);
     }
 
     protected abstract <T> T read(String httpBody, Type returnType) throws IOException, ExceptionalReturnContentException;
@@ -90,20 +108,24 @@ public abstract class ResponseReader {
     protected abstract RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException;
 
     /**
-     * @return the first throwable in the cause chain of <em>t</em> (starting from and including <em>t</em>)
-     * that is assignable to any of <em>ofClasses</em>, or null if not found.
+     * Search the cause chain of <em>t</em> (starting from and including <em>t</em>) for a Throwable
+     * that is assignable to any of <em>ofClasses</em>, or null if not found. The chain is first fully searched
+     * for the first of <em>C</em>, then second, etc.
      *
      * NOTE: Compiler will always issue warnings when calling this method. Nevertheless, it seems the compiler
      * can still figure out the correct return type: the lowest common ancestor of <em>ofClasses</em>.
+     *
+     * @param ofClasses Throwable classes in order of priority to be searched for.
      */
-    public static <T extends Throwable, C extends Class<? extends T>> T findCause(Throwable t, C... ofClasses) {
-        while (t != null) {
-            for (C c : ofClasses) {
+    public static <T extends Throwable, C extends Class<? extends T>> T findCause(Throwable root, C... ofClasses) {
+        for (C c : ofClasses) {
+            Throwable t = root;
+            while (t != null) {
                 if (c.isInstance(t)) {
                     return c.cast(t);
                 }
+                t = t.getCause();
             }
-            t = t.getCause();
         }
         return null;
     }

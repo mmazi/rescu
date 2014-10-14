@@ -178,6 +178,7 @@ public class RestInvocationHandlerTest {
             assert false : "Expected an IOException.";
         } catch (IOException expected) {
             log.info("Got expected exception: " + expected);
+            Assert.assertEquals(expected.getMessage(), "A simulated I/O problem.");
         }
     }
     
@@ -286,7 +287,31 @@ public class RestInvocationHandlerTest {
             final DummyTicker info = proxy.getInfo(0L, 10L);
             Assert.assertFalse(true, "Expected an exception.");
         } catch (ExampleException e) {
-            Assert.assertTrue(e.getError().equals("Order not found"));
+            Assert.assertEquals(e.getError(), "Order not found", e.getError());
+        }
+    }
+
+    @Test
+    public void testParseAsExceptionWhenHttpErrorAndNoExceptionDeclared() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        try {
+            proxy.testIOExceptionDeclared(null);
+            Assert.assertFalse(true, "Expected an exception.");
+        } catch (ResponseException e) {
+            Assert.assertEquals(e.getMessage(), "HTTP status code was not OK: 500", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testParseAsExceptionWhenReturnTypeParseFailsAndNoExceptionDeclared() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{\"result\":\"error\",\"error\":\"Not parsable as ticker\"}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        try {
+            proxy.testIOExceptionDeclared();
+            Assert.assertFalse(true, "Expected an exception.");
+        } catch (ResponseException e) {
+            Assert.assertEquals(e.getMessage(), "Response body could not be parsed as method return type " + DummyTicker.class.toString(), e.getMessage());
         }
     }
 
@@ -303,7 +328,7 @@ public class RestInvocationHandlerTest {
             result = proxy.testExceptionOnArrayMethod("");
             Assert.assertFalse(true, "Expected an exception.");
         } catch (ExampleException e) {
-            Assert.assertTrue(e.getError().equals("Not good"));
+            Assert.assertTrue(e.getError().equals("Not good"), e.getError());
         }
     }
 

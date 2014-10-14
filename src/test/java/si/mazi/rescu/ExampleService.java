@@ -111,4 +111,15 @@ public interface ExampleService {
     @Path("testExceptionOnArrayMethod")
     @Produces(MediaType.APPLICATION_JSON)
     DummyTicker[] testExceptionOnArrayMethod(String param) throws ExampleException;
+
+    @GET
+    @Path("ioexception")
+    @Consumes(MediaType.APPLICATION_JSON)
+    Object testIOExceptionDeclared(DummyAccountInfo ticker) throws IOException;
+
+    @GET
+    @Path("ioexception")
+    @Consumes(MediaType.APPLICATION_JSON)
+    DummyTicker testIOExceptionDeclared() throws IOException;
+
 }

@@ -2,11 +2,11 @@ package si.mazi.rescu;
 
 import java.io.IOException;
 
-public class HttpStatusIOException extends IOException implements HttpStatusException {
+public class ResponseException extends IOException implements HttpStatusException {
     private final InvocationResult invocationResult;
 
-    public HttpStatusIOException(InvocationResult invocationResult) {
-        super("HTTP status code was not OK: " + (invocationResult == null ? null : invocationResult.getStatusCode()));
+    public ResponseException(String message, InvocationResult invocationResult) {
+        super(message);
         this.invocationResult = invocationResult;
     }
 

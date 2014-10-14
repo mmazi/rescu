@@ -36,10 +36,12 @@ public class ResponseReaderTest extends TestCase {
         Assert.assertEquals(findCause(ioe, NullPointerException.class), npe);
         Assert.assertEquals(findCause(ioe, IllegalArgumentException.class), null);
         Assert.assertEquals(findCause(ioe, IOException.class, NullPointerException.class), ioe);
-        Assert.assertEquals(findCause(ioe, NullPointerException.class, IOException.class), ioe);
-        Assert.assertEquals(findCause(ioe, RuntimeException.class, NullPointerException.class), npe);
-        Assert.assertEquals(findCause(ioe, RuntimeException.class, Throwable.class), ioe);
+        Assert.assertEquals(findCause(ioe, NullPointerException.class, IOException.class), npe);
         Assert.assertEquals(findCause(ioe, RuntimeException.class, NullPointerException.class), npe);
         Assert.assertEquals(findCause(ioe, NullPointerException.class, RuntimeException.class), npe);
+        Assert.assertEquals(findCause(ioe, RuntimeException.class, Throwable.class), npe);
+        Assert.assertEquals(findCause(ioe, Throwable.class, RuntimeException.class), ioe);
+
+        Assert.assertEquals(findCause(ioe, IllegalArgumentException.class, UnsupportedOperationException.class), null);
     }
 }
