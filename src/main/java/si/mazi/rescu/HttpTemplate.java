@@ -157,13 +157,10 @@ class HttpTemplate {
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());
 
-        // Copy default HTTP headers
         Map<String, String> headerKeyValues = new HashMap<String, String>(defaultHttpHeaders);
 
-        // Merge defaultHttpHeaders with httpHeaders
         headerKeyValues.putAll(httpHeaders);
 
-        // Add HTTP headers to the request
         for (Map.Entry<String, String> entry : headerKeyValues.entrySet()) {
             connection.setRequestProperty(entry.getKey(), entry.getValue());
             log.trace("Header request property: key='{}', value='{}'", entry.getKey(), entry.getValue());
@@ -173,8 +170,6 @@ class HttpTemplate {
         if (contentLength > 0) {
             connection.setDoOutput(true);
             connection.setDoInput(true);
-
-            // Add content length to header
         }
         connection.setRequestProperty("Content-Length", Integer.toString(contentLength));
 
