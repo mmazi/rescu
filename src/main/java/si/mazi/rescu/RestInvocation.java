@@ -193,7 +193,13 @@ public class RestInvocation implements Serializable {
     public String getRequestBody() {
         return requestWriter.writeBody(this);
     }
-    
+
+    /**
+     * @deprecated this method will be made package local very soon.
+     * Use {@link #getHttpHeadersFromParams()} instead.
+     * @return
+     */
+    @Deprecated
     public Map<String, String> getAllHttpHeaders() {
         if (allHttpHeaders == null) {
             allHttpHeaders = new HashMap<String, String>();
