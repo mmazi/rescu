@@ -24,6 +24,8 @@
 package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import si.mazi.rescu.*;
@@ -42,6 +44,8 @@ import static org.testng.Assert.assertNotNull;
  * @author RedDragCZ
  */
 public class JacksonResponseReaderTest {
+
+    private static final Logger log = LoggerFactory.getLogger(JacksonResponseReaderTest.class);
 
     public JacksonResponseReaderTest() {
     }
@@ -137,8 +141,7 @@ public class JacksonResponseReaderTest {
 
     @Test
     public void testTrailingGarbageIgnored() throws Exception{
-        JacksonResponseReader reader = new JacksonResponseReader(
-                new JacksonMapper(null), true);
+        JacksonResponseReader reader = new JacksonResponseReader(new JacksonMapper(null), true);
         
         InvocationResult invocationResult = new InvocationResult(
                 "{\"status\":\"success\",\"data\":{\"bought\":0,\"remaining\":\"1\",\"order_id\":\"372351\",\"funds\":{\"usd\":\"0.00000000\",\"eur\":\"0\",\"btc\":\"0.01010606\",\"ltc\":\"0\",\"nmc\":\"0\",\"trc\":\"0\",\"dvc\":\"0\",\"ppc\":\"0\",\"ftc\":\"0\",\"wdc\":\"0\",\"dgc\":\"0\",\"xpm\":\"0\",\"ctb\":\"0\",\"ctl\":\"0\",\"esb\":\"0\",\"esl\":\"0\",\"ggb\":\"0\",\"amb\":\"0\",\"utc\":\"0\"}}}<html><head><title>500 Internal Server Error</title></head><body><h1>Internal Server Error</h1><p><i>Failed to connect to ::1: Network is unreachable</i></p><p></p></body></html>\n",
@@ -153,5 +156,15 @@ public class JacksonResponseReaderTest {
         
         final Object bought = ((Map) map.get("data")).get("bought");
         Assert.assertEquals(bought.toString(), "0");
+    }
+
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    @Test
+    public void testExceptionPropertyConflict() throws Exception {
+        JacksonResponseReader reader = new JacksonResponseReader(new JacksonMapper(null), true);
+
+        final RuntimeException ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
+        Assert.assertTrue(ex.getMessage().contains("msg"), ex.getMessage());
+        log.debug("ex = {}", ex);
     }
 }
