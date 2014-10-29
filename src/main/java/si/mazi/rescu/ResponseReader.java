@@ -37,7 +37,9 @@ import java.lang.reflect.Type;
  * @author Martin ZIMA
  */
 public abstract class ResponseReader {
+
     private static final Logger log = LoggerFactory.getLogger(ResponseReader.class);
+    public static final int BODY_FRAGMENT_CHARS = 100;
 
     private final boolean ignoreHttpErrorCodes;
 
@@ -83,7 +85,7 @@ public abstract class ResponseReader {
             try {
                 exception = readException(httpBody, methodMetadata.getExceptionType());
             } catch (IOException e) {
-                log.warn("Error parsing error output: " + e.toString());
+                log.warn("Error parsing error output: " + Utils.clip(httpBody, BODY_FRAGMENT_CHARS), e);
             }
 
             if (exception != null) {
