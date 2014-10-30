@@ -1,15 +1,16 @@
 package si.mazi.rescu;
 
-import junit.framework.TestCase;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 
 import static si.mazi.rescu.ResponseReader.findCause;
 
-public class ResponseReaderTest extends TestCase {
+public class ResponseReaderTest  {
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testFindCause() throws Exception {
         final NullPointerException cause = findCause(null, NullPointerException.class);
         Assert.assertEquals(cause, null);

@@ -33,7 +33,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertEquals;
+
 
 /**
  * Test class for testing HttpTemplate methods
