@@ -132,7 +132,10 @@ class HttpTemplate {
 
         InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
             connection.getInputStream() : connection.getErrorStream();
-        String responseString = readInputStreamAsEncodedString(inputStream, connection).replace("\uFEFF", "");
+        String responseString = readInputStreamAsEncodedString(inputStream, connection);
+        if (responseString != null && responseString.startsWith("\uFEFF")) {
+            responseString = responseString.substring(1);
+        }
         log.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
 
         return new InvocationResult(responseString, httpStatus);
