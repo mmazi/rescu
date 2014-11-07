@@ -24,8 +24,6 @@
 
 package si.mazi.rescu;
 
-import si.mazi.rescu.serialization.jackson.JacksonResponseReaderTest;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -37,8 +35,7 @@ import java.util.Scanner;
 public class ResourceUtils {
 
     public static String getResourceAsString(String resourcePath) throws IOException {
-        InputStream resStream = JacksonResponseReaderTest.class
-                .getResourceAsStream(resourcePath);
+        InputStream resStream = ResourceUtils.class.getResourceAsStream(resourcePath);
         try {
             return new Scanner(resStream, "UTF-8").useDelimiter("\\A").next();
         } finally {
