@@ -165,6 +165,6 @@ public class JacksonResponseReaderTest {
 
         final RuntimeException ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
         Assert.assertTrue(ex.getMessage().contains("msg"), ex.getMessage());
-        log.debug("ex = {}", ex);
+        log.debug("ex = " + ex);
     }
 }
