@@ -84,8 +84,8 @@ public abstract class ResponseReader {
             RuntimeException exception = null;
             try {
                 exception = readException(httpBody, methodMetadata.getExceptionType());
-            } catch (IOException e) {
-                log.warn("Error parsing error output: " + Utils.clip(httpBody, BODY_FRAGMENT_CHARS), e);
+            } catch (Exception e) {
+                log.warn("Noncritical error parsing error output: " + Utils.clip(httpBody, BODY_FRAGMENT_CHARS), e);
             }
 
             if (exception != null) {
