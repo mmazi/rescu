@@ -311,7 +311,7 @@ public class RestInvocationHandlerTest {
             proxy.testIOExceptionDeclared();
             Assert.assertFalse(true, "Expected an exception.");
         } catch (HttpStatusIOException e) {
-            Assert.assertEquals(e.getMessage(), "Response body could not be parsed as method return type " + DummyTicker.class.toString(), e.getMessage());
+            Assert.assertEquals(e.getMessage(), String.format("Response body could not be parsed as method return type %s: last and volume required", DummyTicker.class.toString()));
         }
     }
 

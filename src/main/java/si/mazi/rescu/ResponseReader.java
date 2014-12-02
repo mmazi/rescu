@@ -74,6 +74,7 @@ public abstract class ResponseReader {
                         throw e;
                     }
                 }
+                log.debug("Parsing response as {} failed: {}", methodMetadata.getReturnType(), normalParseFailCause.toString());
             }
         }
 
@@ -97,7 +98,7 @@ public abstract class ResponseReader {
         }
 
         String exceptionMessage = normalParseFailCause instanceof ExceptionalReturnContentException
-                ? "Response body could not be parsed as method return type " + methodMetadata.getReturnType()
+                ? String.format("Response body could not be parsed as method return type %s: %s", methodMetadata.getReturnType(), normalParseFailCause.getMessage())
                 : isHttpStatusPass
                     ? normalParseFailCause.getMessage()
                     : "HTTP status code was not OK: " + invocationResult.getStatusCode();
