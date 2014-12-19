@@ -30,10 +30,7 @@ import si.mazi.rescu.utils.HttpUtils;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,7 +118,9 @@ class HttpTemplate {
 
         if (contentLength > 0) {
             // Write the request body
-            connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
+            OutputStream out = connection.getOutputStream();
+            out.write(requestBody.getBytes(CHARSET_UTF_8));
+            out.flush();
         }
     return connection;
   }
