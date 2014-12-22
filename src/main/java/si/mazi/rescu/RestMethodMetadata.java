@@ -21,6 +21,9 @@
  */
 package si.mazi.rescu;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,6 +40,8 @@ import java.util.Map;
  * This is the metadata about a rest-enabled method. The metadata is read by reflection from the interface.
  */
 public class RestMethodMetadata implements Serializable {
+
+    private static final Logger log = LoggerFactory.getLogger(RestMethodMetadata.class);
 
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS
@@ -100,6 +105,12 @@ public class RestMethodMetadata implements Serializable {
                 exceptionType = (Class<? extends RuntimeException>) thrownException;
             }
         }
+
+        // Do some validation.
+        if (consumes != null && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(httpMethod)) {
+            log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended?", httpMethod, reqContentType);
+        }
+
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
                 baseUrl, intfacePath, methodPathTemplate, exceptionType,
                 reqContentType, resContentType, methodName, methodAnnotationMap, parameterAnnotations);

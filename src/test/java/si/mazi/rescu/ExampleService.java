@@ -122,4 +122,9 @@ public interface ExampleService {
     @Consumes(MediaType.APPLICATION_JSON)
     DummyTicker testIOExceptionDeclared() throws IOException;
 
+    @GET
+    @Path("getWithBody")
+    @Consumes(MediaType.APPLICATION_JSON)
+    DummyTicker testGetMethodWithBody(DummyAccountInfo ticker) throws IOException;
+
 }

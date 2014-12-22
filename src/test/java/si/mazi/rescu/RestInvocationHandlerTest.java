@@ -332,6 +332,14 @@ public class RestInvocationHandlerTest {
         }
     }
 
+    @Test
+    public void testGetMethodWithBodyFail() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.testGetMethodWithBody(new DummyAccountInfo());
+        // No assertions here, but a warning (or two) about a GET request with a body should be logged.
+    }
+
     private static class TestRestInvocationHandler extends RestInvocationHandler {
 
         private RestInvocation invocation;

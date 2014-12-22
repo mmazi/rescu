@@ -22,6 +22,9 @@
 package si.mazi.rescu;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
@@ -38,6 +41,7 @@ import java.util.*;
  * @author Matija Mazi
  */
 public class RestInvocation implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(RestInvocation.class);
 
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
@@ -136,6 +140,11 @@ public class RestInvocation implements Serializable {
 
         for (Params params : paramsMap.values()) {
             params.digestAll(invocation);
+        }
+
+        // Do some validation.
+        if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
+            log.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended?", methodMetadata.getHttpMethod());
         }
 
         return invocation;
