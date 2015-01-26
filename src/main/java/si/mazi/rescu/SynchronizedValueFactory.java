@@ -28,6 +28,6 @@ package si.mazi.rescu;
  *
  * @author Rafał Krupiński
  */
-public interface SynchronizedValueFactory<T> {
-    T createValue();
+public interface SynchronizedValueFactory {
+    long createValue();
 }
