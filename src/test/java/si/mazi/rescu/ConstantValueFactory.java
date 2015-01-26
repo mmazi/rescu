@@ -24,14 +24,14 @@ package si.mazi.rescu;
 /**
  * @author Rafał Krupiński
  */
-public class ConstantValueFactory<T> implements SynchronizedValueFactory<T> {
-    private T value;
+public class ConstantValueFactory<T> implements SynchronizedValueFactory {
+    private long value;
 
-    public ConstantValueFactory(T value) {
+    public ConstantValueFactory(long value) {
         this.value = value;
     }
 
-    public T createValue() {
+    public long createValue() {
         return value;
     }
 }
