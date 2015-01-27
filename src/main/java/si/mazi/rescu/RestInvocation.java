@@ -144,7 +144,7 @@ public class RestInvocation implements Serializable {
 
         // Do some validation.
         if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
-            log.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended?", methodMetadata.getHttpMethod());
+            log.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended? Method: {}", methodMetadata.getHttpMethod(), methodMetadata.getMethodName());
         }
 
         return invocation;

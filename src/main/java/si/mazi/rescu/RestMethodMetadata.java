@@ -108,7 +108,7 @@ public class RestMethodMetadata implements Serializable {
 
         // Do some validation.
         if (consumes != null && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(httpMethod)) {
-            log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended?", httpMethod, reqContentType);
+            log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended? Method: {}", httpMethod, reqContentType, method);
         }
 
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
