@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.testng.Assert.assertEquals;
 
@@ -45,7 +46,7 @@ public class HttpTemplateTest {
     public void testGet() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-httpdata.txt");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        InvocationResult executeResult = testObject.executeRequest("http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET);
+        InvocationResult executeResult = executeRequest(testObject, "http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET);
         assertEquals(200, executeResult.getStatusCode());
         assertEquals("Test data", executeResult.getHttpBody());
     }
@@ -64,12 +65,26 @@ public class HttpTemplateTest {
     public void testPostWithError() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockErrorHttpURLConnection("/error.json");
         HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
-        InvocationResult executeResult = testObject.executeRequest("http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST);
+        InvocationResult executeResult = executeRequest(testObject, "http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST);
         assertEquals(500, executeResult.getStatusCode());
         assertEquals("{\"result\":\"error\",\"error\":\"Order not found\",\"token\":\"unknown_error\"}", executeResult.getHttpBody());
     }
-    
+
     //TODO: test sent body data and headers
+
+    /**
+     * Requests JSON via an HTTP POST
+     *
+     * @param urlString   A string representation of a URL
+     * @param requestBody The contents of the request body
+     * @param httpHeaders Any custom header values (application/json is provided automatically)
+     * @param method      Http method (usually GET or POST)
+     */
+    public static InvocationResult executeRequest(HttpTemplate httpTemplate, String urlString, String requestBody,
+                                                  Map<String, String> httpHeaders, HttpMethod method)
+            throws IOException {
+        return httpTemplate.receive(httpTemplate.send(urlString, requestBody, httpHeaders, method));
+    }
 
     private static class MockHttpTemplate extends HttpTemplate {
 

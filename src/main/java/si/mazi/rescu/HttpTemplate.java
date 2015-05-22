@@ -56,18 +56,12 @@ class HttpTemplate {
     private final HostnameVerifier hostnameVerifier;
 
 
-    /**
-     * Constructor
-     */
-    public HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
+    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
             SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
       this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier);
     }
     
-    /**
-     * Constructor
-     */
-    public HttpTemplate(int connTimeout,int readTimeout, String proxyHost, Integer proxyPort,
+    HttpTemplate(int connTimeout,int readTimeout, String proxyHost, Integer proxyPort,
             SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
@@ -88,24 +82,7 @@ class HttpTemplate {
         }
     }
 
-    /**
-     * Requests JSON via an HTTP POST
-     *
-     * @param urlString   A string representation of a URL
-     * @param requestBody The contents of the request body
-     * @param httpHeaders Any custom header values (application/json is provided automatically)
-     * @param method      Http method (usually GET or POST)
-     */
-    public InvocationResult executeRequest(String urlString, String requestBody,
-                                           Map<String, String> httpHeaders, HttpMethod method)
-            throws IOException {
-
-      HttpURLConnection connection = send(urlString, requestBody, httpHeaders, method);
-
-      return receive(connection);
-    }
-
-  public HttpURLConnection send(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
+    HttpURLConnection send(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
         log.debug("Executing {} request at {}", method, urlString);
         log.trace("Request body = {}", requestBody);
         log.trace("Request headers = {}", httpHeaders);
@@ -122,10 +99,10 @@ class HttpTemplate {
             out.write(requestBody.getBytes(CHARSET_UTF_8));
             out.flush();
         }
-    return connection;
-  }
+        return connection;
+    }
 
-  public InvocationResult receive(HttpURLConnection connection) throws IOException {
+    InvocationResult receive(HttpURLConnection connection) throws IOException {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
