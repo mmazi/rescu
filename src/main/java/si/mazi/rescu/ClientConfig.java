@@ -9,7 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ClientConfig {
-    private final Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+
+    private final Map<Class<? extends Annotation>, Params> defaultParamsMap = new HashMap<Class<? extends Annotation>, Params>();
     
     private SSLSocketFactory sslSocketFactory = null;
     private HostnameVerifier hostnameVerifier = null;
@@ -28,18 +29,18 @@ public class ClientConfig {
         ignoreHttpErrorCodes = Config.isIgnoreHttpErrorCodes();
     }
     
-    public ClientConfig add(Class<? extends Annotation> paramType, String paramName, Object paramValue) {
-        Params params = paramsMap.get(paramType);
+    public ClientConfig addDefaultParam(Class<? extends Annotation> paramType, String paramName, Object paramValue) {
+        Params params = defaultParamsMap.get(paramType);
         if (params == null) {
             params = Params.of();
-            paramsMap.put(paramType, params);
+            defaultParamsMap.put(paramType, params);
         }
         params.add(paramName, paramValue);
         return this;
     }
 
-    public Map<Class<? extends Annotation>, Params> getParamsMap() {
-        return paramsMap;
+    public Map<Class<? extends Annotation>, Params> getDefaultParamsMap() {
+        return defaultParamsMap;
     }
     
     /**

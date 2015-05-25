@@ -9,7 +9,7 @@ public enum ClientConfigUtil {
     ;
 
     public static ClientConfig addBasicAuthCredentials(ClientConfig config, String user, String password) {
-        return config.add(HeaderParam.class, "Authorization", digestForBasicAuth(user, password));
+        return config.addDefaultParam(HeaderParam.class, "Authorization", digestForBasicAuth(user, password));
     }
 
     static String digestForBasicAuth(String username, String password) {

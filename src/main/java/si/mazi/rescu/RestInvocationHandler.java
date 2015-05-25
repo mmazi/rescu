@@ -106,7 +106,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
     protected HttpURLConnection prepareAndInvoke(Object[] args, RestMethodMetadata _methodMetadata) throws IOException {
         RestInvocation invocation = RestInvocation.create(
-                requestWriterResolver, _methodMetadata, args, config.getParamsMap());
+                requestWriterResolver, _methodMetadata, args, config.getDefaultParamsMap());
 
         return invokeHttp(invocation);
     }

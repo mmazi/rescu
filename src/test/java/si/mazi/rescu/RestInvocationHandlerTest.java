@@ -58,8 +58,8 @@ public class RestInvocationHandlerTest {
     public void testInvocationData() throws Exception {
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.add(PathParam.class, "version", 2);
-        clientConfig.add(HeaderParam.class, "testHeader", "lorem");
+        clientConfig.addDefaultParam(PathParam.class, "version", 2);
+        clientConfig.addDefaultParam(HeaderParam.class, "testHeader", "lorem");
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
@@ -86,7 +86,7 @@ public class RestInvocationHandlerTest {
     public void testHttpBasicAuth() throws Exception {
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.add(PathParam.class, "version", 0);
+        clientConfig.addDefaultParam(PathParam.class, "version", 0);
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
@@ -101,7 +101,7 @@ public class RestInvocationHandlerTest {
     @Test
     public void testHttpBasicAuthWithConfig() throws Exception {
         ClientConfig config = ClientConfigUtil.addBasicAuthCredentials(new ClientConfig(), "Aladdin", "open sesame");
-        config.add(PathParam.class, "version", 2);
+        config.addDefaultParam(PathParam.class, "version", 2);
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
