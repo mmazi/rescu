@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -86,12 +87,21 @@ public class Params implements Serializable {
 
     private String toQueryString(boolean encode) {
         StringBuilder b = new StringBuilder();
-        for (String param : data.keySet()) {
-            if (isParamSet(param)) {
-                if (b.length() > 0) {
-                    b.append('&');
+        for (String paramName : data.keySet()) {
+            if (isParamSet(paramName)) {
+                Object originalValue = getParamValue(paramName);
+                boolean createArrayParameters = originalValue instanceof Iterable && paramName.endsWith("[]");
+                @SuppressWarnings("unchecked")
+                Iterable<Object> paramValues = createArrayParameters
+                        ? (Iterable<Object>)originalValue
+                        : Collections.singleton(originalValue);
+                for (Object paramValue : paramValues) {
+                    if (b.length() > 0) {
+                        b.append('&');
+                    }
+                    String paramValueAsString = toString(paramValue);
+                    b.append(paramName).append('=').append(encode(paramValueAsString, encode));
                 }
-                b.append(param).append('=').append(encode(getParamValueAsString(param), encode));
             }
         }
         return b.toString();
@@ -147,12 +157,12 @@ public class Params implements Serializable {
         if (paramValue instanceof BigDecimal) {
             return ((BigDecimal) paramValue).toPlainString();
         } else if (paramValue instanceof Iterable) {
-            return collectionToString((Iterable) paramValue);
+            return iterableToString((Iterable) paramValue);
         }
         return paramValue.toString();
     }
 
-    static String collectionToString(Iterable iterable) {
+    static String iterableToString(Iterable iterable) {
         final StringBuilder sb = new StringBuilder();
         for (Object o : iterable) {
             if (sb.length() > 0) {

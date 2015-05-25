@@ -30,9 +30,13 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
+import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -88,4 +92,28 @@ public class RestInvocationTest {
         assertEquals(invocation.getParamValue(FormParam.class, "nonce"), nonce);
     }
 
+    @Test
+    public void testFormPostCollectionDefault() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        proxy.testFromPostCollection(Arrays.asList("first", "second"));
+
+        final String requestBody = URLDecoder.decode(testHandler.getInvocation().getRequestBody(), "UTF-8");
+        assertThat(requestBody, containsString("data=first,second"));
+    }
+
+    @Test
+    public void testFormPostCollectionArray() throws Exception {
+        ClientConfig config = new ClientConfig();
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config, null, 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        proxy.testFromPostCollectionAsArray(Arrays.asList("first", "second"));
+
+        final String requestBody = testHandler.getInvocation().getRequestBody();
+        assertThat(requestBody, containsString("data[]=first"));
+        assertThat(requestBody, containsString("data[]=second"));
+    }
 }

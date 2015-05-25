@@ -30,6 +30,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author Matija Mazi
@@ -127,4 +128,13 @@ public interface ExampleService {
     @Consumes(MediaType.APPLICATION_JSON)
     DummyTicker testGetMethodWithBody(DummyAccountInfo ticker) throws IOException;
 
+    @POST
+    @Path("formPostCollection")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testFromPostCollection(@FormParam("data") List<String> data);
+
+    @POST
+    @Path("formPostCollection")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testFromPostCollectionAsArray(@FormParam("data[]") List<String> data);
 }
