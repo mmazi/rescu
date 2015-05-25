@@ -32,7 +32,7 @@ Limitations
 ---------------
 
 - Rescu is meant mostly for json-based REST services. The response body is always interpreted as json or plain text. No XML, and no plans to add it.
-- JAX-RS: No support for @MatrixParam.
+- JAX-RS: No support yet for the following annotations: @MatrixParam, @CookieParam, @ApplicationPath, @HttpMethod, @Encoded, @DefaultValue.
 
 
 Logging
