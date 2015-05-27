@@ -26,6 +26,7 @@ Features and benefits
  @Consumes and @Produces (`application/json` and `text/plain` only).
 - Support for basic HTTP authentication and some common request signing paradigms. See the [Basic HTTP Authentication wiki](https://github.com/mmazi/rescu/wiki/Basic-HTTP-Authentication).
 - Support for custom exceptions on API methods: on an exceptional HTTP response, rescu can deserialize the response body as an exception. See [Exception handling wiki](https://github.com/mmazi/rescu/wiki/Exception-handling).
+- Suppoft for custom interceptors.
 
 
 Limitations
