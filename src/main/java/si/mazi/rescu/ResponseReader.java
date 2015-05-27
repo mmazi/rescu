@@ -115,11 +115,12 @@ public abstract class ResponseReader {
      * that is assignable to any of <em>ofClasses</em>, or null if not found. The chain is first fully searched
      * for the first of <em>C</em>, then second, etc.
      *
-     * NOTE: Compiler will always issue warnings when calling this method. Nevertheless, it seems the compiler
-     * can still figure out the correct return type: the lowest common ancestor of <em>ofClasses</em>.
-     *
      * @param ofClasses Throwable classes in order of priority to be searched for.
+     * @param root      The cause from which the search is to be started.
+     * @param <T>       This should be figured out by the compiler: the lowest common ancestor of <em>ofClasses</em>.
+     * @param <C>       Should be figured out by the compiler too.
      */
+    @SafeVarargs
     public static <T extends Throwable, C extends Class<? extends T>> T findCause(Throwable root, C... ofClasses) {
         for (C c : ofClasses) {
             Throwable t = root;

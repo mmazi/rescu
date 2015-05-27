@@ -960,7 +960,7 @@ public class Base64 {
      * @param source The Base64 encoded data
      * @return decoded data
      * @since 2.3.1
-     * @throws java.io.IOException
+     * @throws java.io.IOException If bogus characters exist in source data
      */
     public static byte[] decode(byte[] source) throws java.io.IOException {
 

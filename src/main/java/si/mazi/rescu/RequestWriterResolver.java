@@ -37,22 +37,13 @@ public class RequestWriterResolver {
     //media-type => request writer
     protected final HashMap<String, RequestWriter> writers = new HashMap<String, RequestWriter>();
     
-    /**
-     * Constructor.
-     */
     public RequestWriterResolver() {
     }
     
-    /**
-     * Adds a writer for specified content media type.
-     */
     public void addWriter(String mediaType, RequestWriter writer) {
         writers.put(mediaType, writer);
     }
     
-    /**
-     * Resolves the writer for specified REST invocation.
-     */
     public RequestWriter resolveWriter(RestMethodMetadata methodMetadata) {
         RequestWriter writer;
 

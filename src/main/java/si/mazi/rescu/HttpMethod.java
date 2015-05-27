@@ -23,7 +23,6 @@ package si.mazi.rescu;
 
 /**
  * @author Matija Mazi <br>
- * @created 1/14/13 2:47 PM
  */
 public enum HttpMethod {
     GET, POST, PUT, DELETE, HEAD

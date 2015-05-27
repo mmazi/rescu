@@ -29,12 +29,7 @@ import java.lang.reflect.Proxy;
  */
 public class RestProxyFactory {
 
-    /**
-     * private Constructor
-     */
-    private RestProxyFactory() {
-
-    }
+    private RestProxyFactory() { }
 
     /**
      * Create a proxy implementation of restInterface. The interface must be annotated with jax-rs annotations. Basic support exists for {@link javax.ws.rs.Path}, {@link javax.ws.rs.GET},
@@ -43,6 +38,7 @@ public class RestProxyFactory {
      * @param restInterface The interface to implement
      * @param baseUrl       The service base baseUrl
      * @param <I>           The interface to implement
+     * @param config        Client configuration
      * @return a proxy implementation of restInterface
      */
     public static <I> I createProxy(Class<I> restInterface, String baseUrl, ClientConfig config) {

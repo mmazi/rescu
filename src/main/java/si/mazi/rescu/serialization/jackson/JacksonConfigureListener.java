@@ -39,7 +39,7 @@ public interface JacksonConfigureListener {
      * For example, the users might want to register modules with
      * nonstandard (de)serializers now.
      * 
-     * @param objectMapper
+     * @param objectMapper  the ObjectMapper to configure.
      */
     void configureObjectMapper(ObjectMapper objectMapper);
 }

@@ -23,7 +23,6 @@ package si.mazi.rescu.serialization.jackson.serializers;
 
 /**
  * @author Matija Mazi <br>
- * @created 2/19/13 9:27 PM
  */
 public class YesNoBooleanDeserializerImpl extends BooleanDeserializer {
 

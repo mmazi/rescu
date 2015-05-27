@@ -9,7 +9,6 @@ import static si.mazi.rescu.ResponseReader.findCause;
 
 public class ResponseReaderTest  {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFindCause() throws Exception {
         final NullPointerException cause = findCause(null, NullPointerException.class);

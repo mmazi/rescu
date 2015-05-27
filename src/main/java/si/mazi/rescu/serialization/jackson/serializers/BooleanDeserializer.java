@@ -31,7 +31,6 @@ import java.io.IOException;
 
 /**
  * @author Matija Mazi <br>
- * @created 2/19/13 9:06 PM
  */
 public abstract class BooleanDeserializer extends JsonDeserializer<Boolean> {
 

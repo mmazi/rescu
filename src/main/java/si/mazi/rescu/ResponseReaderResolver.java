@@ -43,16 +43,10 @@ public class ResponseReaderResolver {
     public ResponseReaderResolver() {
     }
     
-    /**
-     * Adds a reader for specified content media type.
-     */
     public void addReader(String mediaType, ResponseReader reader) {
         readers.put(mediaType, reader);
     }
     
-    /**
-     * Resolves the reader for specified REST invocation.
-     */
     public ResponseReader resolveReader(RestMethodMetadata methodMetadata) {
         ResponseReader reader;
 
