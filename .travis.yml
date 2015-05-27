@@ -1,6 +1,8 @@
 language: java
 jdk:
-  - openjdk6
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk7
 before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
 script: "
 if [ ${TRAVIS_PULL_REQUEST} = 'false' ];
