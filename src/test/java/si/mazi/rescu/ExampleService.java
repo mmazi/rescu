@@ -143,4 +143,8 @@ public interface ExampleService {
     @Path("dateQueryParam")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object testDateQueryParam(@QueryParam("startDate") Date date);
+
+    @GET
+    @Path("500")
+    Object test500();
 }

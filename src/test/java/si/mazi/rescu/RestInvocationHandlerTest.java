@@ -44,6 +44,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -93,7 +95,7 @@ public class RestInvocationHandlerTest {
 
         BasicAuthCredentials credentials = new BasicAuthCredentials("Aladdin", "open sesame");
         proxy.testBasicAuth(credentials, 23);
-        HashMap<String, String> authHeaders = new HashMap<String, String>();
+        HashMap<String, String> authHeaders = new HashMap<>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/0/auth?param=23", HttpMethod.GET, "https://example.com", "api/0/auth", "auth", "param=23", null);
     }
@@ -107,7 +109,7 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.getInfo(2L, 5L);
-        HashMap<String, String> headers = new HashMap<String, String>();
+        HashMap<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         headers.put("Content-Type", "application/x-www-form-urlencoded");
         assertRequestData(testHandler, DummyTicker.class, headers, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
@@ -247,7 +249,7 @@ public class RestInvocationHandlerTest {
     public void testValueGenerator()  {
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
-        proxy.getNonce(new ConstantValueFactory<Long>(1L));
+        proxy.getNonce(new ConstantValueFactory<>(1L));
     }
 
     @Test
@@ -337,6 +339,18 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
         proxy.testGetMethodWithBody(new DummyAccountInfo());
         // No assertions here, but a warning (or two) about a GET request with a body should be logged.
+    }
+
+    @Test
+    public void testInterceptor() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler, new HttpCodeExceptionInterceptor());
+        try {
+            proxy.test500();
+            Assert.assertFalse(true, "Expected an exception.");
+        } catch (Exception ex) {
+            assertThat(ex, instanceOf(Http500Exception.class));
+        }
     }
 
 }

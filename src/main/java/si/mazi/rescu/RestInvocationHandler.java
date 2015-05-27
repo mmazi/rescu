@@ -49,9 +49,9 @@ public class RestInvocationHandler implements InvocationHandler {
     private final String baseUrl;
     private final ClientConfig config;
 
-    private final Map<Method, RestMethodMetadata> methodMetadataCache = new HashMap<Method, RestMethodMetadata>();
+    private final Map<Method, RestMethodMetadata> methodMetadataCache = new HashMap<>();
 
-    public RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
+    RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
         
