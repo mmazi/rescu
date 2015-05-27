@@ -11,7 +11,7 @@ public class ParamsTest  {
     @Test
     public void testToString() throws Exception {
         Assert.assertEquals(
-                Params.toString(Arrays.asList(BigDecimal.ONE, new BigDecimal("0.00000043"))),
+                Params.of().toString(Arrays.asList(BigDecimal.ONE, new BigDecimal("0.00000043"))),
                 "1,0.00000043");
     }
 }

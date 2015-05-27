@@ -30,6 +30,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -137,4 +138,9 @@ public interface ExampleService {
     @Path("formPostCollection")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     Object testFromPostCollectionAsArray(@FormParam("data[]") List<String> data);
+
+    @POST
+    @Path("dateQueryParam")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testDateQueryParam(@QueryParam("startDate") Date date);
 }

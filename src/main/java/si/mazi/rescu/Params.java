@@ -25,9 +25,9 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,7 +52,15 @@ import java.util.regex.Pattern;
  */
 public class Params implements Serializable {
 
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     private final Map<String, Object> data = new LinkedHashMap<String, Object>();
+    private final DateFormat iso8601;
+
+    {
+        iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        iso8601.setTimeZone(UTC);
+    }
 
     /**
      * private Constructor to prevent instantiation
@@ -153,16 +161,20 @@ public class Params implements Serializable {
         return toString(paramValue);
     }
 
-    static String toString(Object paramValue) {
+    String toString(Object paramValue) {
         if (paramValue instanceof BigDecimal) {
             return ((BigDecimal) paramValue).toPlainString();
         } else if (paramValue instanceof Iterable) {
             return iterableToString((Iterable) paramValue);
+        } else if (paramValue instanceof Date) {
+            synchronized (iso8601) {
+                return iso8601.format(paramValue);
+            }
         }
         return paramValue.toString();
     }
 
-    static String iterableToString(Iterable iterable) {
+    String iterableToString(Iterable iterable) {
         final StringBuilder sb = new StringBuilder();
         for (Object o : iterable) {
             if (sb.length() > 0) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 RedDragCZ.
+ * Copyright 2014.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,9 @@
 
 package si.mazi.rescu;
 
+import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import javax.ws.rs.FormParam;
@@ -34,22 +37,17 @@ import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 
-/**
- *
- * @author RedDragCZ
- */
 public class RestInvocationTest {
-    
-    public RestInvocationTest() {
-    }
-    /**
-     * Test of create method, of class RestInvocation.
-     */
+
+    private static final Logger log = LoggerFactory.getLogger(RestInvocationTest.class);
+
     @Test
     public void testCreateWithParamsDigest() {
         Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
@@ -71,10 +69,9 @@ public class RestInvocationTest {
                 invocation.getParamValue(HeaderParam.class, "digest"));
     }
 
-    Long nonce = 1328626350245256L;
-
     @Test
     public void testCreateWithValueGenerator() {
+        Long nonce = 1328626350245256L;
         Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         paramsMap.put(FormParam.class, Params.of("nonce", new ConstantValueFactory<Long>(nonce)));
 
@@ -115,5 +112,24 @@ public class RestInvocationTest {
         final String requestBody = testHandler.getInvocation().getRequestBody();
         assertThat(requestBody, containsString("data[]=first"));
         assertThat(requestBody, containsString("data[]=second"));
+    }
+
+    @Test
+    public void testDateQueryParam() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        LocalDateTime dateTime = new LocalDateTime(2015, 5, 27, 14, 24, 11);
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+
+        proxy.testDateQueryParam(dateTime.toDate(tz));
+
+        String queryString = testHandler.getInvocation().getQueryString();
+        int i = queryString.lastIndexOf('=');
+        assertThat(i, is(greaterThan(0)));
+        String datetimeStr = URLDecoder.decode(queryString.substring(i + 1), "UTF-8");
+        log.debug("datetimeStr = {}", datetimeStr);
+
+        assertThat(datetimeStr, matchesPattern("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(([+-][0-9]{2}:[0-9]{2})|Z)"));
     }
 }
