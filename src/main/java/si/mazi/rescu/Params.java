@@ -55,11 +55,14 @@ public class Params implements Serializable {
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
     private final Map<String, Object> data = new LinkedHashMap<String, Object>();
-    private final DateFormat iso8601;
+    private final DateFormat iso8601datetime;
+    private final DateFormat iso8601date;
 
     {
-        iso8601 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        iso8601.setTimeZone(UTC);
+        iso8601datetime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        iso8601datetime.setTimeZone(UTC);
+        iso8601date = new SimpleDateFormat("yyyy-MM-dd");
+        iso8601date.setTimeZone(UTC);
     }
 
     /**
@@ -166,9 +169,13 @@ public class Params implements Serializable {
             return ((BigDecimal) paramValue).toPlainString();
         } else if (paramValue instanceof Iterable) {
             return iterableToString((Iterable) paramValue);
+        } else if (paramValue instanceof java.sql.Date) {
+            synchronized (iso8601date) {
+                return iso8601date.format(paramValue);
+            }
         } else if (paramValue instanceof Date) {
-            synchronized (iso8601) {
-                return iso8601.format(paramValue);
+            synchronized (iso8601datetime) {
+                return iso8601datetime.format(paramValue);
             }
         }
         return paramValue.toString();
