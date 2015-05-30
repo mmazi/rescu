@@ -40,7 +40,7 @@ public class AnnotationUtils {
         try {
             return (String) ann.getClass().getMethod("value").invoke(ann);
         } catch (Exception e) {
-            throw new RuntimeException("Annotation " + annotationClass + " has no element 'value'. This is a bug in rescu.");
+            throw new RuntimeException("Can't access element 'value' in  " + annotationClass + ". This is probably a bug in rescu.", e);
         }
     }
 
