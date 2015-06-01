@@ -89,6 +89,10 @@ public class RestInvocationHandler implements InvocationHandler {
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (method.getDeclaringClass().equals(Object.class)) {
+            return method.invoke(this, args);
+        }
+
         RestMethodMetadata methodMetadata = getMetadata(method);
 
         HttpURLConnection connection;

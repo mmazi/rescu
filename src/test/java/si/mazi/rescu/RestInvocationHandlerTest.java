@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -353,4 +353,15 @@ public class RestInvocationHandlerTest {
         }
     }
 
+    @Test
+    public void testEquals() throws Exception {
+        ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://example.com");
+        assertThat(service, not(equalTo((Object) "something")));
+    }
+
+    @Test
+    public void testHashCode() throws Exception {
+        ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://example.com");
+        new HashMap<ExampleService, Object>().put(service, 1);
+    }
 }
