@@ -46,6 +46,7 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -363,5 +364,20 @@ public class RestInvocationHandlerTest {
     public void testHashCode() throws Exception {
         ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://example.com");
         new HashMap<ExampleService, Object>().put(service, 1);
+    }
+
+    @Test
+    public void testInvocationAwareException() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        try {
+            proxy.invocationAwareException();
+            fail("Should have failed");
+        } catch (ExampleInvocationAwareException e) {
+            assertThat(e.getInvocation(), not(nullValue()));
+            //noinspection ConstantConditions
+            assertThat(e.getInvocation().getHttpMethod(), equalTo("GET"));
+        }
     }
 }

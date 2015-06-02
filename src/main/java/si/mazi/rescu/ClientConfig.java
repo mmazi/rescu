@@ -20,13 +20,15 @@ public class ClientConfig {
     private Integer proxyPort;
     private String proxyHost;
     private boolean ignoreHttpErrorCodes;
-    
+    private boolean wrapUnexpectedExceptions;
+
     public ClientConfig() {
         httpConnTimeout = Config.getHttpConnTimeout();
         httpReadTimeout = Config.getHttpReadTimeout();
         proxyPort = Config.getProxyPort();
         proxyHost = Config.getProxyHost();
         ignoreHttpErrorCodes = Config.isIgnoreHttpErrorCodes();
+        wrapUnexpectedExceptions = Config.isWrapUnexpectedExceptions();
     }
     
     public ClientConfig addDefaultParam(Class<? extends Annotation> paramType, String paramName, Object paramValue) {
@@ -83,74 +85,52 @@ public class ClientConfig {
         this.hostnameVerifier = hostnameVerifier;
     }
 
-    /**
-     * @return the httpConnTimeout
-     */
     public int getHttpConnTimeout() {
         return httpConnTimeout;
     }
 
-    /**
-     * @param httpConnTimeout the httpConnTimeout to set
-     */
     public void setHttpConnTimeout(int httpConnTimeout) {
         this.httpConnTimeout = httpConnTimeout;
     }
 
-    /**
-     * @return the httpReadTimeout
-     */
     public int getHttpReadTimeout() {
         return httpReadTimeout;
     }
 
-    /**
-     * @param httpReadTimeout the httpReadTimeout to set
-     */
     public void setHttpReadTimeout(int httpReadTimeout) {
         this.httpReadTimeout = httpReadTimeout;
     }
 
-    /**
-     * @return the proxyPort
-     */
     public Integer getProxyPort() {
         return proxyPort;
     }
 
-    /**
-     * @param proxyPort the proxyPort to set
-     */
     public void setProxyPort(Integer proxyPort) {
         this.proxyPort = proxyPort;
     }
 
-    /**
-     * @return the proxyHost
-     */
     public String getProxyHost() {
         return proxyHost;
     }
 
-    /**
-     * @param proxyHost the proxyHost to set
-     */
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
     }
 
-    /**
-     * @return the ignoreHttpErrorCodes
-     */
     public boolean isIgnoreHttpErrorCodes() {
         return ignoreHttpErrorCodes;
     }
 
-    /**
-     * @param ignoreHttpErrorCodes the ignoreHttpErrorCodes to set
-     */
     public void setIgnoreHttpErrorCodes(boolean ignoreHttpErrorCodes) {
         this.ignoreHttpErrorCodes = ignoreHttpErrorCodes;
+    }
+
+    public boolean isWrapUnexpectedExceptions() {
+        return wrapUnexpectedExceptions;
+    }
+
+    public void setWrapUnexpectedExceptions(boolean wrapUnexpectedExceptions) {
+        this.wrapUnexpectedExceptions = wrapUnexpectedExceptions;
     }
 
     /**

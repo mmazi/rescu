@@ -21,6 +21,8 @@
  */
 package si.mazi.rescu;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import si.mazi.rescu.serialization.PlainTextResponseReader;
 import si.mazi.rescu.serialization.ToStringRequestWriter;
 import si.mazi.rescu.serialization.jackson.JacksonMapper;
@@ -41,9 +43,11 @@ import java.util.Map;
  */
 public class RestInvocationHandler implements InvocationHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(RestInvocationHandler.class);
+
     private final ResponseReaderResolver responseReaderResolver;
     private final RequestWriterResolver requestWriterResolver;
-    
+
     private final HttpTemplate httpTemplate;
     private final String intfacePath;
     private final String baseUrl;
@@ -54,13 +58,13 @@ public class RestInvocationHandler implements InvocationHandler {
     RestInvocationHandler(Class<?> restInterface, String url, ClientConfig config) {
         this.intfacePath = restInterface.getAnnotation(Path.class).value();
         this.baseUrl = url;
-        
+
         if (config == null) {
             config = new ClientConfig(); //default config
         }
-        
+
         this.config = config;
-        
+
         //setup default readers/writers
         JacksonMapper jacksonMapper = new JacksonMapper(config.getJacksonConfigureListener());
 
@@ -96,23 +100,30 @@ public class RestInvocationHandler implements InvocationHandler {
         RestMethodMetadata methodMetadata = getMetadata(method);
 
         HttpURLConnection connection;
-        SynchronizedValueFactory vf;
-        if ((vf = getValueGenerator(args)) != null) {
-            synchronized (vf) {
-                connection = prepareAndInvoke(args, methodMetadata);
-            }
-        } else {
-            connection = prepareAndInvoke(args, methodMetadata);
+        RestInvocation invocation = null;
+        Object lock = getValueGenerator(args);
+        if (lock == null) {
+            lock = new Object(); // effectively no locking
         }
-
-        return receiveAndMap(methodMetadata, connection);
-    }
-
-    protected HttpURLConnection prepareAndInvoke(Object[] args, RestMethodMetadata _methodMetadata) throws IOException {
-        RestInvocation invocation = RestInvocation.create(
-                requestWriterResolver, _methodMetadata, args, config.getDefaultParamsMap());
-
-        return invokeHttp(invocation);
+        try {
+            synchronized (lock) {
+                invocation = RestInvocation.create(
+                        requestWriterResolver, methodMetadata, args, config.getDefaultParamsMap());
+                connection = invokeHttp(invocation);
+            }
+            return receiveAndMap(methodMetadata, connection);
+        } catch (Exception e) {
+            if (e instanceof InvocationAware) {
+                try {
+                    ((InvocationAware) e).setInvocation(invocation);
+                } catch (Exception ex) {
+                    log.warn("Failed to set invocation on the InvocationAware", ex);
+                }
+            } else if (config.isWrapUnexpectedExceptions()) {
+                throw new InvocationAwareException(e, invocation);
+            }
+            throw e;
+        }
     }
 
     protected HttpURLConnection invokeHttp(RestInvocation invocation) throws IOException {
@@ -140,7 +151,7 @@ public class RestInvocationHandler implements InvocationHandler {
             RestMethodMetadata methodMetadata) throws IOException {
         return responseReaderResolver.resolveReader(methodMetadata).read(invocationResult, methodMetadata);
     }
-    
+
     private RestMethodMetadata getMetadata(Method method) {
         RestMethodMetadata metadata = methodMetadataCache.get(method);
         if (metadata == null) {

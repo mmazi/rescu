@@ -147,4 +147,8 @@ public interface ExampleService {
     @GET
     @Path("500")
     Object test500();
+
+    @GET
+    @Path("invocationAwareException")
+    Object invocationAwareException() throws ExampleInvocationAwareException;
 }
