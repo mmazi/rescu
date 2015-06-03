@@ -22,6 +22,7 @@
 package si.mazi.rescu;
 
 import com.google.common.collect.ImmutableMap;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -41,7 +42,10 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -378,6 +382,31 @@ public class RestInvocationHandlerTest {
             assertThat(e.getInvocation(), not(nullValue()));
             //noinspection ConstantConditions
             assertThat(e.getInvocation().getHttpMethod(), equalTo("GET"));
+        }
+    }
+
+    @Test
+    public void responseHeadersAwareException() throws Exception {
+        final Map<String, List<String>> mockHeaders = new HashMap<>();
+        mockHeaders.put("X-my-header", Collections.singletonList("My value"));
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500) {
+            @Override
+            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                super.invokeHttp(invocation);
+                HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
+                Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
+                return mockConnection;
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        try {
+            proxy.responseHeadersAwareException();
+            fail("Should have failed");
+        } catch (ExampleResponseHeadersAwareException e) {
+            Map<String, List<String>> actualHeaders = e.getResponseHeaders();
+            assertThat(actualHeaders, not(nullValue()));
+            assertThat(actualHeaders, hasEntry("X-my-header", Collections.singletonList("My value")));
         }
     }
 }

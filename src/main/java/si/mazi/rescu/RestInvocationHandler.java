@@ -99,7 +99,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
         RestMethodMetadata methodMetadata = getMetadata(method);
 
-        HttpURLConnection connection;
+        HttpURLConnection connection = null;
         RestInvocation invocation = null;
         Object lock = getValueGenerator(args);
         if (lock == null) {
@@ -113,14 +113,25 @@ public class RestInvocationHandler implements InvocationHandler {
             }
             return receiveAndMap(methodMetadata, connection);
         } catch (Exception e) {
+            boolean shouldWrap = config.isWrapUnexpectedExceptions();
             if (e instanceof InvocationAware) {
                 try {
                     ((InvocationAware) e).setInvocation(invocation);
+                    shouldWrap = false;
                 } catch (Exception ex) {
                     log.warn("Failed to set invocation on the InvocationAware", ex);
                 }
-            } else if (config.isWrapUnexpectedExceptions()) {
-                throw new InvocationAwareException(e, invocation);
+            }
+            if (e instanceof HttpResponseAware && connection != null) {
+                try {
+                    ((HttpResponseAware) e).setResponseHeaders(connection.getHeaderFields());
+                    shouldWrap = false;
+                } catch (Exception ex) {
+                    log.warn("Failed to set response headers on the HttpReponseAware", ex);
+                }
+            }
+            if (shouldWrap) {
+                throw new AwareException(e, invocation);
             }
             throw e;
         }

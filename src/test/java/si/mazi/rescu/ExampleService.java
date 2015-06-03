@@ -151,4 +151,8 @@ public interface ExampleService {
     @GET
     @Path("invocationAwareException")
     Object invocationAwareException() throws ExampleInvocationAwareException;
+
+    @GET
+    @Path("responseHeadersAwareException")
+    Object responseHeadersAwareException() throws ExampleResponseHeadersAwareException;
 }
