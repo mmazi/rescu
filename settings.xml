@@ -1,0 +1,11 @@
+<settings>
+    <!-- This is a Maven settings file that is used by after-success.sh that is run by Travis-CI
+    to publish built artefacts to a Maven repository. -->
+    <servers>
+        <server>
+            <id>ossrh</id>
+            <username>${env.CI_DEPLOY_USERNAME}</username>
+            <password>${env.CI_DEPLOY_PASSWORD}</password>
+        </server>
+    </servers>
+</settings>
