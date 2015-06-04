@@ -3,7 +3,7 @@
     to publish built artefacts to a Maven repository. -->
     <servers>
         <server>
-            <id>ossrh</id>
+            <id>sonatype-nexus-snapshots</id>
             <username>${env.CI_DEPLOY_USERNAME}</username>
             <password>${env.CI_DEPLOY_PASSWORD}</password>
         </server>
