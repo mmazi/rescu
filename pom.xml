@@ -169,12 +169,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <!-- fix hang issue http://jira.codehaus.org/browse/MGPG-9 : -->
-<!--
-                        <configuration>
-                            <mavenExecutorId>forked-path</mavenExecutorId>
-                        </configuration>
--->
                     </plugin>
                 </plugins>
             </build>
