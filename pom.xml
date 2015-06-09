@@ -169,7 +169,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keyname>53205B66</keyname>
+                            <keyname>Matija Mazi (Maven Central) &lt;matija.mazi@gmail.com&gt;</keyname>
                         </configuration>
                     </plugin>
                 </plugins>
