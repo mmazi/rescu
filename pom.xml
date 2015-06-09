@@ -168,6 +168,9 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <keyname>53205B66</keyname>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
