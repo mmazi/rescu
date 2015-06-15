@@ -26,7 +26,6 @@ package si.mazi.rescu.serialization.jackson;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import si.mazi.rescu.*;
 import si.mazi.rescu.dto.DummyTicker;
@@ -36,8 +35,9 @@ import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static com.googlecode.catchexception.CatchException.catchException;
+import static com.googlecode.catchexception.CatchException.caughtException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
@@ -65,8 +65,8 @@ public class JacksonResponseReaderTest {
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
                         RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
-        assertEquals(DummyTicker.class, result.getClass());
-        assertEquals(34567L, ((DummyTicker)result).getVolume());
+        assertThat(result).isInstanceOf(DummyTicker.class);
+        assertThat(((DummyTicker) result).getVolume()).isEqualTo(34567L);
     }
     
     @Test
@@ -77,20 +77,16 @@ public class JacksonResponseReaderTest {
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        try {
-            Object result = reader.read(invocationResult,
+        catchException(reader).read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null));
-            
-            Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (ExampleException e) {
-            Assert.assertEquals(e.getError(), "Order not found");
-            Assert.assertEquals(e.getToken(), "unknown_error");
-            Assert.assertEquals(e.getResult(), "error");
-            Assert.assertEquals(e.getHttpStatusCode(), 500);
-        } catch (Exception e) {
-            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
-        }
+                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null));;
+
+        ExampleException e = caughtException();
+        assertThat(e).isInstanceOf(ExampleException.class);
+        assertThat(e.getError()).isEqualTo("Order not found");
+        assertThat(e.getToken()).isEqualTo("unknown_error");
+        assertThat(e.getResult()).isEqualTo("error");
+        assertThat(e.getHttpStatusCode()).isEqualTo(500);
     }
 
     @Test
@@ -100,19 +96,16 @@ public class JacksonResponseReaderTest {
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        try {
-            Object result = reader.read(invocationResult,
+        catchException(reader).read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
                         null, null, MediaType.APPLICATION_JSON, null, null, null));
 
-            Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (HttpStatusIOException e) {
-            Assert.assertTrue(e.getHttpBody().contains("Order not found"));
-            Assert.assertTrue(e.getHttpBody().contains("unknown_error"));
-            Assert.assertEquals(e.getHttpStatusCode(), 500);
-        } catch (Exception e) {
-            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
-        }
+        HttpStatusIOException e = caughtException();
+        assertThat(e).isInstanceOf(HttpStatusIOException.class);
+
+        assertThat(e.getHttpBody()).contains("Order not found");
+        assertThat(e.getHttpBody()).contains("unknown_error");
+        assertThat(e.getHttpStatusCode()).isEqualTo(500);
     }
 
     @Test
@@ -128,15 +121,16 @@ public class JacksonResponseReaderTest {
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(resType, HttpMethod.GET, null, null, null,
                         RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
-        
-        assertEquals(GenericResult.class, result.getClass());
-        assertNotNull(((GenericResult)result).getResult());
-        assertEquals(DummyTicker[].class, ((GenericResult)result).getResult().getClass());
+
+        assertThat(result).isInstanceOf(GenericResult.class);
+        assertThat(((GenericResult)result).getResult())
+                .isNotNull()
+                .isInstanceOf(DummyTicker[].class);
         
         DummyTicker[] tickers = (DummyTicker[])((GenericResult)result).getResult();
-        assertEquals(2, tickers.length);
-        assertEquals(12345, tickers[0].getLast());
-        assertEquals(8910, tickers[1].getVolume());
+        assertThat(tickers).hasSize(2);
+        assertThat(tickers[0].getLast()).isEqualTo(12345);
+        assertThat(tickers[1].getVolume()).isEqualTo(8910);
     }
 
     @Test
@@ -155,7 +149,7 @@ public class JacksonResponseReaderTest {
         Map map = (Map)result;
         
         final Object bought = ((Map) map.get("data")).get("bought");
-        Assert.assertEquals(bought.toString(), "0");
+        assertThat(bought.toString()).isEqualTo("0");
     }
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
@@ -164,7 +158,7 @@ public class JacksonResponseReaderTest {
         JacksonResponseReader reader = new JacksonResponseReader(new JacksonMapper(null), true);
 
         final RuntimeException ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
-        Assert.assertTrue(ex.getMessage().contains("msg"), ex.getMessage());
+        assertThat(ex.getMessage()).contains("msg");
         log.debug("ex = " + ex);
     }
 }
