@@ -85,7 +85,12 @@ Supported settings with example values (copy this into your `rescu.properties` f
     rescu.http.readProxyPort = 80                   # HTTP proxy port. Both host and port must be set in order to use a proxy.
     rescu.http.ignoreErrorCodes = true              # If set to true, the HTTP response body never be parsed as Exception but always as the method response type. Defaults to false.
 
-Important note:
+License
+---------------
+
+Rescu is released under the MIT License. Please see [LINCESE.txt] for the full text.
+
+An important note
 ---------------
 
 I am very open to new suggestions, change requests etc. If ResCU seems almost right for you, but not quite,
