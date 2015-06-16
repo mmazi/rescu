@@ -24,7 +24,6 @@ package si.mazi.rescu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import si.mazi.rescu.utils.AssertUtil;
 import si.mazi.rescu.utils.HttpUtils;
 
 import javax.net.ssl.HostnameVerifier;
@@ -87,8 +86,8 @@ class HttpTemplate {
         log.trace("Request body = {}", requestBody);
         log.trace("Request headers = {}", httpHeaders);
 
-        AssertUtil.notNull(urlString, "urlString cannot be null");
-        AssertUtil.notNull(httpHeaders, "httpHeaders should not be null");
+        preconditionNotNull(urlString, "urlString cannot be null");
+        preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
         HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
@@ -129,9 +128,9 @@ class HttpTemplate {
      */
     private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
 
-        AssertUtil.notNull(method, "method cannot be null");
-        AssertUtil.notNull(urlString, "urlString cannot be null");
-        AssertUtil.notNull(httpHeaders, "httpHeaders cannot be null");
+        preconditionNotNull(method, "method cannot be null");
+        preconditionNotNull(urlString, "urlString cannot be null");
+        preconditionNotNull(httpHeaders, "httpHeaders cannot be null");
 
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());
@@ -240,6 +239,12 @@ class HttpTemplate {
             }
         }
         return charset;
+    }
+
+    private static void preconditionNotNull(Object what, String message) {
+        if (what == null) {
+            throw new NullPointerException(message);
+        }
     }
 
 }
