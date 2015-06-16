@@ -38,19 +38,16 @@ public abstract class EnumIntDeserializer<E extends Enum<E>> extends JsonDeseria
     private Class<E> enumClass;
 
     protected EnumIntDeserializer(Class<E> enumClass) {
-
         this.enumClass = enumClass;
     }
 
     @Override
     public E deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-
         E[] constants = enumClass.getEnumConstants();
-        return constants[jp.getValueAsInt() + getIndexBase()];
+        return constants[jp.getValueAsInt() - getIndexBase()];
     }
 
     protected int getIndexBase() {
-
         return 0;
     }
 }
