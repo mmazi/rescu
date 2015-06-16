@@ -21,7 +21,7 @@
  */
 package si.mazi.rescu;
 
-import si.mazi.rescu.utils.Base64;
+import net.iharder.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;

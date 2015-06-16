@@ -1,6 +1,6 @@
 package si.mazi.rescu;
 
-import si.mazi.rescu.utils.Base64;
+import net.iharder.Base64;
 
 import javax.ws.rs.HeaderParam;
 import java.io.UnsupportedEncodingException;
