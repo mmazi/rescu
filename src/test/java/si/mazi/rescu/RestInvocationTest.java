@@ -39,9 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.testng.Assert.assertEquals;
 
 public class RestInvocationTest {
@@ -97,7 +95,7 @@ public class RestInvocationTest {
         proxy.testFromPostCollection(Arrays.asList("first", "second"));
 
         final String requestBody = URLDecoder.decode(testHandler.getInvocation().getRequestBody(), "UTF-8");
-        assertThat(requestBody, containsString("data=first,second"));
+        assertThat(requestBody).contains("data=first,second");
     }
 
     @Test
@@ -110,8 +108,8 @@ public class RestInvocationTest {
         proxy.testFromPostCollectionAsArray(Arrays.asList("first", "second"));
 
         final String requestBody = testHandler.getInvocation().getRequestBody();
-        assertThat(requestBody, containsString("data[]=first"));
-        assertThat(requestBody, containsString("data[]=second"));
+        assertThat(requestBody).contains("data[]=first");
+        assertThat(requestBody).contains("data[]=second");
     }
 
     @Test
@@ -126,10 +124,10 @@ public class RestInvocationTest {
 
         String queryString = testHandler.getInvocation().getQueryString();
         int i = queryString.lastIndexOf('=');
-        assertThat(i, is(greaterThan(0)));
+        assertThat(i).isGreaterThan(0);
         String datetimeStr = URLDecoder.decode(queryString.substring(i + 1), "UTF-8");
         log.debug("datetimeStr = {}", datetimeStr);
 
-        assertThat(datetimeStr, matchesPattern("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(([+-][0-9]{2}:[0-9]{2})|Z)"));
+        assertThat(datetimeStr).matches("[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(([+-][0-9]{2}:[0-9]{2})|Z)");
     }
 }
