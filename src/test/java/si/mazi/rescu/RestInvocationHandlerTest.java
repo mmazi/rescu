@@ -402,4 +402,14 @@ public class RestInvocationHandlerTest {
         assertThat(actualHeaders).isNotNull()
                 .containsEntry("X-my-header", Collections.singletonList("My value"));
     }
+
+    @Test
+    public void shouldUrlEncodePathParams() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        proxy.removeEntity("Entity name");
+
+        assertThat(testHandler.getInvocation().getInvocationUrl()).contains("Entity+name");
+    }
 }

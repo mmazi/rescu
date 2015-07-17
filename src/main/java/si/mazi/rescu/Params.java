@@ -111,14 +111,14 @@ public class Params implements Serializable {
                         b.append('&');
                     }
                     String paramValueAsString = toString(paramValue);
-                    b.append(paramName).append('=').append(encode(paramValueAsString, encode));
+                    b.append(paramName).append('=').append(urlEncode(paramValueAsString, encode));
                 }
             }
         }
         return b.toString();
     }
 
-    private String encode(String data, boolean encode) {
+    private String urlEncode(String data, boolean encode) {
         try {
             return encode ? URLEncoder.encode(data, "UTF-8") : data;
         } catch (UnsupportedEncodingException e) {
@@ -144,7 +144,7 @@ public class Params implements Serializable {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
             }
             path = Pattern.compile("\\{" + paramName + "(:.+?)?\\}").matcher(
-                path).replaceAll(Matcher.quoteReplacement(getParamValueAsString(paramName)));
+                path).replaceAll(Matcher.quoteReplacement(urlEncode(getParamValueAsString(paramName), true)));
         }
         return path;
     }

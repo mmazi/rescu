@@ -155,4 +155,8 @@ public interface ExampleService {
     @GET
     @Path("responseHeadersAwareException")
     Object responseHeadersAwareException() throws ExampleResponseHeadersAwareException;
+
+    @DELETE
+    @Path("entity/{name}/remove")
+    Object removeEntity(@PathParam("name") String name);
 }
