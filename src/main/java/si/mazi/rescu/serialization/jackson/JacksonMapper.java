@@ -51,6 +51,7 @@ public class JacksonMapper {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
         return objectMapper;
     }
     
