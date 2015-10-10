@@ -22,6 +22,8 @@
  */
 package si.mazi.rescu;
 
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.exception.OAuthException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.utils.HttpUtils;
@@ -53,19 +55,21 @@ class HttpTemplate {
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
+    private final OAuthConsumer oAuthConsumer;
 
 
     HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
-            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
-      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier);
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
+      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
     }
     
-    HttpTemplate(int connTimeout,int readTimeout, String proxyHost, Integer proxyPort,
-            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
+    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
+        this.oAuthConsumer = oAuthConsumer;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -90,7 +94,7 @@ class HttpTemplate {
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
-        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
+        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength, oAuthConsumer);
 
         if (contentLength > 0) {
             // Write the request body
@@ -126,7 +130,7 @@ class HttpTemplate {
      * @return An HttpURLConnection based on the given parameters
      * @throws IOException If something goes wrong
      */
-    private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
+    private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength, OAuthConsumer oAuthConsumer) throws IOException {
 
         preconditionNotNull(method, "method cannot be null");
         preconditionNotNull(urlString, "urlString cannot be null");
@@ -150,6 +154,14 @@ class HttpTemplate {
             connection.setDoInput(true);
         }
         connection.setRequestProperty("Content-Length", Integer.toString(contentLength));
+
+        if (oAuthConsumer != null) {
+            try {
+                oAuthConsumer.sign(connection);
+            } catch (OAuthException e) {
+                throw new RuntimeException("OAuth error", e);
+            }
+        }
 
         return connection;
     }
