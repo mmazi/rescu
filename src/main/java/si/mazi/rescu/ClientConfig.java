@@ -23,6 +23,7 @@
 
 package si.mazi.rescu;
 
+import oauth.signpost.OAuthConsumer;
 import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
 
 import javax.net.ssl.HostnameVerifier;
@@ -44,6 +45,7 @@ public class ClientConfig {
     private String proxyHost;
     private boolean ignoreHttpErrorCodes;
     private boolean wrapUnexpectedExceptions;
+    private OAuthConsumer oAuthConsumer;
 
     public ClientConfig() {
         httpConnTimeout = Config.getHttpConnTimeout();
@@ -170,5 +172,13 @@ public class ClientConfig {
      */
     public void setJacksonConfigureListener(JacksonConfigureListener jacksonConfigureListener) {
         this.jacksonConfigureListener = jacksonConfigureListener;
+    }
+
+    public OAuthConsumer getOAuthConsumer() {
+        return oAuthConsumer;
+    }
+
+    public void setOAuthConsumer(OAuthConsumer oAuthConsumer) {
+        this.oAuthConsumer = oAuthConsumer;
     }
 }
