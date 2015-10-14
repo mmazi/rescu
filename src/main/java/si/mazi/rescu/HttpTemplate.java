@@ -24,8 +24,10 @@ package si.mazi.rescu;
 
 import oauth.signpost.OAuthConsumer;
 import oauth.signpost.exception.OAuthException;
+import oauth.signpost.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import si.mazi.rescu.oauth.RescuOAuthRequestAdapter;
 import si.mazi.rescu.utils.HttpUtils;
 
 import javax.net.ssl.HostnameVerifier;
@@ -94,7 +96,17 @@ class HttpTemplate {
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
-        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength, oAuthConsumer);
+        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
+
+        if (oAuthConsumer != null) {
+            HttpRequest request = new RescuOAuthRequestAdapter(connection, requestBody);
+
+            try {
+                oAuthConsumer.sign(request);
+            } catch (OAuthException e) {
+                throw new RuntimeException("OAuth error", e);
+            }
+        }
 
         if (contentLength > 0) {
             // Write the request body
@@ -130,7 +142,7 @@ class HttpTemplate {
      * @return An HttpURLConnection based on the given parameters
      * @throws IOException If something goes wrong
      */
-    private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength, OAuthConsumer oAuthConsumer) throws IOException {
+    private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
 
         preconditionNotNull(method, "method cannot be null");
         preconditionNotNull(urlString, "urlString cannot be null");
@@ -154,14 +166,6 @@ class HttpTemplate {
             connection.setDoInput(true);
         }
         connection.setRequestProperty("Content-Length", Integer.toString(contentLength));
-
-        if (oAuthConsumer != null) {
-            try {
-                oAuthConsumer.sign(connection);
-            } catch (OAuthException e) {
-                throw new RuntimeException("OAuth error", e);
-            }
-        }
 
         return connection;
     }
