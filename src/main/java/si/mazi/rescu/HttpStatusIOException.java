@@ -24,9 +24,13 @@
 package si.mazi.rescu;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
-public class HttpStatusIOException extends IOException implements HttpStatusException {
+public class HttpStatusIOException extends IOException implements HttpStatusException, HttpResponseAware {
     private final InvocationResult invocationResult;
+
+    private Map<String, List<String>> headers;
 
     public HttpStatusIOException(String message, InvocationResult invocationResult) {
         super(message);
@@ -43,5 +47,15 @@ public class HttpStatusIOException extends IOException implements HttpStatusExce
 
     public String getHttpBody() {
         return invocationResult.getHttpBody();
+    }
+
+    @Override
+    public void setResponseHeaders(Map<String, List<String>> headers) {
+        this.headers = headers;
+    }
+
+    @Override
+    public Map<String, List<String>> getResponseHeaders() {
+        return headers;
     }
 }
