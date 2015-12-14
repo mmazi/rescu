@@ -146,7 +146,7 @@ public interface ExampleService {
 
     @GET
     @Path("500")
-    Object test500();
+    Object test500() throws IOException;
 
     @GET
     @Path("invocationAwareException")
