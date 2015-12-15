@@ -55,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Matija Mazi
  */
-@SuppressWarnings("Duplicates")
+//@SuppressWarnings("Duplicates")
 public class RestInvocationHandlerTest {
 
     private static final Logger log = LoggerFactory.getLogger(RestInvocationHandlerTest.class);
