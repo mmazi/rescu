@@ -159,4 +159,9 @@ public interface ExampleService {
     @DELETE
     @Path("entity/{name}/remove")
     Object removeEntity(@PathParam("name") String name);
+
+    @POST
+    @Path(value = "future_orders_info.do")
+    Object getFuturesOrders(@FormParam("order_id") String orderId, @HeaderParam("sign") ParamsDigest signer)
+            throws IOException;
 }

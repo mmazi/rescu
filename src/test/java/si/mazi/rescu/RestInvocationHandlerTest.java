@@ -438,4 +438,24 @@ public class RestInvocationHandlerTest {
         assertThat(testHandler.getInvocation().getInvocationUrl()).contains("Entity+name");
     }
 
+    @Test
+    public void shouldDigestUrlEncodedFormParams() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final MockParamsDigest digest = new MockParamsDigest();
+        proxy.getFuturesOrders("1233455,1234324,2123131", digest);
+
+        assertThat(digest.requestBody).isEqualTo("order_id=1233455%2C1234324%2C2123131");
+    }
+
+    private static class MockParamsDigest implements ParamsDigest {
+
+        private String requestBody;
+
+        @Override public String digestParams(RestInvocation restInvocation) {
+            requestBody = restInvocation.getRequestBody();
+            return "";
+        }
+    }
 }
