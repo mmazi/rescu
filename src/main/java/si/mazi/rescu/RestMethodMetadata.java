@@ -78,7 +78,7 @@ public class RestMethodMetadata implements Serializable {
         this.exceptionType = exceptionType;
     }
 
-    static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
+    public static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
         String methodName = method.getName();
         Map<Class<? extends Annotation>, Annotation> methodAnnotationMap
                 = AnnotationUtils.getMethodAnnotationMap(method,
