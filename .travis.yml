@@ -6,6 +6,8 @@ jdk:
 script: mvn clean install
 after_success:
   - ./after-success.sh
+addons:
+  hostname: rescu-build-host
 env:
   global:
     - secure: "fjALtzu+RrfDqhDHtEwZn/LBN6swYZC146+PdfdeMi4aGrYAg46tXq7zKT3V\naRsyMg6tT9GhFsrUe2KZVXga3yOWIe+WOWY3v3kA3Y5s+O5kmBIMMZfVJTH0\nyKFT0nT+Ht4zomYRtjBjJvgtm3AZuyDx0zI6X8V2BtulJrmM5SQ="
