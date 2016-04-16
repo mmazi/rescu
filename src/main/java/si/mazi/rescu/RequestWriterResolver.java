@@ -35,7 +35,7 @@ import java.util.HashMap;
 public class RequestWriterResolver {
 
     //media-type => request writer
-    protected final HashMap<String, RequestWriter> writers = new HashMap<String, RequestWriter>();
+    protected final HashMap<String, RequestWriter> writers = new HashMap<>();
     
     public RequestWriterResolver() {
     }

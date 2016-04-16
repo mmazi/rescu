@@ -11,7 +11,7 @@ import java.net.HttpURLConnection;
  * @author Rafał Krupiński
  */
 public class RescuOAuthRequestAdapter extends HttpURLConnectionRequestAdapter {
-    private String messagePayload;
+    private final String messagePayload;
 
     public RescuOAuthRequestAdapter(HttpURLConnection connection, String messagePayload) {
         super(connection);

@@ -29,8 +29,8 @@ import java.lang.reflect.Method;
  */
 class InterceptedInvocationHandler implements InvocationHandler {
 
-    private Interceptor interceptor;
-    private InvocationHandler intercepted;
+    private final Interceptor interceptor;
+    private final InvocationHandler intercepted;
 
     public InterceptedInvocationHandler(Interceptor interceptor, InvocationHandler intercepted) {
         this.interceptor = interceptor;

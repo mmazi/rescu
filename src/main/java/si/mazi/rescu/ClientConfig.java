@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class ClientConfig {
 
-    private final Map<Class<? extends Annotation>, Params> defaultParamsMap = new HashMap<Class<? extends Annotation>, Params>();
+    private final Map<Class<? extends Annotation>, Params> defaultParamsMap = new HashMap<>();
     
     private SSLSocketFactory sslSocketFactory = null;
     private HostnameVerifier hostnameVerifier = null;
