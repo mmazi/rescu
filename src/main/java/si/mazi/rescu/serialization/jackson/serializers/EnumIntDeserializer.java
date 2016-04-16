@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public abstract class EnumIntDeserializer<E extends Enum<E>> extends JsonDeserializer<E> {
 
-    private Class<E> enumClass;
+    private final Class<E> enumClass;
 
     protected EnumIntDeserializer(Class<E> enumClass) {
         this.enumClass = enumClass;

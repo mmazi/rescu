@@ -82,7 +82,7 @@ public class RestInvocation implements Serializable {
 
         HashMap<Class<? extends Annotation>, Params> paramsMap = createEmptyParamsMap(defaultParamsMap);
 
-        List<Object> unannanotatedParams = new ArrayList<Object>();
+        List<Object> unannanotatedParams = new ArrayList<>();
         
         Annotation[][] paramAnnotations = methodMetadata.getParameterAnnotations();
         for (int i = 0; i < paramAnnotations.length; i++) {
@@ -151,7 +151,7 @@ public class RestInvocation implements Serializable {
     }
 
     public static HashMap<Class<? extends Annotation>, Params> createEmptyParamsMap(Map<Class<? extends Annotation>, Params> defaultParamsMap) {
-        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
+        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<>();
 
         for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
             paramsMap.put(annotationClass, Params.of());
@@ -211,7 +211,7 @@ public class RestInvocation implements Serializable {
     @Deprecated
     public Map<String, String> getAllHttpHeaders() {
         if (allHttpHeaders == null) {
-            allHttpHeaders = new HashMap<String, String>();
+            allHttpHeaders = new HashMap<>();
             allHttpHeaders.putAll(getHttpHeadersFromParams());
             if (methodMetadata.getReqContentType() != null) {
                 allHttpHeaders.put("Content-Type", methodMetadata.getReqContentType());

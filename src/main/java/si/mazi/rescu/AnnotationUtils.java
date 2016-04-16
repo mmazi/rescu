@@ -68,7 +68,7 @@ public class AnnotationUtils {
      */
     static Map<Class<? extends Annotation>, Annotation> getMethodAnnotationMap(Method method, Collection<Class<? extends Annotation>> annotationClasses) {
         Annotation[] methodAnnotations = method.getAnnotations();
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = new HashMap<Class<? extends Annotation>, Annotation>();
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = new HashMap<>();
         for (Annotation methodAnnotation : methodAnnotations) {
             methodAnnotationMap.put(methodAnnotation.annotationType(), methodAnnotation);
         }

@@ -54,7 +54,7 @@ public class Params implements Serializable {
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
-    private final Map<String, Object> data = new LinkedHashMap<String, Object>();
+    private final Map<String, Object> data = new LinkedHashMap<>();
     private final DateFormat iso8601datetime;
     private final DateFormat iso8601date;
 
@@ -150,7 +150,7 @@ public class Params implements Serializable {
     }
 
     public Map<String, String> asHttpHeaders() {
-        Map<String, String> stringMap = new LinkedHashMap<String, String>();
+        Map<String, String> stringMap = new LinkedHashMap<>();
         for (String key : data.keySet()) {
             if (isParamSet(key)) {
                 stringMap.put(key, getParamValueAsString(key));

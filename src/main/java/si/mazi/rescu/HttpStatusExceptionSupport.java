@@ -27,18 +27,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class HttpStatusExceptionSupport extends RuntimeException implements HttpStatusException {
 
+    public HttpStatusExceptionSupport() { }
+
+    public HttpStatusExceptionSupport(String message) {
+        super(message);
+    }
+
     @JsonIgnore
     private int __httpStatusCode;
 
     @JsonIgnore
     public StackTraceElement[] getStackTrace() {
         return super.getStackTrace();
-    }
-
-    public HttpStatusExceptionSupport() { }
-
-    public HttpStatusExceptionSupport(String message) {
-        super(message);
     }
 
     @Override
