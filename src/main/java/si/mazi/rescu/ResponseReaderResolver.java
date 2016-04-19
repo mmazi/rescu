@@ -35,7 +35,7 @@ import java.util.HashMap;
 public class ResponseReaderResolver {
 
     //media-type => response reader
-    protected final HashMap<String, ResponseReader> readers = new HashMap<String, ResponseReader>();
+    protected final HashMap<String, ResponseReader> readers = new HashMap<>();
 
     /**
      * Constructor.

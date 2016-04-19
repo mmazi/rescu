@@ -30,15 +30,15 @@ public class HttpStatusExceptionSupport extends RuntimeException implements Http
     @JsonIgnore
     private int __httpStatusCode;
 
-    @JsonIgnore
-    public StackTraceElement[] getStackTrace() {
-        return super.getStackTrace();
-    }
-
     public HttpStatusExceptionSupport() { }
 
     public HttpStatusExceptionSupport(String message) {
         super(message);
+    }
+
+    @JsonIgnore
+    public StackTraceElement[] getStackTrace() {
+        return super.getStackTrace();
     }
 
     @Override

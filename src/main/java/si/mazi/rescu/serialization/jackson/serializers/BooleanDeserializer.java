@@ -34,7 +34,7 @@ import java.io.IOException;
  */
 public abstract class BooleanDeserializer extends JsonDeserializer<Boolean> {
 
-    private String trueValue, falseValue;
+    private final String trueValue, falseValue;
 
     protected BooleanDeserializer(String trueValue, String falseValue) {
 

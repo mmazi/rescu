@@ -51,7 +51,7 @@ class HttpTemplate {
     /**
      * Default request header fields
      */
-    private final Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
+    private final Map<String, String> defaultHttpHeaders = new HashMap<>();
     private final int connTimeout;
     private final int readTimeout;
     private final Proxy proxy;
@@ -151,7 +151,7 @@ class HttpTemplate {
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());
 
-        Map<String, String> headerKeyValues = new HashMap<String, String>(defaultHttpHeaders);
+        Map<String, String> headerKeyValues = new HashMap<>(defaultHttpHeaders);
 
         headerKeyValues.putAll(httpHeaders);
 

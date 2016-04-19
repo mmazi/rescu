@@ -30,11 +30,11 @@ package si.mazi.rescu.utils;
  */
 public final class HttpUtils {
 
+    private HttpUtils() {
+    }
+
     public static boolean isErrorStatusCode(int statusCode) {
         return statusCode / 100 != 2;
-    }
-    
-    private HttpUtils() {
     }
 
 }
