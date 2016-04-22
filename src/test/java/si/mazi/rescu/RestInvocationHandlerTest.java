@@ -43,10 +43,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.googlecode.catchexception.CatchException.catchException;
 import static com.googlecode.catchexception.CatchException.caughtException;
@@ -447,6 +446,47 @@ public class RestInvocationHandlerTest {
         proxy.getFuturesOrders("1233455,1234324,2123131", digest);
 
         assertThat(digest.requestBody).isEqualTo("order_id=1233455%2C1234324%2C2123131");
+    }
+
+    @Test
+    public void shouldReceiveSequentialNonces() throws Exception {
+        final TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
+            @Override protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                // Pause to symulate network lag
+                try { Thread.sleep(new Random().nextInt(100));
+                } catch (InterruptedException e) { throw new RuntimeException(e); }
+                return super.invokeHttp(invocation);
+            }
+        };
+        final ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final SynchronizedValueFactory vf = new SynchronizedValueFactory() {
+            private int seq = 0;
+            @Override public Object createValue() { return seq++; }
+        };
+
+        final AtomicLong maxNonce = new AtomicLong(-1);
+        final ExecutorService threadPool = new ForkJoinPool(5);
+
+        List<Future<Boolean>> futures = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            Future<Boolean> test = threadPool.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() {
+                    log.info("Submitting call");
+                    proxy.getNonce(vf);
+                    long nonce = ((Number) testHandler.getInvocation().getParamsMap().get(FormParam.class).getParamValue("nonce")).longValue();
+                    log.info("Got nonce {}, maxNonce = {}", nonce, maxNonce);
+                    boolean success = nonce > maxNonce.get();
+                    maxNonce.set(nonce);
+                    return success;
+                }
+            });
+            futures.add(test);
+        }
+        for (Future<Boolean> future : futures) {
+            assertThat(future.get(5, TimeUnit.SECONDS)).isTrue();
+        }
     }
 
     private static class MockParamsDigest implements ParamsDigest {
