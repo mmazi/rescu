@@ -30,7 +30,11 @@ import java.util.Map;
 /**
  * @author Matija Mazi <br>
  */
-public class AnnotationUtils {
+public final class AnnotationUtils {
+
+    private AnnotationUtils() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
 
     static <T extends Annotation> String getValueOrNull(Class<T> annotationClass, Annotation ann) {
 

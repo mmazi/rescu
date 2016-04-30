@@ -50,7 +50,7 @@ import java.util.regex.Pattern;
  *
  * @author Matija Mazi
  */
-public class Params implements Serializable {
+public final class Params implements Serializable {
 
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 

@@ -28,7 +28,7 @@ import java.lang.reflect.Proxy;
  * @author Matija Mazi
  * @see #createProxy(Class, InvocationHandler, Interceptor...)
  */
-public class RestProxyFactory {
+public final class RestProxyFactory {
 
     private RestProxyFactory() { }
 

@@ -23,7 +23,12 @@
 
 package si.mazi.rescu;
 
-public class Utils {
+public final class Utils {
+
+    private Utils() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
+
     public static String clip(String str, int startChars) {
         return str.length() <= startChars ? str : str.substring(0, startChars) + "...";
     }
