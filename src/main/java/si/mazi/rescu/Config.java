@@ -33,7 +33,7 @@ import java.util.Properties;
 /**
  * @author Matija Mazi <br>
  */
-class Config {
+final class Config {
     public static final String RESCU_PROPERTIES = "rescu.properties";
     
     
@@ -94,6 +94,10 @@ class Config {
         log.debug("proxyHost = {}", proxyHost);
         log.debug("proxyPort = {}", proxyPort);
         log.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
+    }
+
+    private Config() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
     }
 
     private static boolean getBoolean(Properties properties, String key) {

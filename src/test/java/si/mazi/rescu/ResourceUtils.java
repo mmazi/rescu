@@ -32,7 +32,11 @@ import java.util.Scanner;
  *
  * @author Martin ZIMA
  */
-public class ResourceUtils {
+public final class ResourceUtils {
+
+    private ResourceUtils() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
 
     public static String getResourceAsString(String resourcePath) throws IOException {
         InputStream resStream = ResourceUtils.class.getResourceAsStream(resourcePath);

@@ -40,10 +40,14 @@ import java.security.NoSuchAlgorithmException;
  * request body (which is composed of @FormParams).
  * </p>
  */
-public class HmacPostBodyDigest implements ParamsDigest {
+public final class HmacPostBodyDigest implements ParamsDigest {
 
     private static final String HMAC_SHA_512 = "HmacSHA512";
     private final Mac mac;
+
+    private HmacPostBodyDigest() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
 
     /**
      * Constructor
