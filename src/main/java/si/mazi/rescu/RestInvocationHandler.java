@@ -69,8 +69,6 @@ public class RestInvocationHandler implements InvocationHandler {
         JacksonMapper jacksonMapper = new JacksonMapper(config.getJacksonConfigureListener());
 
         requestWriterResolver = new RequestWriterResolver();
-        /*requestWriterResolver.addWriter(null,
-                new NullRequestWriter());*/
         requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED,
                 new FormUrlEncodedRequestWriter());
         requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,

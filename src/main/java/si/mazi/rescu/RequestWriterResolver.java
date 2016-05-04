@@ -49,7 +49,6 @@ public class RequestWriterResolver {
 
         String reqContentType = methodMetadata.getReqContentType();
         if (reqContentType == null) {
-            //throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
             reqContentType = MediaType.APPLICATION_FORM_URLENCODED;
         }
         writer = writers.get(reqContentType);
