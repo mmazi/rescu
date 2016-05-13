@@ -46,6 +46,7 @@ public class ClientConfig {
     private boolean ignoreHttpErrorCodes;
     private boolean wrapUnexpectedExceptions;
     private OAuthConsumer oAuthConsumer;
+    private String digestHeader;
 
     public ClientConfig() {
         httpConnTimeout = Config.getHttpConnTimeout();
@@ -180,5 +181,11 @@ public class ClientConfig {
 
     public void setOAuthConsumer(OAuthConsumer oAuthConsumer) {
         this.oAuthConsumer = oAuthConsumer;
+    }
+
+    public String getDigestHeader() { return digestHeader; }
+
+    public void setDigestHeader(String digestAlgorithm) {
+        this.digestHeader = digestHeader;
     }
 }
