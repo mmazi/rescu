@@ -25,6 +25,7 @@ package si.mazi.rescu;
 
 import oauth.signpost.OAuthConsumer;
 import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
+import si.mazi.rescu.signature.SignatureInfo;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -47,6 +48,7 @@ public class ClientConfig {
     private boolean wrapUnexpectedExceptions;
     private OAuthConsumer oAuthConsumer;
     private String digestHeader;
+    private SignatureInfo signatureInfo;
 
     public ClientConfig() {
         httpConnTimeout = Config.getHttpConnTimeout();
@@ -185,7 +187,11 @@ public class ClientConfig {
 
     public String getDigestHeader() { return digestHeader; }
 
-    public void setDigestHeader(String digestAlgorithm) {
+    public void setDigestHeader(String digestHeader) {
         this.digestHeader = digestHeader;
     }
+
+    public SignatureInfo getSignatureInfo() { return signatureInfo; }
+
+    public void setSignatureInfo(SignatureInfo signatureInfo) { this.signatureInfo = signatureInfo; }
 }

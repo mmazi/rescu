@@ -28,6 +28,7 @@ import oauth.signpost.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.oauth.RescuOAuthRequestAdapter;
+import si.mazi.rescu.signature.*;
 import si.mazi.rescu.utils.HttpUtils;
 import si.mazi.rescu.digest.Sha256PostBodyDigest;
 
@@ -36,6 +37,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -59,24 +61,26 @@ class HttpTemplate {
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
     private final OAuthConsumer oAuthConsumer;
-    private String digestHeader;
+    private final String digestHeader;
+    private final SignatureInfo signatureInfo;
 
 
     HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer,
-                 String digestHeader) {
-        this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer, digestHeader);
+                 String digestHeader, SignatureInfo signatureInfo) {
+        this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer, digestHeader, signatureInfo);
     }
 
     HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer,
-                 String digestHeader) {
+                 String digestHeader, SignatureInfo signatureInfo) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
         this.oAuthConsumer = oAuthConsumer;
         this.digestHeader = digestHeader;
+        this.signatureInfo = signatureInfo;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -100,10 +104,11 @@ class HttpTemplate {
         preconditionNotNull(urlString, "urlString cannot be null");
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
-        Map<String, String> digestedHttpHeaders = getDigestedHttpHeaders(httpHeaders, requestBody);
+        Map<String, String> signaturedHttpHeaders = SignatureSigner.addSignature(digestHeader, method, urlString, httpHeaders,
+                requestBody, signatureInfo);
 
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
-        HttpURLConnection connection = configureURLConnection(method, urlString, digestedHttpHeaders, contentLength);
+        HttpURLConnection connection = configureURLConnection(method, urlString, signaturedHttpHeaders, contentLength);
 
         if (oAuthConsumer != null) {
             HttpRequest request = new RescuOAuthRequestAdapter(connection, requestBody);
@@ -207,8 +212,8 @@ class HttpTemplate {
      * Reads an InputStream as a String allowing for different encoding types. This closes the stream at the end.
      * </p>
      *
-     * @param inputStream      The input stream
-     * @param connection     The HTTP connection object
+     * @param inputStream The input stream
+     * @param connection  The HTTP connection object
      * @return A String representation of the input stream
      * @throws IOException If something goes wrong
      */
@@ -265,21 +270,6 @@ class HttpTemplate {
             }
         }
         return charset;
-    }
-
-    Map<String, String> getDigestedHttpHeaders(Map<String, String> httpHeaders, String requestBody) {
-
-        Map<String, String> digestedHttpHeaders = new HashMap<String, String>();
-        digestedHttpHeaders.putAll(httpHeaders);
-
-        if (digestHeader != null) {
-            if (httpHeaders.containsKey(digestHeader)) {
-                log.warn("Header 'Digest' is overwritten");
-            }
-            digestedHttpHeaders.put(digestHeader, Sha256PostBodyDigest.createInstance().digestParams(requestBody));
-        }
-
-        return digestedHttpHeaders;
     }
 
     private static void preconditionNotNull(Object what, String message) {

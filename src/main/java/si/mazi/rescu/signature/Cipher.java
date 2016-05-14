@@ -23,7 +23,7 @@ package si.mazi.rescu.signature;
 
 import java.security.SignatureException;
 
-interface Cipher {
+public interface Cipher {
 
     String encrypt(String message) throws SignatureException;
 }
