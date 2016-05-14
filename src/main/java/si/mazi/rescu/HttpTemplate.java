@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2012 - 2013 Xeiam LLC http://xeiam.com
  * Copyright (C) 2012 - 2013 Matija Mazi matija.mazi@gmail.com
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
  * of the Software, and to permit persons to whom the Software is furnished to do
  * so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,13 +28,16 @@ import oauth.signpost.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.oauth.RescuOAuthRequestAdapter;
+import si.mazi.rescu.signature.*;
 import si.mazi.rescu.utils.HttpUtils;
+import si.mazi.rescu.digest.Sha256PostBodyDigest;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -58,20 +61,26 @@ class HttpTemplate {
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
     private final OAuthConsumer oAuthConsumer;
+    private final String digestHeader;
+    private final SignatureInfo signatureInfo;
 
 
     HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
-                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
-      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer,
+                 String digestHeader, SignatureInfo signatureInfo) {
+        this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer, digestHeader, signatureInfo);
     }
-    
+
     HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
-                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer,
+                 String digestHeader, SignatureInfo signatureInfo) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
         this.oAuthConsumer = oAuthConsumer;
+        this.digestHeader = digestHeader;
+        this.signatureInfo = signatureInfo;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -95,8 +104,11 @@ class HttpTemplate {
         preconditionNotNull(urlString, "urlString cannot be null");
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
+        Map<String, String> signaturedHttpHeaders = SignatureSigner.addSignature(digestHeader, method, urlString, httpHeaders,
+                requestBody, signatureInfo);
+
         int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
-        HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
+        HttpURLConnection connection = configureURLConnection(method, urlString, signaturedHttpHeaders, contentLength);
 
         if (oAuthConsumer != null) {
             HttpRequest request = new RescuOAuthRequestAdapter(connection, requestBody);
@@ -122,7 +134,7 @@ class HttpTemplate {
         log.debug("Request http status = {}", httpStatus);
 
         InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
-            connection.getInputStream() : connection.getErrorStream();
+                connection.getInputStream() : connection.getErrorStream();
         String responseString = readInputStreamAsEncodedString(inputStream, connection);
         if (responseString != null && responseString.startsWith("\uFEFF")) {
             responseString = responseString.substring(1);
@@ -177,21 +189,21 @@ class HttpTemplate {
             connection.setReadTimeout(readTimeout);
         }
         if (connTimeout > 0) {
-          connection.setConnectTimeout(connTimeout);
+            connection.setConnectTimeout(connTimeout);
         }
-        
+
         if (connection instanceof HttpsURLConnection) {
-            HttpsURLConnection httpsConnection = (HttpsURLConnection)connection;
-            
+            HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
+
             if (sslSocketFactory != null) {
                 httpsConnection.setSSLSocketFactory(sslSocketFactory);
             }
-            
+
             if (hostnameVerifier != null) {
                 httpsConnection.setHostnameVerifier(hostnameVerifier);
             }
         }
-        
+
         return connection;
     }
 
@@ -200,8 +212,8 @@ class HttpTemplate {
      * Reads an InputStream as a String allowing for different encoding types. This closes the stream at the end.
      * </p>
      *
-     * @param inputStream      The input stream
-     * @param connection     The HTTP connection object
+     * @param inputStream The input stream
+     * @param connection  The HTTP connection object
      * @return A String representation of the input stream
      * @throws IOException If something goes wrong
      */
@@ -226,7 +238,10 @@ class HttpTemplate {
         } finally {
             inputStream.close();
             if (reader != null) {
-                try { reader.close(); } catch (IOException ignore) { }
+                try {
+                    reader.close();
+                } catch (IOException ignore) {
+                }
             }
         }
     }
