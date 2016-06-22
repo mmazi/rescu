@@ -63,12 +63,7 @@ public abstract class ResponseReader {
             } else {
                 try {
                     return read(httpBody, methodMetadata.getReturnType());
-                } catch (IOException e) {
-                    normalParseFailCause = findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class);
-                    if (normalParseFailCause == null) {
-                        throw e;
-                    }
-                } catch (RuntimeException e) {
+                } catch (IOException|RuntimeException e) {
                     normalParseFailCause = findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class);
                     if (normalParseFailCause == null) {
                         throw e;
