@@ -58,13 +58,7 @@ public class PlainTextResponseReader extends ResponseReader {
         try {
             // try constructng the exception with message
             constructedException = exceptionType.getConstructor(String.class).newInstance(message);
-        } catch (IllegalAccessException e) {
-            reflectiveOperationException = e;
-        } catch (InstantiationException e) {
-            reflectiveOperationException = e;
-        } catch (InvocationTargetException e) {
-            reflectiveOperationException = e;
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException|InstantiationException|InvocationTargetException|NoSuchMethodException e) {
             reflectiveOperationException = e;
         }
 
