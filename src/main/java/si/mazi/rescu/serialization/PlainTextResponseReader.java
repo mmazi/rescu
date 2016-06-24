@@ -69,9 +69,7 @@ public class PlainTextResponseReader extends ResponseReader {
                 // fallback to no-parameter constructor
                 constructedException = exceptionType.newInstance();
                 log.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
-            } catch (IllegalAccessException e) {
-                reflectiveOperationException = e;
-            } catch (InstantiationException e) {
+            } catch (IllegalAccessException | InstantiationException e) {
                 reflectiveOperationException = e;
             }
 
