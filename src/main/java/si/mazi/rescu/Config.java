@@ -38,7 +38,7 @@ final class Config {
     
     
 
-    private static final Logger log = LoggerFactory.getLogger(Config.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
     
     private static final String HTTP_CONN_TIMEOUT = "rescu.http.connTimeoutMillis";
 
@@ -74,7 +74,7 @@ final class Config {
         if (propsStream != null) {
             try {
                 properties.load(propsStream);
-                log.debug("Loaded properties from {}.", RESCU_PROPERTIES);
+                LOGGER.debug("Loaded properties from {}.", RESCU_PROPERTIES);
             } catch (IOException e) {
                 throw new RuntimeException("Error reading " + RESCU_PROPERTIES, e);
             }
@@ -88,12 +88,12 @@ final class Config {
         ignoreHttpErrorCodes = getBoolean(properties, IGNORE_HTTP_ERROR_CODES);
         wrapUnexpectedExceptions = getBoolean(properties, WRAP_UNEXPECTED_EXCEPTIONS);
 
-        log.debug("Configuration from rescu.properties:");
-        log.debug("httpConnTimeout = {}", httpConnTimeout);
-        log.debug("httpReadTimeout = {}", httpReadTimeout);
-        log.debug("proxyHost = {}", proxyHost);
-        log.debug("proxyPort = {}", proxyPort);
-        log.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
+        LOGGER.debug("Configuration from rescu.properties:");
+        LOGGER.debug("httpConnTimeout = {}", httpConnTimeout);
+        LOGGER.debug("httpReadTimeout = {}", httpReadTimeout);
+        LOGGER.debug("proxyHost = {}", proxyHost);
+        LOGGER.debug("proxyPort = {}", proxyPort);
+        LOGGER.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
     }
 
     private Config() throws InstantiationException {

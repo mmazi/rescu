@@ -38,7 +38,7 @@ import java.lang.reflect.Type;
  */
 public abstract class ResponseReader {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseReader.class);
     public static final int BODY_FRAGMENT_CHARS = 100;
 
     private final boolean ignoreHttpErrorCodes;
@@ -69,7 +69,7 @@ public abstract class ResponseReader {
                         throw e;
                     }
                 }
-                log.debug("Parsing response as {} failed: {}", methodMetadata.getReturnType(), normalParseFailCause.toString());
+                LOGGER.debug("Parsing response as {} failed: {}", methodMetadata.getReturnType(), normalParseFailCause.toString());
             }
         }
 
@@ -81,7 +81,7 @@ public abstract class ResponseReader {
             try {
                 exception = readException(httpBody, methodMetadata.getExceptionType());
             } catch (Exception e) {
-                log.warn("Noncritical error parsing error output: " + Utils.clip(httpBody, BODY_FRAGMENT_CHARS), e);
+                LOGGER.warn("Noncritical error parsing error output: " + Utils.clip(httpBody, BODY_FRAGMENT_CHARS), e);
             }
 
             if (exception != null) {

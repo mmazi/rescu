@@ -46,7 +46,7 @@ class HttpTemplate {
 
     public final static String CHARSET_UTF_8 = "UTF-8";
 
-    private final Logger log = LoggerFactory.getLogger(HttpTemplate.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpTemplate.class);
 
     /**
      * Default request header fields
@@ -83,14 +83,14 @@ class HttpTemplate {
             proxy = Proxy.NO_PROXY;
         } else {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-            log.info("Using proxy {}", proxy);
+            LOGGER.info("Using proxy {}", proxy);
         }
     }
 
     HttpURLConnection send(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
-        log.debug("Executing {} request at {}", method, urlString);
-        log.trace("Request body = {}", requestBody);
-        log.trace("Request headers = {}", httpHeaders);
+        LOGGER.debug("Executing {} request at {}", method, urlString);
+        LOGGER.trace("Request body = {}", requestBody);
+        LOGGER.trace("Request headers = {}", httpHeaders);
 
         preconditionNotNull(urlString, "urlString cannot be null");
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
@@ -119,7 +119,7 @@ class HttpTemplate {
 
     InvocationResult receive(HttpURLConnection connection) throws IOException {
         int httpStatus = connection.getResponseCode();
-        log.debug("Request http status = {}", httpStatus);
+        LOGGER.debug("Request http status = {}", httpStatus);
 
         InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
             connection.getInputStream() : connection.getErrorStream();
@@ -127,7 +127,7 @@ class HttpTemplate {
         if (responseString != null && responseString.startsWith("\uFEFF")) {
             responseString = responseString.substring(1);
         }
-        log.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
+        LOGGER.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
 
         return new InvocationResult(responseString, httpStatus);
     }
@@ -157,7 +157,7 @@ class HttpTemplate {
 
         for (Map.Entry<String, String> entry : headerKeyValues.entrySet()) {
             connection.setRequestProperty(entry.getKey(), entry.getValue());
-            log.trace("Header request property: key='{}', value='{}'", entry.getKey(), entry.getValue());
+            LOGGER.trace("Header request property: key='{}', value='{}'", entry.getKey(), entry.getValue());
         }
 
         // Perform additional configuration for POST

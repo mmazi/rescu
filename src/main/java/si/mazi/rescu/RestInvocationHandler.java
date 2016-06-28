@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class RestInvocationHandler implements InvocationHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(RestInvocationHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestInvocationHandler.class);
 
     private final ResponseReaderResolver responseReaderResolver;
     private final RequestWriterResolver requestWriterResolver;
@@ -119,7 +119,7 @@ public class RestInvocationHandler implements InvocationHandler {
                     ((InvocationAware) e).setInvocation(invocation);
                     shouldWrap = false;
                 } catch (Exception ex) {
-                    log.warn("Failed to set invocation on the InvocationAware", ex);
+                    LOGGER.warn("Failed to set invocation on the InvocationAware", ex);
                 }
             }
             if (e instanceof HttpResponseAware && connection != null) {
@@ -127,7 +127,7 @@ public class RestInvocationHandler implements InvocationHandler {
                     ((HttpResponseAware) e).setResponseHeaders(connection.getHeaderFields());
                     shouldWrap = false;
                 } catch (Exception ex) {
-                    log.warn("Failed to set response headers on the HttpReponseAware", ex);
+                    LOGGER.warn("Failed to set response headers on the HttpReponseAware", ex);
                 }
             }
             if (shouldWrap) {
