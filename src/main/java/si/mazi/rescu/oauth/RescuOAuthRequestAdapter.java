@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Rafał Krupiński
@@ -20,6 +21,6 @@ public class RescuOAuthRequestAdapter extends HttpURLConnectionRequestAdapter {
 
     @Override
     public InputStream getMessagePayload() throws IOException {
-        return messagePayload != null ? new ByteArrayInputStream(messagePayload.getBytes()) : null;
+        return messagePayload != null ? new ByteArrayInputStream(messagePayload.getBytes(StandardCharsets.UTF_8)) : null;
     }
 }
