@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 RedDragCZ.
+ * Copyright 2016 mrmx.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,49 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
+ * Default implementation for JacksonObjectMapperFactory
  *
- * @author Martin ZIMA
+ * @author mrmx
  */
-public class JacksonMapperTest {
-    
-    private boolean testConfigured;
-    
-    public JacksonMapperTest() {
+public class DefaultJacksonObjectMapperFactory implements JacksonObjectMapperFactory {
+
+    /**
+     * Creates a configured instance of <code>ObjectMapper</code>.
+     *
+     * @return configured instance of <code>ObjectMapper</code>
+     */
+    @Override
+    public ObjectMapper createObjectMapper() {
+        ObjectMapper objectMapper = createInstance();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
+        return objectMapper;
     }
 
     /**
-     * Test of createObjectMapper method, of class JacksonMapper.
+     * Allows subclasing and overriding of ObjectMapper instances
+     *
+     * @return instance of <code>ObjectMapper</code>
      */
-    @Test
-    public void testCreateObjectMapper() {
-        ObjectMapper objectMapper = new JacksonMapper(null).getObjectMapper();
-        assert(objectMapper != null);
-        //TODO: test default config (i.e. not fail on unknown properties)
+    protected ObjectMapper createInstance() {
+        return new ObjectMapper();
     }
 
-    @Test
-    public void testConfigurator() throws IOException {
-        testConfigured = false;
-        
-        JacksonMapper jacksonMapper = new JacksonMapper(new JacksonConfigureListener() {
-            
-            public void configureObjectMapper(ObjectMapper objectMapper) {
-                testConfigured = true;
-            }
-        });
-        
-        JsonNode testRead = jacksonMapper.getObjectMapper().readTree("{}");
-        assert(testConfigured); //configurator ran
-    }
-    
 }

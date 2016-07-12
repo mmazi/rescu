@@ -31,6 +31,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
+import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 
 public class ClientConfig {
 
@@ -39,6 +40,7 @@ public class ClientConfig {
     private SSLSocketFactory sslSocketFactory = null;
     private HostnameVerifier hostnameVerifier = null;
     private JacksonConfigureListener jacksonConfigureListener = null;
+    private JacksonObjectMapperFactory jacksonObjectMapperFactory = null;
     private int httpConnTimeout;
     private int httpReadTimeout;
     private Integer proxyPort;
@@ -174,6 +176,22 @@ public class ClientConfig {
         this.jacksonConfigureListener = jacksonConfigureListener;
     }
 
+    /**
+     * @return the jacksonObjectMapperFactory
+     * @see JacksonObjectMapperFactory
+     */
+    public JacksonObjectMapperFactory getJacksonObjectMapperFactory() {
+        return jacksonObjectMapperFactory;
+    }
+
+    /**
+     * @param jacksonObjectMapperFactory the jacksonObjectMapperFactory to set
+     * @see JacksonObjectMapperFactory
+     */
+    public void setJacksonObjectMapperFactory(JacksonObjectMapperFactory jacksonObjectMapperFactory) {
+        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;
+    }
+    
     public OAuthConsumer getOAuthConsumer() {
         return oAuthConsumer;
     }

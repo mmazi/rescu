@@ -24,9 +24,7 @@
 
 package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Provides Jackson object mapping services.
@@ -36,23 +34,27 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class JacksonMapper {
 
     private final JacksonConfigureListener jacksonConfigureListener;
+    private final JacksonObjectMapperFactory jacksonObjectMapperFactory;
     private final ObjectMapper objectMapper;
-    
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this.jacksonConfigureListener = jacksonConfigureListener;
         
+    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
+        this(jacksonConfigureListener,null);
+    }
+    
+    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener,JacksonObjectMapperFactory jacksonObjectMapperFactory) {
+        this.jacksonConfigureListener = jacksonConfigureListener;                        
+        if(jacksonObjectMapperFactory == null) {
+           jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
+        }
+        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;        
         this.objectMapper = createObjectMapper();
         if (this.jacksonConfigureListener != null) {
             this.jacksonConfigureListener.configureObjectMapper(objectMapper);
         }
     }
     
-    static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
-        return objectMapper;
+    protected ObjectMapper createObjectMapper() {
+        return jacksonObjectMapperFactory.createObjectMapper();
     }
     
     public ObjectMapper getObjectMapper() {
