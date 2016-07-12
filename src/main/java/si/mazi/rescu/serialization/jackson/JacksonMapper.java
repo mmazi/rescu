@@ -24,9 +24,7 @@
 
 package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Provides Jackson object mapping services.
@@ -55,7 +53,7 @@ public class JacksonMapper {
         }
     }
     
-    public ObjectMapper createObjectMapper() {        
+    protected ObjectMapper createObjectMapper() {
         return jacksonObjectMapperFactory.createObjectMapper();
     }
     
