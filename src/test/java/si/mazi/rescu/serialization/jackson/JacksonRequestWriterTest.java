@@ -50,7 +50,7 @@ public class JacksonRequestWriterTest {
     @Test
     public void testWriteBody() {
         JacksonRequestWriter writer = new JacksonRequestWriter(
-                new JacksonMapper(null));
+                new JacksonMapper());
         
         DummyAccountInfo dummyAccountInfo = new DummyAccountInfo("mm", "USD", 3);
         ArrayList<Object> unannotatedParams = new ArrayList<Object>();

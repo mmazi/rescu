@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @author Martin Zima (reddragcz)
  */
+@Deprecated
 public interface JacksonConfigureListener {
     
     /**
