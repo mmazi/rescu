@@ -14,49 +14,43 @@
  * all copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,at si.mazi.rescu.serialization.jackson.JacksonMapper.createObjectMapper(JacksonMapper.java:48)
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides Jackson object mapping services.
- * 
+ *
  * @author Martin ZIMA
  */
 public class JacksonMapper {
 
-    private final JacksonConfigureListener jacksonConfigureListener;
     private final JacksonObjectMapperFactory jacksonObjectMapperFactory;
     private final ObjectMapper objectMapper;
-        
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this(jacksonConfigureListener,null);
+
+    public JacksonMapper() {
+        this(new DefaultJacksonObjectMapperFactory());
     }
-    
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener,JacksonObjectMapperFactory jacksonObjectMapperFactory) {
-        this.jacksonConfigureListener = jacksonConfigureListener;                        
+
+    public JacksonMapper(JacksonObjectMapperFactory jacksonObjectMapperFactory) {
         if(jacksonObjectMapperFactory == null) {
-           jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
+            throw new IllegalArgumentException("null JacksonObjectMapperFactory");
         }
-        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;        
+        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;
         this.objectMapper = createObjectMapper();
-        if (this.jacksonConfigureListener != null) {
-            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
     }
-    
+
     protected ObjectMapper createObjectMapper() {
         return jacksonObjectMapperFactory.createObjectMapper();
     }
-    
+
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }

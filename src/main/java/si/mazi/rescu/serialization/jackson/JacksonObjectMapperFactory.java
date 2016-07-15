@@ -39,4 +39,12 @@ public interface JacksonObjectMapperFactory {
      */
     ObjectMapper createObjectMapper();
 
+    /**
+     * Allow configuration after <code>ObjectMapper</code> creation. For example, the users
+     * might want to register modules with nonstandard (de)serializers now.
+     *
+     * @param objectMapper the ObjectMapper to configure.
+     */
+    void configureObjectMapper(ObjectMapper objectMapper);
+
 }

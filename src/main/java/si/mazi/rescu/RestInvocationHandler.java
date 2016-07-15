@@ -66,10 +66,7 @@ public class RestInvocationHandler implements InvocationHandler {
         this.config = config;
 
         //setup default readers/writers
-        JacksonMapper jacksonMapper = new JacksonMapper(
-                config.getJacksonConfigureListener(),
-                config.getJacksonObjectMapperFactory()
-        );
+        JacksonMapper jacksonMapper = new JacksonMapper(config.getJacksonObjectMapperFactory());
 
         requestWriterResolver = new RequestWriterResolver();
         /*requestWriterResolver.addWriter(null,
