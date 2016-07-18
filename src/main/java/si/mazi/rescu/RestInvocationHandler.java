@@ -92,7 +92,8 @@ public class RestInvocationHandler implements InvocationHandler {
                 this.config.getHttpConnTimeout(),
                 this.config.getHttpReadTimeout(),
                 this.config.getProxyHost(), this.config.getProxyPort(),
-                this.config.getSslSocketFactory(), this.config.getHostnameVerifier(), this.config.getOAuthConsumer());
+                this.config.getSslSocketFactory(), this.config.getHostnameVerifier(), this.config.getOAuthConsumer(),
+                this.config.getDigestHeader());
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
