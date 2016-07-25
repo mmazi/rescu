@@ -21,37 +21,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package si.mazi.rescu.serialization.jackson;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
 
 /**
- * Provides Jackson object mapping services.
  *
  * @author Martin ZIMA
  */
-public class JacksonMapper {
-
-    private final JacksonObjectMapperFactory jacksonObjectMapperFactory;
-    private final ObjectMapper objectMapper;
-
-    public JacksonMapper() {
-        this(new DefaultJacksonObjectMapperFactory());
+public class DefaultJacksonObjectMapperFactoryTest {
+    
+    private boolean testConfigured;
+    
+    public DefaultJacksonObjectMapperFactoryTest() {
     }
 
-    public JacksonMapper(JacksonObjectMapperFactory jacksonObjectMapperFactory) {
-        if(jacksonObjectMapperFactory == null) {
-            throw new IllegalArgumentException("null JacksonObjectMapperFactory");
-        }
-        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;
-        this.objectMapper = createObjectMapper();
+    /**
+     * Test of createObjectMapper method, of class JacksonMapper.
+     */
+    @Test
+    public void testCreateObjectMapper() {
+        ObjectMapper objectMapper = new DefaultJacksonObjectMapperFactory().createObjectMapper();
+        assert(objectMapper != null);
+        //TODO: test default config (i.e. not fail on unknown properties)
     }
 
-    protected ObjectMapper createObjectMapper() {
-        return jacksonObjectMapperFactory.createObjectMapper();
+    @Test
+    public void testConfigurator() throws IOException {
+        testConfigured = false;
+        
+        DefaultJacksonObjectMapperFactory factory = new DefaultJacksonObjectMapperFactory(){
+            public void configureObjectMapper(ObjectMapper objectMapper) {
+                testConfigured = true;
+            }
+        };
+        
+        JsonNode testRead = factory.createObjectMapper().readTree("{}");
+        assert(testConfigured); //configurator ran
     }
-
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
+    
 }
