@@ -226,20 +226,6 @@ public class RestInvocation implements Serializable {
         return str == null ? "" : str;
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    static String rtrim(String s, char charToTrim) {
-        int i = s.length() - 1;
-        for (; i >= 0 && s.charAt(i) == charToTrim; i--);
-        return s.substring(0, i + 1);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    static String ltrim(String s, char charToTrim) {
-        int i = 0;
-        for (; i < s.length() && s.charAt(i) == charToTrim; i++);
-        return s.substring(i);
-    }
-
     static String getPath(
             Map<Class<? extends Annotation>, Params> paramsMap, String methodPath) {
         return paramsMap.get(PathParam.class).applyToPath(methodPath);
