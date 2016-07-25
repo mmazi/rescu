@@ -24,40 +24,45 @@
 
 package si.mazi.rescu.serialization.jackson;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.testng.annotations.Test;
+
+import java.io.IOException;
 
 /**
- * Provides Jackson object mapping services.
- * 
+ *
  * @author Martin ZIMA
  */
-public class JacksonMapper {
+public class DefaultJacksonObjectMapperFactoryTest {
+    
+    private boolean testConfigured;
+    
+    public DefaultJacksonObjectMapperFactoryTest() {
+    }
 
-    private final JacksonConfigureListener jacksonConfigureListener;
-    private final JacksonObjectMapperFactory jacksonObjectMapperFactory;
-    private final ObjectMapper objectMapper;
+    /**
+     * Test of createObjectMapper method, of class JacksonMapper.
+     */
+    @Test
+    public void testCreateObjectMapper() {
+        ObjectMapper objectMapper = new DefaultJacksonObjectMapperFactory().createObjectMapper();
+        assert(objectMapper != null);
+        //TODO: test default config (i.e. not fail on unknown properties)
+    }
+
+    @Test
+    public void testConfigurator() throws IOException {
+        testConfigured = false;
         
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this(jacksonConfigureListener,null);
+        DefaultJacksonObjectMapperFactory factory = new DefaultJacksonObjectMapperFactory(){
+            public void configureObjectMapper(ObjectMapper objectMapper) {
+                testConfigured = true;
+            }
+        };
+        
+        JsonNode testRead = factory.createObjectMapper().readTree("{}");
+        assert(testConfigured); //configurator ran
     }
     
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener,JacksonObjectMapperFactory jacksonObjectMapperFactory) {
-        this.jacksonConfigureListener = jacksonConfigureListener;                        
-        if(jacksonObjectMapperFactory == null) {
-           jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
-        }
-        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;        
-        this.objectMapper = createObjectMapper();
-        if (this.jacksonConfigureListener != null) {
-            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
-    }
-    
-    protected ObjectMapper createObjectMapper() {
-        return jacksonObjectMapperFactory.createObjectMapper();
-    }
-    
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
-    }
 }

@@ -30,7 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * JSON converter of Jackson library.
  * 
  * @author Martin Zima (reddragcz)
+ * @deprecated Use {@link JacksonObjectMapperFactory} instead.
  */
+@Deprecated
 public interface JacksonConfigureListener {
     
     /**

@@ -42,10 +42,15 @@ public class DefaultJacksonObjectMapperFactory implements JacksonObjectMapperFac
     @Override
     public ObjectMapper createObjectMapper() {
         ObjectMapper objectMapper = createInstance();
+        configureObjectMapper(objectMapper);
+        return objectMapper;
+    }
+
+    @Override
+    public void configureObjectMapper(ObjectMapper objectMapper) {
+        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
-        return objectMapper;
     }
 
     /**

@@ -21,11 +21,13 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.serialization.PlainTextResponseReader;
 import si.mazi.rescu.serialization.ToStringRequestWriter;
-import si.mazi.rescu.serialization.jackson.JacksonMapper;
+import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
+import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
 import si.mazi.rescu.serialization.jackson.JacksonResponseReader;
 
@@ -66,10 +68,11 @@ public class RestInvocationHandler implements InvocationHandler {
         this.config = config;
 
         //setup default readers/writers
-        JacksonMapper jacksonMapper = new JacksonMapper(
-                config.getJacksonConfigureListener(),
-                config.getJacksonObjectMapperFactory()
-        );
+        JacksonObjectMapperFactory mapperFactory = config.getJacksonObjectMapperFactory();
+        if (mapperFactory == null) {
+            mapperFactory = new DefaultJacksonObjectMapperFactory();
+        }
+        ObjectMapper mapper = mapperFactory.createObjectMapper();
 
         requestWriterResolver = new RequestWriterResolver();
         /*requestWriterResolver.addWriter(null,
@@ -77,13 +80,13 @@ public class RestInvocationHandler implements InvocationHandler {
         requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED,
                 new FormUrlEncodedRequestWriter());
         requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,
-                new JacksonRequestWriter(jacksonMapper));
+                new JacksonRequestWriter(mapper));
         requestWriterResolver.addWriter(MediaType.TEXT_PLAIN,
                 new ToStringRequestWriter());
 
         responseReaderResolver = new ResponseReaderResolver();
         responseReaderResolver.addReader(MediaType.APPLICATION_JSON,
-                new JacksonResponseReader(jacksonMapper, this.config.isIgnoreHttpErrorCodes()));
+                new JacksonResponseReader(mapper, this.config.isIgnoreHttpErrorCodes()));
         responseReaderResolver.addReader(MediaType.TEXT_PLAIN,
                 new PlainTextResponseReader(this.config.isIgnoreHttpErrorCodes()));
 

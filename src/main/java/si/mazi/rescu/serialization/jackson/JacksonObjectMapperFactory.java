@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author mrmx
  */
-public interface JacksonObjectMapperFactory {
+public interface JacksonObjectMapperFactory extends JacksonConfigureListener {
 
     /**
      * Creates a configured instance of <code>ObjectMapper</code>.
@@ -38,5 +38,13 @@ public interface JacksonObjectMapperFactory {
      * @return configured instance of <code>ObjectMapper</code>
      */
     ObjectMapper createObjectMapper();
+
+    /**
+     * Allow configuration after <code>ObjectMapper</code> creation. For example, the users
+     * might want to register modules with nonstandard (de)serializers now.
+     *
+     * @param objectMapper the ObjectMapper to configure.
+     */
+    void configureObjectMapper(ObjectMapper objectMapper);
 
 }
