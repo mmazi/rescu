@@ -22,6 +22,7 @@
  */
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import oauth.signpost.OAuthConsumer;
 import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
@@ -160,27 +161,28 @@ public class ClientConfig {
     }
 
     /**
-     * @return the jacksonConfigureListener
-     * @see JacksonConfigureListener
+     * @deprecated use {@link #getJacksonObjectMapperFactory()} instead.
      */
     @Deprecated
     public JacksonConfigureListener getJacksonConfigureListener() {
-        if (jacksonObjectMapperFactory == null) {
-            return null;
-        }
-        checkJacksonConfigureListenerSupport();
-        return ((DefaultJacksonObjectMapperFactory) jacksonObjectMapperFactory).getJacksonConfigureListener();
+        return getJacksonObjectMapperFactory();
     }
 
     /**
-     * @param jacksonConfigureListener the jacksonConfigureListener to set
+     * @deprecated use {@link #setJacksonObjectMapperFactory(JacksonObjectMapperFactory)} instead.
      * @see JacksonConfigureListener
      */
     @Deprecated
-    public void setJacksonConfigureListener(JacksonConfigureListener jacksonConfigureListener) {
-        getJacksonObjectMapperFactory();//Lazy build
-        checkJacksonConfigureListenerSupport();        
-        ((DefaultJacksonObjectMapperFactory) jacksonObjectMapperFactory).setJacksonConfigureListener(jacksonConfigureListener);
+    public void setJacksonConfigureListener(final JacksonConfigureListener jacksonConfigureListener) {
+        if (jacksonObjectMapperFactory != null) {
+            throw new IllegalStateException("Can't have both JacksonObjectMapperFactory and JacksonConfigureListener set. Please use only JacksonObjectMapperFactory.");
+        }
+        jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory() {
+            @Override public void configureObjectMapper(ObjectMapper objectMapper) {
+                super.configureObjectMapper(objectMapper);
+                jacksonConfigureListener.configureObjectMapper(objectMapper);
+            }
+        };
     }
 
     /**
@@ -188,10 +190,6 @@ public class ClientConfig {
      * @see JacksonObjectMapperFactory
      */
     public JacksonObjectMapperFactory getJacksonObjectMapperFactory() {
-        if (jacksonObjectMapperFactory == null) {
-            //Lazy build
-            jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
-        }
         return jacksonObjectMapperFactory;
     }
 
@@ -211,13 +209,4 @@ public class ClientConfig {
         this.oAuthConsumer = oAuthConsumer;
     }
 
-    /**
-     * Checks if jacksonObjectMapperFactory impl inheritance in order to keep
-     * JacksonConfigureListener backwards support.
-     */
-    private void checkJacksonConfigureListenerSupport() {
-        if (!DefaultJacksonObjectMapperFactory.class.isAssignableFrom(jacksonObjectMapperFactory.getClass())) {
-            throw new IllegalArgumentException("Must extend DefaultJacksonObjectMapperFactory in order to use this method");
-        }
-    }
 }

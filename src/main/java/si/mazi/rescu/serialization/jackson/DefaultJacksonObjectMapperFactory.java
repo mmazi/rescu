@@ -34,27 +34,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class DefaultJacksonObjectMapperFactory implements JacksonObjectMapperFactory {
 
-    private JacksonConfigureListener jacksonConfigureListener;
-
-
-    /**
-     * Allows backwards compatibility with <code>JacksonConfigureListener</code>
-     *
-     * @param jacksonConfigureListener
-     */
-    public void setJacksonConfigureListener(JacksonConfigureListener jacksonConfigureListener) {
-        this.jacksonConfigureListener = jacksonConfigureListener;
-    }
-    
-    /**
-     * Gets the <code>JacksonConfigureListener</code>
-     * 
-     * @return <code>JacksonConfigureListener</code>
-     */
-    public JacksonConfigureListener getJacksonConfigureListener() {
-        return jacksonConfigureListener;
-    }   
-    
     /**
      * Creates a configured instance of <code>ObjectMapper</code>.
      *
@@ -72,11 +51,6 @@ public class DefaultJacksonObjectMapperFactory implements JacksonObjectMapperFac
         objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
-        //backwards compatibility:backwards compatibility
-        if (jacksonConfigureListener != null) {
-            //Extra configuration:
-            jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
     }
 
     /**

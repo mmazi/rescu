@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author mrmx
  */
-public interface JacksonObjectMapperFactory {
+public interface JacksonObjectMapperFactory extends JacksonConfigureListener {
 
     /**
      * Creates a configured instance of <code>ObjectMapper</code>.

@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.serialization.PlainTextResponseReader;
 import si.mazi.rescu.serialization.ToStringRequestWriter;
+import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
+import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
 import si.mazi.rescu.serialization.jackson.JacksonResponseReader;
 
@@ -66,7 +68,11 @@ public class RestInvocationHandler implements InvocationHandler {
         this.config = config;
 
         //setup default readers/writers
-        ObjectMapper mapper = config.getJacksonObjectMapperFactory().createObjectMapper();
+        JacksonObjectMapperFactory mapperFactory = config.getJacksonObjectMapperFactory();
+        if (mapperFactory == null) {
+            mapperFactory = new DefaultJacksonObjectMapperFactory();
+        }
+        ObjectMapper mapper = mapperFactory.createObjectMapper();
 
         requestWriterResolver = new RequestWriterResolver();
         /*requestWriterResolver.addWriter(null,
