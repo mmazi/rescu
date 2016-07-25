@@ -88,6 +88,15 @@ public class RestInvocationHandlerTest {
     }
 
     @Test
+    public void testEmptyServicePath() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService2.class, new ClientConfig(), null, 200, "https://example.com/api/v2");
+        ExampleService2 proxy = RestProxyFactory.createProxy(ExampleService2.class, testHandler);
+
+        proxy.buy("john");
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/v2/buy?user=john", HttpMethod.GET, "https://example.com/api/v2", "/buy", "buy", "user=john", null);
+    }
+
+    @Test
     public void testHttpBasicAuth() throws Exception {
 
         ClientConfig clientConfig = new ClientConfig();

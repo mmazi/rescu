@@ -34,7 +34,12 @@ class TestRestInvocationHandler extends RestInvocationHandler {
 
     public TestRestInvocationHandler(Class<?> restInterface, ClientConfig config,
                                      String responseBody, int responseStatusCode) {
-        super(restInterface, "https://example.com", config);
+        this(restInterface, config, responseBody, responseStatusCode, "https://example.com");
+    }
+
+    public TestRestInvocationHandler(Class<?> restInterface, ClientConfig config,
+                                     String responseBody, int responseStatusCode, String baseUrl) {
+        super(restInterface, baseUrl, config);
 
         this.responseStatusCode = responseStatusCode;
         this.responseBody = responseBody;
