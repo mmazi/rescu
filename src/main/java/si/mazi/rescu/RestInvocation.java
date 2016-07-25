@@ -116,10 +116,9 @@ public class RestInvocation implements Serializable {
         String methodPath = getPath(paramsMap, methodMetadata.getMethodPathTemplate());
         
         String path = getPath(paramsMap, methodMetadata.getIntfacePath());
-        path = appendIfNotEmpty(path, methodPath, "/");
-        
+
         String queryString = paramsMap.get(QueryParam.class).asQueryString();
-        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
+        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, methodPath, queryString);
 
         RestInvocation invocation = new RestInvocation(
                 paramsMap,
@@ -175,23 +174,52 @@ public class RestInvocation implements Serializable {
         return null;
     }
 
-    static String getInvocationUrl(String baseUrl, String path, String queryString) {
-        // TODO make more robust in terms of path separator ('/') handling
-        // (Use UriBuilder?)
+    static String getInvocationUrl(String baseUrl, String apiPath, String methodPath, String queryString) {
+        apiPath = appendPath(apiPath, methodPath);
         String completeUrl = baseUrl;
-        completeUrl = appendIfNotEmpty(completeUrl, path, "/");
+        completeUrl = appendPath(completeUrl, apiPath);
         completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
         return completeUrl;
     }
 
     static String appendIfNotEmpty(String url, String next, String separator) {
-        if (url.length() > 0 && next != null && next.length() > 0) {
+        if (next != null && next.length() > 0) {
             if (!url.endsWith(separator) && !next.startsWith(separator)) {
                 url += separator;
             }
             url += next;
         }
         return url;
+    }
+
+    static String appendPath(String first, String second) {
+        String firstTrimmed = first == null ? null : rtrim(first, '/');
+        String secondTrimmed = second == null ? null : ltrim(second, '/');
+        if (isNullOrEmpty(secondTrimmed)) {
+            return firstTrimmed + '/';
+        }
+        if (isNullOrEmpty(firstTrimmed)) {
+            return '/' + secondTrimmed;
+        }
+        return firstTrimmed + '/' + secondTrimmed;
+    }
+
+    static boolean isNullOrEmpty(String str) {
+        return str == null || str.length() == 0;
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    static String rtrim(String s, char charToTrim) {
+        int i = s.length() - 1;
+        for (; i >= 0 && s.charAt(i) == charToTrim; i--);
+        return s.substring(0, i + 1);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    static String ltrim(String s, char charToTrim) {
+        int i = 0;
+        for (; i < s.length() && s.charAt(i) == charToTrim; i++);
+        return s.substring(i);
     }
 
     static String getPath(
