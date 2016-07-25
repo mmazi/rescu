@@ -21,42 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Provides Jackson object mapping services.
- * 
+ *
  * @author Martin ZIMA
  */
 public class JacksonMapper {
 
-    private final JacksonConfigureListener jacksonConfigureListener;
     private final JacksonObjectMapperFactory jacksonObjectMapperFactory;
     private final ObjectMapper objectMapper;
-        
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this(jacksonConfigureListener,null);
+
+    public JacksonMapper() {
+        this(new DefaultJacksonObjectMapperFactory());
     }
-    
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener,JacksonObjectMapperFactory jacksonObjectMapperFactory) {
-        this.jacksonConfigureListener = jacksonConfigureListener;                        
+
+    public JacksonMapper(JacksonObjectMapperFactory jacksonObjectMapperFactory) {
         if(jacksonObjectMapperFactory == null) {
-           jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
+            throw new IllegalArgumentException("null JacksonObjectMapperFactory");
         }
-        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;        
+        this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;
         this.objectMapper = createObjectMapper();
-        if (this.jacksonConfigureListener != null) {
-            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
     }
-    
+
     protected ObjectMapper createObjectMapper() {
         return jacksonObjectMapperFactory.createObjectMapper();
     }
-    
+
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }

@@ -46,7 +46,7 @@ public class JacksonMapperTest {
      */
     @Test
     public void testCreateObjectMapper() {
-        ObjectMapper objectMapper = new JacksonMapper(null).getObjectMapper();
+        ObjectMapper objectMapper = new JacksonMapper().getObjectMapper();
         assert(objectMapper != null);
         //TODO: test default config (i.e. not fail on unknown properties)
     }
@@ -55,7 +55,7 @@ public class JacksonMapperTest {
     public void testConfigurator() throws IOException {
         testConfigured = false;
         
-        JacksonMapper jacksonMapper = new JacksonMapper(new JacksonConfigureListener() {
+        JacksonMapper jacksonMapper = new JacksonMapper(new DefaultJacksonObjectMapperFactory(){
             
             public void configureObjectMapper(ObjectMapper objectMapper) {
                 testConfigured = true;

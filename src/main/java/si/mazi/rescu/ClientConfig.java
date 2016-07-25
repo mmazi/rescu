@@ -20,26 +20,25 @@
  * SOFTWARE.
  *
  */
-
 package si.mazi.rescu;
 
 import oauth.signpost.OAuthConsumer;
+import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
+import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
-import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 
 public class ClientConfig {
 
     private final Map<Class<? extends Annotation>, Params> defaultParamsMap = new HashMap<>();
-    
+
     private SSLSocketFactory sslSocketFactory = null;
     private HostnameVerifier hostnameVerifier = null;
-    private JacksonConfigureListener jacksonConfigureListener = null;
     private JacksonObjectMapperFactory jacksonObjectMapperFactory = null;
     private int httpConnTimeout;
     private int httpReadTimeout;
@@ -57,7 +56,7 @@ public class ClientConfig {
         ignoreHttpErrorCodes = Config.isIgnoreHttpErrorCodes();
         wrapUnexpectedExceptions = Config.isWrapUnexpectedExceptions();
     }
-    
+
     public ClientConfig addDefaultParam(Class<? extends Annotation> paramType, String paramName, Object paramValue) {
         Params params = defaultParamsMap.get(paramType);
         if (params == null) {
@@ -71,11 +70,11 @@ public class ClientConfig {
     public Map<Class<? extends Annotation>, Params> getDefaultParamsMap() {
         return defaultParamsMap;
     }
-    
+
     /**
      * Gets the override SSL socket factory for HttpsURLConnection
      * used if HTTPS protocol is requested.
-     * 
+     *
      * @return the sslSocketFactory
      */
     public SSLSocketFactory getSslSocketFactory() {
@@ -85,7 +84,7 @@ public class ClientConfig {
     /**
      * Sets the override SSL socket factory for HttpsURLConnection
      * used if HTTPS protocol is requested.
-     * 
+     *
      * @param sslSocketFactory the sslSocketFactory to set
      */
     public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
@@ -95,7 +94,7 @@ public class ClientConfig {
     /**
      * Gets the override hostname verifier for HttpsURLConnection
      * used if HTTPS protocol is requested.
-     * 
+     *
      * @return the hostnameVerifier
      */
     public HostnameVerifier getHostnameVerifier() {
@@ -105,7 +104,7 @@ public class ClientConfig {
     /**
      * Sets the override hostname for HttpsURLConnection
      * used if HTTPS protocol is requested.
-     * 
+     *
      * @param hostnameVerifier the hostnameVerifier to set
      */
     public void setHostnameVerifier(HostnameVerifier hostnameVerifier) {
@@ -164,16 +163,24 @@ public class ClientConfig {
      * @return the jacksonConfigureListener
      * @see JacksonConfigureListener
      */
+    @Deprecated
     public JacksonConfigureListener getJacksonConfigureListener() {
-        return jacksonConfigureListener;
+        if (jacksonObjectMapperFactory == null) {
+            return null;
+        }
+        checkJacksonConfigureListenerSupport();
+        return ((DefaultJacksonObjectMapperFactory) jacksonObjectMapperFactory).getJacksonConfigureListener();
     }
 
     /**
      * @param jacksonConfigureListener the jacksonConfigureListener to set
      * @see JacksonConfigureListener
      */
+    @Deprecated
     public void setJacksonConfigureListener(JacksonConfigureListener jacksonConfigureListener) {
-        this.jacksonConfigureListener = jacksonConfigureListener;
+        getJacksonObjectMapperFactory();//Lazy build
+        checkJacksonConfigureListenerSupport();        
+        ((DefaultJacksonObjectMapperFactory) jacksonObjectMapperFactory).setJacksonConfigureListener(jacksonConfigureListener);
     }
 
     /**
@@ -181,6 +188,10 @@ public class ClientConfig {
      * @see JacksonObjectMapperFactory
      */
     public JacksonObjectMapperFactory getJacksonObjectMapperFactory() {
+        if (jacksonObjectMapperFactory == null) {
+            //Lazy build
+            jacksonObjectMapperFactory = new DefaultJacksonObjectMapperFactory();
+        }
         return jacksonObjectMapperFactory;
     }
 
@@ -191,12 +202,22 @@ public class ClientConfig {
     public void setJacksonObjectMapperFactory(JacksonObjectMapperFactory jacksonObjectMapperFactory) {
         this.jacksonObjectMapperFactory = jacksonObjectMapperFactory;
     }
-    
+
     public OAuthConsumer getOAuthConsumer() {
         return oAuthConsumer;
     }
 
     public void setOAuthConsumer(OAuthConsumer oAuthConsumer) {
         this.oAuthConsumer = oAuthConsumer;
+    }
+
+    /**
+     * Checks if jacksonObjectMapperFactory impl inheritance in order to keep
+     * JacksonConfigureListener backwards support.
+     */
+    private void checkJacksonConfigureListenerSupport() {
+        if (!DefaultJacksonObjectMapperFactory.class.isAssignableFrom(jacksonObjectMapperFactory.getClass())) {
+            throw new IllegalArgumentException("Must extend DefaultJacksonObjectMapperFactory in order to use this method");
+        }
     }
 }
