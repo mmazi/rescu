@@ -53,7 +53,7 @@ public class InvocationUrlTest {
 
     @Test
     public void shouldHandleSlashesWhenAppendingEmptyPath1() throws Exception {
-        assertThat(appendPath("one", "")).isEqualTo("one/");
+        assertThat(appendPath("one", "")).isEqualTo("one");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class InvocationUrlTest {
 
     @Test
     public void shouldHandleSlashesWhenAppendingToEmptyPath1() throws Exception {
-        assertThat(appendPath("", "two")).isEqualTo("/two");
+        assertThat(appendPath("", "two")).isEqualTo("two");
     }
 
     @Test
@@ -93,31 +93,23 @@ public class InvocationUrlTest {
 
     @Test
     public void shouldWorkWithNormalStuff() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "/apiPath/", "method", "param=value");
+        String url = getInvocationUrl("http://www.example.com", "/apiPath/", "param=value");
 
         assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/apiPath/method?param=value");
+        assertThat(url).isEqualTo("http://www.example.com/apiPath/?param=value");
     }
 
     @Test
     public void shouldComposeNonEmptyElementsWithFullSlashes() throws Exception {
-        String url = getInvocationUrl("http://www.example.com/", "/apiPath/", "/method/", "param=value");
+        String url = getInvocationUrl("http://www.example.com/", "/apiPath/", "param=value");
 
         assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/apiPath/method/?param=value");
+        assertThat(url).isEqualTo("http://www.example.com/apiPath/?param=value");
     }
 
     @Test
     public void shouldComposeEmptyElementsWithFullSlashes() throws Exception {
-        String url = getInvocationUrl("http://www.example.com/", "/", "/method/", "param=value");
-
-        assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/method/?param=value");
-    }
-
-    @Test
-    public void shouldComposeAllEmptyElementsWithFullSlashes() throws Exception {
-        String url = getInvocationUrl("http://www.example.com/", "/", "/", "param=value");
+        String url = getInvocationUrl("http://www.example.com/", "/", "param=value");
 
         assertUrl(url);
         assertThat(url).isEqualTo("http://www.example.com/?param=value");
@@ -125,50 +117,34 @@ public class InvocationUrlTest {
 
     @Test
     public void shouldComposeNonEmptyElementsWithNoSlashes() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "apiPath", "method", "param=value");
+        String url = getInvocationUrl("http://www.example.com", "apiPath", "param=value");
 
         assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/apiPath/method?param=value");
+        assertThat(url).isEqualTo("http://www.example.com/apiPath?param=value");
     }
 
     @Test
-    public void shouldComposeEmptyElementsWithNoSlashes() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "", "", "param=value");
+    public void shouldSupportEmptyPathWithNoSlash() throws Exception {
+        String url = getInvocationUrl("http://www.example.com", "", "param=value");
+
+        assertUrl(url);
+        assertThat(url).isEqualTo("http://www.example.com?param=value");
+    }
+
+    @Test
+    public void shouldSupportEmptyPathAsSlash() throws Exception {
+        String url = getInvocationUrl("http://www.example.com", "/", "param=value");
 
         assertUrl(url);
         assertThat(url).isEqualTo("http://www.example.com/?param=value");
     }
 
     @Test
-    public void shouldSupportEmptyPathWithNoSlash() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "", "method", "param=value");
-
-        assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/method?param=value");
-    }
-
-    @Test
-    public void shouldSupportEmptyPathAsSlash() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "/", "method", "param=value");
-
-        assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/method?param=value");
-    }
-
-    @Test
-    public void shouldTrimDoubleSlashWithEmptyPath() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "/", "method", "param=value");
-
-        assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/method?param=value");
-    }
-
-    @Test
     public void shouldKeepFinalSlash() throws Exception {
-        String url = getInvocationUrl("http://www.example.com", "/", "method/", "param=value");
+        String url = getInvocationUrl("http://www.example.com/", "", "param=value");
 
         assertUrl(url);
-        assertThat(url).isEqualTo("http://www.example.com/method/?param=value");
+        assertThat(url).isEqualTo("http://www.example.com/?param=value");
     }
 
     private void assertUrl(String url) {

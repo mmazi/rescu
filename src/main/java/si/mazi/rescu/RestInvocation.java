@@ -32,6 +32,8 @@ import javax.ws.rs.QueryParam;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This holds name-value mapping for various types of params used in REST (QueryParam, PathParam, FormParam, HeaderParam).
@@ -45,6 +47,9 @@ public class RestInvocation implements Serializable {
 
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
+
+    private static final Pattern STARTS_WITH_SLASHES = Pattern.compile("(/*)(.*)");
+    private static final Pattern ENDS_WITH_SLASHES = Pattern.compile("(.*?)(/*)");
 
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams;
@@ -116,9 +121,10 @@ public class RestInvocation implements Serializable {
         String methodPath = getPath(paramsMap, methodMetadata.getMethodPathTemplate());
         
         String path = getPath(paramsMap, methodMetadata.getIntfacePath());
+        path = appendPath(path, methodPath);
 
         String queryString = paramsMap.get(QueryParam.class).asQueryString();
-        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, methodPath, queryString);
+        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
 
         RestInvocation invocation = new RestInvocation(
                 paramsMap,
@@ -174,8 +180,7 @@ public class RestInvocation implements Serializable {
         return null;
     }
 
-    static String getInvocationUrl(String baseUrl, String apiPath, String methodPath, String queryString) {
-        apiPath = appendPath(apiPath, methodPath);
+    static String getInvocationUrl(String baseUrl, String apiPath, String queryString) {
         String completeUrl = baseUrl;
         completeUrl = appendPath(completeUrl, apiPath);
         completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
@@ -183,7 +188,7 @@ public class RestInvocation implements Serializable {
     }
 
     static String appendIfNotEmpty(String url, String next, String separator) {
-        if (next != null && next.length() > 0) {
+        if (next != null && isNonEmpty(next)) {
             if (!url.endsWith(separator) && !next.startsWith(separator)) {
                 url += separator;
             }
@@ -193,19 +198,32 @@ public class RestInvocation implements Serializable {
     }
 
     static String appendPath(String first, String second) {
-        String firstTrimmed = first == null ? null : rtrim(first, '/');
-        String secondTrimmed = second == null ? null : ltrim(second, '/');
-        if (isNullOrEmpty(secondTrimmed)) {
-            return firstTrimmed + '/';
+        first = nullToEmpty(first);
+        second = nullToEmpty(second);
+
+        Matcher firstParsed = ENDS_WITH_SLASHES.matcher(first);
+        if (!firstParsed.matches()) {
+            throw new RuntimeException("Incorrect regular expression ENDS_WITH_SLASHES, fix the bug in rescu.");
         }
-        if (isNullOrEmpty(firstTrimmed)) {
-            return '/' + secondTrimmed;
+        Matcher secondParsed = STARTS_WITH_SLASHES.matcher(second);
+        if (!secondParsed.matches()) {
+            throw new RuntimeException("Incorrect regular expression STARTS_WITH_SLASHES, fix the bug in rescu.");
         }
-        return firstTrimmed + '/' + secondTrimmed;
+
+        String firstTrimmed = firstParsed.group(1);
+        String secondTrimmed = secondParsed.group(2);
+
+        // Use middle slash when any of the original strings contained adjacent slash, or both trimmed strings were nonempty.
+        boolean midSlash = isNonEmpty(firstParsed.group(2)) || isNonEmpty(secondParsed.group(1)) || (isNonEmpty(firstTrimmed) && isNonEmpty(secondTrimmed));
+        return firstTrimmed + (midSlash ? "/" : "") + secondTrimmed;
     }
 
-    static boolean isNullOrEmpty(String str) {
-        return str == null || str.length() == 0;
+    private static boolean isNonEmpty(String str) {
+        return str.length() > 0;
+    }
+
+    private static String nullToEmpty(String str) {
+        return str == null ? "" : str;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
