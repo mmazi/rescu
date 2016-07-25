@@ -27,7 +27,7 @@
 
     <groupId>com.github.mmazi</groupId>
     <artifactId>rescu</artifactId>
-    <version>1.8.2-SNAPSHOT</version>
+    <version>1.9.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ResCU</name>
