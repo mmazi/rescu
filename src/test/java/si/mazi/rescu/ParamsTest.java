@@ -28,6 +28,8 @@ import org.testng.annotations.Test;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 
 public class ParamsTest  {
 
@@ -36,5 +38,11 @@ public class ParamsTest  {
         Assert.assertEquals(
                 Params.of().toString(Arrays.asList(BigDecimal.ONE, new BigDecimal("0.00000043"))),
                 "1,0.00000043");
+    }
+
+    @Test
+    public void shouldSensiblySerializeIterableWithNullElement() throws Exception {
+        HashMap<String, String> expected = new HashMap<String, String>() {{ put("key", "null"); }};
+        Assert.assertEquals(Params.of("key", Collections.<String>singletonList(null)).asHttpHeaders(), expected);
     }
 }

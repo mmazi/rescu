@@ -178,7 +178,7 @@ public final class Params implements Serializable {
                 return iso8601datetime.format(paramValue);
             }
         }
-        return paramValue.toString();
+        return String.valueOf(paramValue);
     }
 
     String iterableToString(Iterable iterable) {
