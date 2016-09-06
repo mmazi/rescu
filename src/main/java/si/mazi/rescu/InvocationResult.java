@@ -26,12 +26,14 @@ package si.mazi.rescu;
 
 import si.mazi.rescu.utils.HttpUtils;
 
+import java.io.Serializable;
+
 /**
  * Result of a REST service invocation.
  * 
  * @author Martin ZIMA
  */
-public class InvocationResult {
+public class InvocationResult implements Serializable {
     
     private final String httpBody;
     private final int statusCode;
