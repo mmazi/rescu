@@ -36,7 +36,7 @@ import java.lang.reflect.Type;
  * Returns the response body as a string.
  */
 public class PlainTextResponseReader extends ResponseReader {
-    private static final Logger log = LoggerFactory.getLogger(PlainTextResponseReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlainTextResponseReader.class);
 
     public PlainTextResponseReader(boolean ignoreHttpErrorCodes) {
         super(ignoreHttpErrorCodes);
@@ -68,13 +68,13 @@ public class PlainTextResponseReader extends ResponseReader {
             try {
                 // fallback to no-parameter constructor
                 constructedException = exceptionType.newInstance();
-                log.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
+                LOGGER.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
             } catch (IllegalAccessException | InstantiationException e) {
                 reflectiveOperationException = e;
             }
 
             if (reflectiveOperationException != null) {
-                log.warn("Cannot construct a {}. Throwing a RuntimeException instead. Main cause: {}", exceptionType, reflectiveOperationException.toString());
+                LOGGER.warn("Cannot construct a {}. Throwing a RuntimeException instead. Main cause: {}", exceptionType, reflectiveOperationException.toString());
                 throw new RuntimeException(message);
             }
         }

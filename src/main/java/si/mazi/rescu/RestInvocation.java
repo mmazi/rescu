@@ -43,7 +43,7 @@ import java.util.regex.Pattern;
  * @author Matija Mazi
  */
 public class RestInvocation implements Serializable {
-    private static final Logger log = LoggerFactory.getLogger(RestInvocation.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestInvocation.class);
 
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
@@ -149,7 +149,7 @@ public class RestInvocation implements Serializable {
 
         // Do some validation.
         if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
-            log.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended? Method: {}", methodMetadata.getHttpMethod(), methodMetadata.getMethodName());
+            LOGGER.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended? Method: {}", methodMetadata.getHttpMethod(), methodMetadata.getMethodName());
         }
 
         return invocation;

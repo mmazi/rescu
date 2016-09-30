@@ -41,7 +41,7 @@ import java.util.Map;
  */
 public class RestMethodMetadata implements Serializable {
 
-    private static final Logger log = LoggerFactory.getLogger(RestMethodMetadata.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestMethodMetadata.class);
 
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS
@@ -108,7 +108,7 @@ public class RestMethodMetadata implements Serializable {
 
         // Do some validation.
         if (consumes != null && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(httpMethod)) {
-            log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended? Method: {}", httpMethod, reqContentType, method);
+            LOGGER.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended? Method: {}", httpMethod, reqContentType, method);
         }
 
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
