@@ -39,7 +39,7 @@ import java.lang.reflect.Type;
 public abstract class ResponseReader {
 
     private static final Logger log = LoggerFactory.getLogger(ResponseReader.class);
-    public static final int BODY_FRAGMENT_CHARS = 100;
+    public static final int BODY_FRAGMENT_CHARS = 200;
 
     private final boolean ignoreHttpErrorCodes;
 
@@ -85,6 +85,9 @@ public abstract class ResponseReader {
             }
 
             if (exception != null) {
+                if (exception.getMessage() == null) {
+                    log.info("Constructed an exception with no message. Response body was: {}", Utils.clip(httpBody, BODY_FRAGMENT_CHARS));
+                }
                 if (exception instanceof HttpStatusException) {
                     ((HttpStatusException) exception).setHttpStatusCode(invocationResult.getStatusCode());
                 }
