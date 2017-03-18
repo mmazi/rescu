@@ -35,7 +35,6 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -218,7 +217,7 @@ class HttpTemplate {
                 inputStream = new GZIPInputStream(inputStream);
             }
             final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding)
-                    : new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                    : new InputStreamReader(inputStream, CHARSET_UTF_8);
             reader = new BufferedReader(in);
             StringBuilder sb = new StringBuilder();
             for (String line; (line = reader.readLine()) != null; ) {
