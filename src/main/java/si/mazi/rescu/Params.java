@@ -23,9 +23,11 @@ package si.mazi.rescu;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,9 +50,20 @@ import java.util.regex.Pattern;
  *
  * @author Matija Mazi
  */
-public class Params implements Serializable {
+public final class Params implements Serializable {
 
-    private final Map<String, Object> data = new LinkedHashMap<String, Object>();
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
+    private final Map<String, Object> data = new LinkedHashMap<>();
+    private final DateFormat iso8601datetime;
+    private final DateFormat iso8601date;
+
+    {
+        iso8601datetime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        iso8601datetime.setTimeZone(UTC);
+        iso8601date = new SimpleDateFormat("yyyy-MM-dd");
+        iso8601date.setTimeZone(UTC);
+    }
 
     /**
      * private Constructor to prevent instantiation
@@ -85,18 +98,27 @@ public class Params implements Serializable {
 
     private String toQueryString(boolean encode) {
         StringBuilder b = new StringBuilder();
-        for (String param : data.keySet()) {
-            if (isParamSet(param)) {
-                if (b.length() > 0) {
-                    b.append('&');
+        for (String paramName : data.keySet()) {
+            if (isParamSet(paramName)) {
+                Object originalValue = getParamValue(paramName);
+                boolean createArrayParameters = originalValue instanceof Iterable && paramName.endsWith("[]");
+                @SuppressWarnings("unchecked")
+                Iterable<Object> paramValues = createArrayParameters
+                        ? (Iterable<Object>)originalValue
+                        : Collections.singleton(originalValue);
+                for (Object paramValue : paramValues) {
+                    if (b.length() > 0) {
+                        b.append('&');
+                    }
+                    String paramValueAsString = toString(paramValue);
+                    b.append(paramName).append('=').append(urlEncode(paramValueAsString, encode));
                 }
-                b.append(param).append('=').append(encode(getParamValueAsString(param), encode));
             }
         }
         return b.toString();
     }
 
-    private String encode(String data, boolean encode) {
+    private String urlEncode(String data, boolean encode) {
         try {
             return encode ? URLEncoder.encode(data, "UTF-8") : data;
         } catch (UnsupportedEncodingException e) {
@@ -122,13 +144,13 @@ public class Params implements Serializable {
                 throw new IllegalArgumentException("The value of '" + paramName + "' path parameter was not specified.");
             }
             path = Pattern.compile("\\{" + paramName + "(:.+?)?\\}").matcher(
-                path).replaceAll(Matcher.quoteReplacement(getParamValueAsString(paramName)));
+                path).replaceAll(Matcher.quoteReplacement(urlEncode(getParamValueAsString(paramName), true)));
         }
         return path;
     }
 
     public Map<String, String> asHttpHeaders() {
-        Map<String, String> stringMap = new LinkedHashMap<String, String>();
+        Map<String, String> stringMap = new LinkedHashMap<>();
         for (String key : data.keySet()) {
             if (isParamSet(key)) {
                 stringMap.put(key, getParamValueAsString(key));
@@ -139,7 +161,35 @@ public class Params implements Serializable {
 
     private String getParamValueAsString(String key) {
         Object paramValue = getParamValue(key);
-        return paramValue.toString();
+        return toString(paramValue);
+    }
+
+    String toString(Object paramValue) {
+        if (paramValue instanceof BigDecimal) {
+            return ((BigDecimal) paramValue).toPlainString();
+        } else if (paramValue instanceof Iterable) {
+            return iterableToString((Iterable) paramValue);
+        } else if (paramValue instanceof java.sql.Date) {
+            synchronized (iso8601date) {
+                return iso8601date.format(paramValue);
+            }
+        } else if (paramValue instanceof Date) {
+            synchronized (iso8601datetime) {
+                return iso8601datetime.format(paramValue);
+            }
+        }
+        return String.valueOf(paramValue);
+    }
+
+    String iterableToString(Iterable iterable) {
+        final StringBuilder sb = new StringBuilder();
+        for (Object o : iterable) {
+            if (sb.length() > 0) {
+                sb.append(",");
+            }
+            sb.append(toString(o));
+        }
+        return sb.toString();
     }
 
     public void digestAll(RestInvocation invocationParams) {
@@ -157,6 +207,14 @@ public class Params implements Serializable {
 
     public Object getParamValue(String paramName) {
         return data.get(paramName);
+    }
+
+    public void replaceValueFactories(){
+        for (Map.Entry<String, Object> e : data.entrySet()) {
+            Object value = e.getValue();
+            if(value instanceof SynchronizedValueFactory)
+                e.setValue(((SynchronizedValueFactory) value).createValue());
+        }
     }
 
     @Override

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,7 +30,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * JSON converter of Jackson library.
  * 
  * @author Martin Zima (reddragcz)
+ * @deprecated Use {@link JacksonObjectMapperFactory} instead.
  */
+@Deprecated
 public interface JacksonConfigureListener {
     
     /**
@@ -39,7 +41,7 @@ public interface JacksonConfigureListener {
      * For example, the users might want to register modules with
      * nonstandard (de)serializers now.
      * 
-     * @param objectMapper
+     * @param objectMapper  the ObjectMapper to configure.
      */
     void configureObjectMapper(ObjectMapper objectMapper);
 }

@@ -22,19 +22,20 @@
  */
 package si.mazi.rescu;
 
+import oauth.signpost.OAuthConsumer;
+import oauth.signpost.exception.OAuthException;
+import oauth.signpost.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import si.mazi.rescu.utils.AssertUtil;
+import si.mazi.rescu.oauth.RescuOAuthRequestAdapter;
 import si.mazi.rescu.utils.HttpUtils;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -51,31 +52,27 @@ class HttpTemplate {
     /**
      * Default request header fields
      */
-    private final Map<String, String> defaultHttpHeaders = new HashMap<String, String>();
+    private final Map<String, String> defaultHttpHeaders = new HashMap<>();
     private final int connTimeout;
     private final int readTimeout;
     private final Proxy proxy;
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
+    private final OAuthConsumer oAuthConsumer;
 
 
-    /**
-     * Constructor
-     */
-    public HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
-            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
-      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier);
+    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
+      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
     }
     
-    /**
-     * Constructor
-     */
-    public HttpTemplate(int connTimeout,int readTimeout, String proxyHost, Integer proxyPort,
-            SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier) {
+    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
+                 SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
         this.sslSocketFactory = sslSocketFactory;
         this.hostnameVerifier = hostnameVerifier;
+        this.oAuthConsumer = oAuthConsumer;
 
         defaultHttpHeaders.put("Accept-Charset", CHARSET_UTF_8);
         // defaultHttpHeaders.put("Content-Type", "application/x-www-form-urlencoded");
@@ -91,46 +88,48 @@ class HttpTemplate {
         }
     }
 
-    /**
-     * Requests JSON via an HTTP POST
-     *
-     * @param urlString   A string representation of a URL
-     * @param requestBody The contents of the request body
-     * @param httpHeaders Any custom header values (application/json is provided automatically)
-     * @param method      Http method (usually GET or POST)
-     * @param contentType the mime type to be set as the value of the Content-Type header
-     */
-    public InvocationResult executeRequest(String urlString, String requestBody,
-            Map<String, String> httpHeaders, HttpMethod method, String contentType)
-            throws IOException {
-
+    HttpURLConnection send(String urlString, String requestBody, Map<String, String> httpHeaders, HttpMethod method) throws IOException {
         log.debug("Executing {} request at {}", method, urlString);
         log.trace("Request body = {}", requestBody);
         log.trace("Request headers = {}", httpHeaders);
 
-        AssertUtil.notNull(urlString, "urlString cannot be null");
-        AssertUtil.notNull(httpHeaders, "httpHeaders should not be null");
+        preconditionNotNull(urlString, "urlString cannot be null");
+        preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
-        if (contentType != null) {
-            httpHeaders.put("Content-Type", contentType);
-        }
-
-        int contentLength = requestBody == null ? 0 : requestBody.length();
+        int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
         HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
+
+        if (oAuthConsumer != null) {
+            HttpRequest request = new RescuOAuthRequestAdapter(connection, requestBody);
+
+            try {
+                oAuthConsumer.sign(request);
+            } catch (OAuthException e) {
+                throw new RuntimeException("OAuth error", e);
+            }
+        }
 
         if (contentLength > 0) {
             // Write the request body
-            connection.getOutputStream().write(requestBody.getBytes(CHARSET_UTF_8));
+            OutputStream out = connection.getOutputStream();
+            out.write(requestBody.getBytes(CHARSET_UTF_8));
+            out.flush();
         }
+        return connection;
+    }
 
+    InvocationResult receive(HttpURLConnection connection) throws IOException {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
 
         InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
             connection.getInputStream() : connection.getErrorStream();
         String responseString = readInputStreamAsEncodedString(inputStream, connection);
+        if (responseString != null && responseString.startsWith("\uFEFF")) {
+            responseString = responseString.substring(1);
+        }
         log.trace("Http call returned {}; response body:\n{}", httpStatus, responseString);
-        
+
         return new InvocationResult(responseString, httpStatus);
     }
 
@@ -146,20 +145,17 @@ class HttpTemplate {
      */
     private HttpURLConnection configureURLConnection(HttpMethod method, String urlString, Map<String, String> httpHeaders, int contentLength) throws IOException {
 
-        AssertUtil.notNull(method, "method cannot be null");
-        AssertUtil.notNull(urlString, "urlString cannot be null");
-        AssertUtil.notNull(httpHeaders, "httpHeaders cannot be null");
+        preconditionNotNull(method, "method cannot be null");
+        preconditionNotNull(urlString, "urlString cannot be null");
+        preconditionNotNull(httpHeaders, "httpHeaders cannot be null");
 
         HttpURLConnection connection = getHttpURLConnection(urlString);
         connection.setRequestMethod(method.name());
 
-        // Copy default HTTP headers
-        Map<String, String> headerKeyValues = new HashMap<String, String>(defaultHttpHeaders);
+        Map<String, String> headerKeyValues = new HashMap<>(defaultHttpHeaders);
 
-        // Merge defaultHttpHeaders with httpHeaders
         headerKeyValues.putAll(httpHeaders);
 
-        // Add HTTP headers to the request
         for (Map.Entry<String, String> entry : headerKeyValues.entrySet()) {
             connection.setRequestProperty(entry.getKey(), entry.getValue());
             log.trace("Header request property: key='{}', value='{}'", entry.getKey(), entry.getValue());
@@ -169,10 +165,8 @@ class HttpTemplate {
         if (contentLength > 0) {
             connection.setDoOutput(true);
             connection.setDoInput(true);
-
-            // Add content length to header
-            connection.setRequestProperty("Content-Length", Integer.toString(contentLength));
         }
+        connection.setRequestProperty("Content-Length", Integer.toString(contentLength));
 
         return connection;
     }
@@ -223,7 +217,8 @@ class HttpTemplate {
             if (izGzipped(connection)) {
                 inputStream = new GZIPInputStream(inputStream);
             }
-            final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding) : new InputStreamReader(inputStream);
+            final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding)
+                    : new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             reader = new BufferedReader(in);
             StringBuilder sb = new StringBuilder();
             for (String line; (line = reader.readLine()) != null; ) {
@@ -262,6 +257,12 @@ class HttpTemplate {
             }
         }
         return charset;
+    }
+
+    private static void preconditionNotNull(Object what, String message) {
+        if (what == null) {
+            throw new NullPointerException(message);
+        }
     }
 
 }

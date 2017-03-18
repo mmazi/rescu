@@ -21,12 +21,13 @@
  */
 package si.mazi.rescu;
 
-import si.mazi.rescu.utils.Base64;
+import net.iharder.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -40,7 +41,7 @@ import java.security.NoSuchAlgorithmException;
  * request body (which is composed of @FormParams).
  * </p>
  */
-public class HmacPostBodyDigest implements ParamsDigest {
+public final class HmacPostBodyDigest implements ParamsDigest {
 
     private static final String HMAC_SHA_512 = "HmacSHA512";
     private final Mac mac;
@@ -53,7 +54,7 @@ public class HmacPostBodyDigest implements ParamsDigest {
     private HmacPostBodyDigest(String secretKeyBase64) throws IllegalArgumentException {
 
         try {
-            SecretKey secretKey = new SecretKeySpec(Base64.decode(secretKeyBase64.getBytes()), HMAC_SHA_512);
+            SecretKey secretKey = new SecretKeySpec(Base64.decode(secretKeyBase64.getBytes(StandardCharsets.UTF_8)), HMAC_SHA_512);
             mac = Mac.getInstance(HMAC_SHA_512);
             mac.init(secretKey);
         } catch (IOException e) {
@@ -72,7 +73,7 @@ public class HmacPostBodyDigest implements ParamsDigest {
 
     public String digestParams(RestInvocation restInvocation) {
 
-        mac.update(restInvocation.getRequestBody().getBytes());
+        mac.update(restInvocation.getRequestBody().getBytes(StandardCharsets.UTF_8));
         return Base64.encodeBytes(mac.doFinal()).trim();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Matija Mazi
+ * Copyright (C) 2015 Matija Mazi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -18,35 +18,13 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package si.mazi.rescu.jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+package si.mazi.rescu;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-/**
- * @author Matija Mazi <br>
- */
-public class SqlTimeDeserializer extends JsonDeserializer<Date> {
-
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    @Override
-    public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-
-        String str = jp.getValueAsString();
-        try {
-            return dateFormat.parse(str);
-        } catch (ParseException e) {
-            throw new InvalidFormatException("Error parsing as date", str, Date.class);
-        }
+public class MessageException extends RuntimeException {
+    public MessageException(String message) {
+        super(message);
     }
 }

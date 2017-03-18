@@ -21,26 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.testng.Assert;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 import si.mazi.rescu.*;
 import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 
+import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static com.googlecode.catchexception.CatchException.catchException;
+import static com.googlecode.catchexception.CatchException.caughtException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
  * @author RedDragCZ
  */
 public class JacksonResponseReaderTest {
+
+    private static final Logger log = LoggerFactory.getLogger(JacksonResponseReaderTest.class);
 
     public JacksonResponseReaderTest() {
     }
@@ -50,70 +56,60 @@ public class JacksonResponseReaderTest {
      */
     @Test
     public void testRead() throws Exception {
-        JacksonResponseReader reader = new JacksonResponseReader(
-                new JacksonMapper(null), true);
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), true);
 
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/example-ticker.json"), 200);
 
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
-        assertEquals(DummyTicker.class, result.getClass());
-        assertEquals(34567L, ((DummyTicker)result).getVolume());
+        assertThat(result).isInstanceOf(DummyTicker.class);
+        assertThat(((DummyTicker) result).getVolume()).isEqualTo(34567L);
     }
     
     @Test
     public void testExceptionRead() throws Exception {
-        JacksonResponseReader reader = new JacksonResponseReader(
-                new JacksonMapper(null), false);
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), false);
 
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        try {
-            Object result = reader.read(invocationResult,
+        catchException(reader).read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        ExampleException.class, null, null, null, null));
-            
-            Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (ExampleException e) {
-            Assert.assertEquals(e.getError(), "Order not found");
-            Assert.assertEquals(e.getToken(), "unknown_error");
-            Assert.assertEquals(e.getResult(), "error");
-            Assert.assertEquals(e.getHttpStatusCode(), 500);
-        } catch (Exception e) {
-            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
-        }
+                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null));
+
+        ExampleException e = caughtException();
+        assertThat(e).isInstanceOf(ExampleException.class);
+        assertThat(e.getError()).isEqualTo("Order not found");
+        assertThat(e.getToken()).isEqualTo("unknown_error");
+        assertThat(e.getResult()).isEqualTo("error");
+        assertThat(e.getHttpStatusCode()).isEqualTo(500);
     }
 
     @Test
     public void testIOExceptionRead() throws Exception {
-        JacksonResponseReader reader = new JacksonResponseReader(new JacksonMapper(null), false);
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), false);
 
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        try {
-            Object result = reader.read(invocationResult,
+        catchException(reader).read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        null, null, null, null, null));
+                        null, null, MediaType.APPLICATION_JSON, null, null, null));
 
-            Assert.assertTrue(false, "An exception should have been thrown.");
-        } catch (HttpStatusIOException e) {
-            Assert.assertTrue(e.getHttpBody().contains("Order not found"));
-            Assert.assertTrue(e.getHttpBody().contains("unknown_error"));
-            Assert.assertEquals(e.getHttpStatusCode(), 500);
-        } catch (Exception e) {
-            Assert.assertTrue(false, "Wrong exception type thrown: " + e);
-        }
+        HttpStatusIOException e = caughtException();
+        assertThat(e).isInstanceOf(HttpStatusIOException.class);
+
+        assertThat(e.getHttpBody()).contains("Order not found");
+        assertThat(e.getHttpBody()).contains("unknown_error");
+        assertThat(e.getHttpStatusCode()).isEqualTo(500);
     }
 
     @Test
     public void testGenericRead() throws Exception {
-        JacksonResponseReader reader = new JacksonResponseReader(
-                new JacksonMapper(null), true);
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), true);
 
         Type resType = new TypeReference<GenericResult<DummyTicker[]>>() {}.getType();
         
@@ -122,22 +118,22 @@ public class JacksonResponseReaderTest {
 
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(resType, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
-        
-        assertEquals(GenericResult.class, result.getClass());
-        assertNotNull(((GenericResult)result).getResult());
-        assertEquals(DummyTicker[].class, ((GenericResult)result).getResult().getClass());
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
+
+        assertThat(result).isInstanceOf(GenericResult.class);
+        assertThat(((GenericResult)result).getResult())
+                .isNotNull()
+                .isInstanceOf(DummyTicker[].class);
         
         DummyTicker[] tickers = (DummyTicker[])((GenericResult)result).getResult();
-        assertEquals(2, tickers.length);
-        assertEquals(12345, tickers[0].getLast());
-        assertEquals(8910, tickers[1].getVolume());
+        assertThat(tickers).hasSize(2);
+        assertThat(tickers[0].getLast()).isEqualTo(12345);
+        assertThat(tickers[1].getVolume()).isEqualTo(8910);
     }
 
     @Test
     public void testTrailingGarbageIgnored() throws Exception{
-        JacksonResponseReader reader = new JacksonResponseReader(
-                new JacksonMapper(null), true);
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), true);
         
         InvocationResult invocationResult = new InvocationResult(
                 "{\"status\":\"success\",\"data\":{\"bought\":0,\"remaining\":\"1\",\"order_id\":\"372351\",\"funds\":{\"usd\":\"0.00000000\",\"eur\":\"0\",\"btc\":\"0.01010606\",\"ltc\":\"0\",\"nmc\":\"0\",\"trc\":\"0\",\"dvc\":\"0\",\"ppc\":\"0\",\"ftc\":\"0\",\"wdc\":\"0\",\"dgc\":\"0\",\"xpm\":\"0\",\"ctb\":\"0\",\"ctl\":\"0\",\"esb\":\"0\",\"esl\":\"0\",\"ggb\":\"0\",\"amb\":\"0\",\"utc\":\"0\"}}}<html><head><title>500 Internal Server Error</title></head><body><h1>Internal Server Error</h1><p><i>Failed to connect to ::1: Network is unreachable</i></p><p></p></body></html>\n",
@@ -145,12 +141,26 @@ public class JacksonResponseReaderTest {
         
         Object result = reader.read(invocationResult,
                 new RestMethodMetadata(Map.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, null, null, null, null));
+                        RuntimeException.class, null, MediaType.APPLICATION_JSON, null, null, null));
         
         assert(Map.class.isAssignableFrom(result.getClass()));
         Map map = (Map)result;
         
         final Object bought = ((Map) map.get("data")).get("bought");
-        Assert.assertEquals(bought.toString(), "0");
+        assertThat(bought.toString()).isEqualTo("0");
+    }
+
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    @Test
+    public void testExceptionPropertyConflict() throws Exception {
+        JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), true);
+
+        final RuntimeException ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
+        assertThat(ex.getMessage()).contains("msg");
+        log.debug("ex = " + ex);
+    }
+
+    private ObjectMapper createObjectMapper() {
+        return new DefaultJacksonObjectMapperFactory().createObjectMapper();
     }
 }

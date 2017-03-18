@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 RedDragCZ.
+ * Copyright 2016 mrmx.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,38 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
- * Provides Jackson object mapping services.
- * 
- * @author Martin ZIMA
+ * Default implementation for JacksonObjectMapperFactory
+ *
+ * @author mrmx
  */
-public class JacksonMapper {
+public class DefaultJacksonObjectMapperFactory implements JacksonObjectMapperFactory {
 
-    private final JacksonConfigureListener jacksonConfigureListener;
-    private final ObjectMapper objectMapper;
-    
-    public JacksonMapper(JacksonConfigureListener jacksonConfigureListener) {
-        this.jacksonConfigureListener = jacksonConfigureListener;
-        
-        this.objectMapper = createObjectMapper();
-        if (this.jacksonConfigureListener != null) {
-            this.jacksonConfigureListener.configureObjectMapper(objectMapper);
-        }
+    /**
+     * Creates a configured instance of <code>ObjectMapper</code>.
+     *
+     * @return configured instance of <code>ObjectMapper</code>
+     */
+    @Override
+    public ObjectMapper createObjectMapper() {
+        ObjectMapper objectMapper = createInstance();
+        configureObjectMapper(objectMapper);
+        return objectMapper;
     }
-    
-    static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public void configureObjectMapper(ObjectMapper objectMapper) {
+        objectMapper.setAnnotationIntrospector(new IgnoreThrowableProperties());
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objectMapper;
+        objectMapper.configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
     }
-    
-    public ObjectMapper getObjectMapper() {
-        return objectMapper;
+
+    /**
+     * Allows subclasing and overriding of ObjectMapper instances
+     *
+     * @return instance of <code>ObjectMapper</code>
+     */
+    protected ObjectMapper createInstance() {
+        return new ObjectMapper();
     }
+
 }

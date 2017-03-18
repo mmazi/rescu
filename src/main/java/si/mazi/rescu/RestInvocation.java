@@ -22,6 +22,9 @@
 package si.mazi.rescu;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
@@ -29,6 +32,8 @@ import javax.ws.rs.QueryParam;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This holds name-value mapping for various types of params used in REST (QueryParam, PathParam, FormParam, HeaderParam).
@@ -38,9 +43,13 @@ import java.util.*;
  * @author Matija Mazi
  */
 public class RestInvocation implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(RestInvocation.class);
 
     @SuppressWarnings("unchecked")
     protected static final List<Class<? extends Annotation>> PARAM_ANNOTATION_CLASSES = Arrays.asList(QueryParam.class, PathParam.class, FormParam.class, HeaderParam.class);
+
+    private static final Pattern STARTS_WITH_SLASHES = Pattern.compile("(/*)(.*)");
+    private static final Pattern ENDS_WITH_SLASHES = Pattern.compile("(.*?)(/*)");
 
     private final Map<Class<? extends Annotation>, Params> paramsMap;
     private final List<Object> unannanotatedParams;
@@ -49,7 +58,9 @@ public class RestInvocation implements Serializable {
     private final String invocationUrl;
     private final String queryString;
     private final String path;
-    private final RequestWriterResolver requestWriterResolver;
+    private final RequestWriter requestWriter;
+
+    private Map<String, String> allHttpHeaders;
 
     public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
             List<Object> unannanotatedParams,
@@ -66,25 +77,17 @@ public class RestInvocation implements Serializable {
         this.invocationUrl = invocationUrl;
         this.queryString = queryString;
         this.path = path;
-        this.requestWriterResolver = requestWriterResolver;
+        this.requestWriter = requestWriterResolver == null ? null : requestWriterResolver.resolveWriter(this.getMethodMetadata());
     }
 
     static RestInvocation create(RequestWriterResolver requestWriterResolver,
             RestMethodMetadata methodMetadata,
             Object[] args,
             Map<Class<? extends Annotation>, Params> defaultParamsMap) {
-        
-        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
-        
-        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
-            paramsMap.put(annotationClass, Params.of());
-        }
-        
-        if (defaultParamsMap != null) {
-            paramsMap.putAll(defaultParamsMap);
-        }
 
-        List<Object> unannanotatedParams = new ArrayList<Object>();
+        HashMap<Class<? extends Annotation>, Params> paramsMap = createEmptyParamsMap(defaultParamsMap);
+
+        List<Object> unannanotatedParams = new ArrayList<>();
         
         Annotation[][] paramAnnotations = methodMetadata.getParameterAnnotations();
         for (int i = 0; i < paramAnnotations.length; i++) {
@@ -111,11 +114,15 @@ public class RestInvocation implements Serializable {
             }
         }
 
+        for (Params params : paramsMap.values()) {
+            params.replaceValueFactories();
+        }
+
         String methodPath = getPath(paramsMap, methodMetadata.getMethodPathTemplate());
         
         String path = getPath(paramsMap, methodMetadata.getIntfacePath());
-        path = appendIfNotEmpty(path, methodPath, "/");
-        
+        path = appendPath(path, methodPath);
+
         String queryString = paramsMap.get(QueryParam.class).asQueryString();
         String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
 
@@ -128,19 +135,37 @@ public class RestInvocation implements Serializable {
                 queryString,
                 path,
                 requestWriterResolver);
-        
+
         for (int i = 0; i < unannanotatedParams.size(); i++) {
             Object param = unannanotatedParams.get(i);
             if (param instanceof ParamsDigest) {
                 unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(invocation));
             }
         }
-        
+
         for (Params params : paramsMap.values()) {
             params.digestAll(invocation);
         }
-        
+
+        // Do some validation.
+        if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
+            log.warn("{} request will contain a body. While this is allowed, the body should be ignored by the server. Is this intended? Method: {}", methodMetadata.getHttpMethod(), methodMetadata.getMethodName());
+        }
+
         return invocation;
+    }
+
+    public static HashMap<Class<? extends Annotation>, Params> createEmptyParamsMap(Map<Class<? extends Annotation>, Params> defaultParamsMap) {
+        HashMap<Class<? extends Annotation>, Params> paramsMap = new HashMap<>();
+
+        for (Class<? extends Annotation> annotationClass : PARAM_ANNOTATION_CLASSES) {
+            paramsMap.put(annotationClass, Params.of());
+        }
+
+        if (defaultParamsMap != null) {
+            paramsMap.putAll(defaultParamsMap);
+        }
+        return paramsMap;
     }
 
     private static String getParamName(Annotation queryParam) {
@@ -155,17 +180,15 @@ public class RestInvocation implements Serializable {
         return null;
     }
 
-    static String getInvocationUrl(String baseUrl, String path, String queryString) {
-        // TODO make more robust in terms of path separator ('/') handling
-        // (Use UriBuilder?)
+    static String getInvocationUrl(String baseUrl, String apiPath, String queryString) {
         String completeUrl = baseUrl;
-        completeUrl = appendIfNotEmpty(completeUrl, path, "/");
+        completeUrl = appendPath(completeUrl, apiPath);
         completeUrl = appendIfNotEmpty(completeUrl, queryString, "?");
         return completeUrl;
     }
 
     static String appendIfNotEmpty(String url, String next, String separator) {
-        if (url.length() > 0 && next != null && next.length() > 0) {
+        if (next != null && isNonEmpty(next)) {
             if (!url.endsWith(separator) && !next.startsWith(separator)) {
                 url += separator;
             }
@@ -174,23 +197,70 @@ public class RestInvocation implements Serializable {
         return url;
     }
 
+    static String appendPath(String first, String second) {
+        first = nullToEmpty(first);
+        second = nullToEmpty(second);
+
+        Matcher firstParsed = ENDS_WITH_SLASHES.matcher(first);
+        if (!firstParsed.matches()) {
+            throw new RuntimeException("Incorrect regular expression ENDS_WITH_SLASHES, fix the bug in rescu.");
+        }
+        Matcher secondParsed = STARTS_WITH_SLASHES.matcher(second);
+        if (!secondParsed.matches()) {
+            throw new RuntimeException("Incorrect regular expression STARTS_WITH_SLASHES, fix the bug in rescu.");
+        }
+
+        String firstTrimmed = firstParsed.group(1);
+        String secondTrimmed = secondParsed.group(2);
+
+        // Use middle slash when any of the original strings contained adjacent slash, or both trimmed strings were nonempty.
+        boolean midSlash = isNonEmpty(firstParsed.group(2)) || isNonEmpty(secondParsed.group(1)) || (isNonEmpty(firstTrimmed) && isNonEmpty(secondTrimmed));
+        return firstTrimmed + (midSlash ? "/" : "") + secondTrimmed;
+    }
+
+    private static boolean isNonEmpty(String str) {
+        return str.length() > 0;
+    }
+
+    private static String nullToEmpty(String str) {
+        return str == null ? "" : str;
+    }
+
     static String getPath(
             Map<Class<? extends Annotation>, Params> paramsMap, String methodPath) {
         return paramsMap.get(PathParam.class).applyToPath(methodPath);
     }
 
     public String getRequestBody() {
-        return requestWriterResolver
-                .resolveWriter(this)
-                .writeBody(this);
+        return requestWriter.writeBody(this);
     }
-    
-    public Map<String, String> getHttpHeaders() {
+
+    /**
+     * @deprecated this method will be made package local very soon.
+     * Use {@link #getHttpHeadersFromParams()} instead.
+     * @return
+     */
+    @Deprecated
+    public Map<String, String> getAllHttpHeaders() {
+        if (allHttpHeaders == null) {
+            allHttpHeaders = new HashMap<>();
+            allHttpHeaders.putAll(getHttpHeadersFromParams());
+            if (methodMetadata.getReqContentType() != null) {
+                allHttpHeaders.put("Content-Type", methodMetadata.getReqContentType());
+            }
+            if (methodMetadata.getResContentType() != null) {
+                allHttpHeaders.put("Accept", methodMetadata.getResContentType());
+            }
+        }
+        return allHttpHeaders;
+    }
+
+    public Map<String, String> getHttpHeadersFromParams() {
         return getParamsMap().get(HeaderParam.class).asHttpHeaders();
     }
 
-    public String getContentType() {
-        return methodMetadata.getContentType();
+    public String getReqContentType() {
+        return methodMetadata.getReqContentType();
     }
 
     /**

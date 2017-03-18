@@ -22,6 +22,7 @@
 package si.mazi.rescu;
 
 import com.google.common.collect.ImmutableMap;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -36,18 +37,24 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.HttpURLConnection;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static org.testng.Assert.assertEquals;
+import static com.googlecode.catchexception.CatchException.catchException;
+import static com.googlecode.catchexception.CatchException.caughtException;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Matija Mazi
  */
+@SuppressWarnings("Duplicates")
 public class RestInvocationHandlerTest {
 
     private static final Logger log = LoggerFactory.getLogger(RestInvocationHandlerTest.class);
@@ -56,16 +63,16 @@ public class RestInvocationHandlerTest {
     public void testInvocationData() throws Exception {
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.add(PathParam.class, "version", 2);
-        clientConfig.add(HeaderParam.class, "testHeader", "lorem");
+        clientConfig.addDefaultParam(PathParam.class, "version", 2);
+        clientConfig.addDefaultParam(HeaderParam.class, "testHeader", "lorem");
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.buy("john", "secret", new BigDecimal("3.14"), new BigDecimal("10.00"));
         assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14&price=10.00", FormParam.class, "user", "john");
-        assertEquals("lorem", testHandler.invocation.getHttpHeaders().get("testHeader"));
-        
+        assertThat(testHandler.getInvocation().getAllHttpHeaders().get("testHeader")).isEqualTo("lorem");
+
         BigDecimal amount = new BigDecimal("3.14");
         proxy.buy("john", "secret", amount, null);
         assertRequestData(testHandler, Order.class, null, "https://example.com/api/2/buy/", HttpMethod.POST, "https://example.com", "api/2/buy/", "buy/", "", "user=john&password=secret&amount=3.14", FormParam.class, "amount", amount);
@@ -77,21 +84,30 @@ public class RestInvocationHandlerTest {
         assertRequestData(testHandler, DummyTicker.class, null, "https://example.com/api/2/btc_usd/ticker", HttpMethod.GET, "https://example.com", "api/2/btc_usd/ticker", "btc_usd/ticker", "", "", PathParam.class, "ident", "btc");
 
         proxy.getInfo(1000L, 2000L);
-        assertRequestData(testHandler, Object.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo", FormParam.class, "method", "getInfo");
+        assertRequestData(testHandler, DummyTicker.class, null, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", "method=getInfo", FormParam.class, "method", "getInfo");
+    }
+
+    @Test
+    public void testEmptyServicePath() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService2.class, new ClientConfig(), null, 200, "https://example.com/api/v2");
+        ExampleService2 proxy = RestProxyFactory.createProxy(ExampleService2.class, testHandler);
+
+        proxy.buy("john");
+        assertRequestData(testHandler, Order.class, null, "https://example.com/api/v2/buy?user=john", HttpMethod.GET, "https://example.com/api/v2", "/buy", "buy", "user=john", null);
     }
 
     @Test
     public void testHttpBasicAuth() throws Exception {
 
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.add(PathParam.class, "version", 0);
+        clientConfig.addDefaultParam(PathParam.class, "version", 0);
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         BasicAuthCredentials credentials = new BasicAuthCredentials("Aladdin", "open sesame");
         proxy.testBasicAuth(credentials, 23);
-        HashMap<String, String> authHeaders = new HashMap<String, String>();
+        HashMap<String, String> authHeaders = new HashMap<>();
         authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
         assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/0/auth?param=23", HttpMethod.GET, "https://example.com", "api/0/auth", "auth", "param=23", null);
     }
@@ -99,15 +115,16 @@ public class RestInvocationHandlerTest {
     @Test
     public void testHttpBasicAuthWithConfig() throws Exception {
         ClientConfig config = ClientConfigUtil.addBasicAuthCredentials(new ClientConfig(), "Aladdin", "open sesame");
-        config.add(PathParam.class, "version", 2);
+        config.addDefaultParam(PathParam.class, "version", 2);
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config, null, 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.getInfo(2L, 5L);
-        HashMap<String, String> authHeaders = new HashMap<String, String>();
-        authHeaders.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
-        assertRequestData(testHandler, Object.class, authHeaders, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+        assertRequestData(testHandler, DummyTicker.class, headers, "https://example.com/api/2", HttpMethod.POST, "https://example.com", "api/2", "", "", null);
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody) {
@@ -115,26 +132,26 @@ public class RestInvocationHandlerTest {
     }
 
     private void assertRequestData(TestRestInvocationHandler testHandler, Class resultClass, Map<String, String> headers, String url, HttpMethod httpMethod, String baseUrl, String path, String methodPath, String queryString, String postBody, Class<? extends Annotation> paramAnn, String paramName, Object expectedParamValue) {
-        Assert.assertEquals(testHandler.invocation.getInvocationUrl(), url);
-        Assert.assertEquals(testHandler.invocation.getMethodPath(), methodPath);
-        Assert.assertEquals(testHandler.invocation.getBaseUrl(), baseUrl);
-        Assert.assertEquals(testHandler.invocation.getQueryString(), queryString);
-        Assert.assertEquals(testHandler.invocation.getPath(), path);
-        Assert.assertEquals(testHandler.invocation.getMethodMetadata().getHttpMethod(), httpMethod);
-        Assert.assertEquals(testHandler.invocation.getMethodMetadata().getReturnType(), resultClass);
+        Assert.assertEquals(testHandler.getInvocation().getInvocationUrl(), url);
+        Assert.assertEquals(testHandler.getInvocation().getMethodPath(), methodPath);
+        Assert.assertEquals(testHandler.getInvocation().getBaseUrl(), baseUrl);
+        Assert.assertEquals(testHandler.getInvocation().getQueryString(), queryString);
+        Assert.assertEquals(testHandler.getInvocation().getPath(), path);
+        Assert.assertEquals(testHandler.getInvocation().getMethodMetadata().getHttpMethod(), httpMethod);
+        Assert.assertEquals(testHandler.getInvocation().getMethodMetadata().getReturnType(), resultClass);
 
         if (paramAnn != null) {
             Map<Pair<Class<? extends Annotation>, String>, Object> arguments = ImmutableMap.<Pair<Class<? extends Annotation>, String>, Object>builder().put(new Pair<Class<? extends Annotation>, String>(paramAnn, paramName), expectedParamValue).build();
             for (Pair<Class<? extends Annotation>, String> param : arguments.keySet()) {
-                Object argValue = testHandler.invocation.getParamValue(param.first(), param.second());
+                Object argValue = testHandler.getInvocation().getParamValue(param.first(), param.second());
                 Assert.assertEquals(argValue, arguments.get(param), "Wrong param value for " + param + ": " + argValue);
             }
         }
         if (postBody != null) {
-            Assert.assertEquals(testHandler.invocation.getRequestBody(), postBody);
+            Assert.assertEquals(testHandler.getInvocation().getRequestBody(), postBody);
         }
         if (headers != null) {
-            Assert.assertEquals(headers, testHandler.invocation.getHttpHeaders());
+            Assert.assertEquals(headers, testHandler.getInvocation().getAllHttpHeaders());
         }
     }
 
@@ -145,7 +162,7 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         proxy.testJsonBody(new DummyAccountInfo("mm", "USD", 3));
-        Assert.assertEquals(testHandler.invocation.getRequestBody(), "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
+        Assert.assertEquals(testHandler.getInvocation().getRequestBody(), "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
     }
 
     @Test
@@ -169,12 +186,11 @@ public class RestInvocationHandlerTest {
         };
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
-        try {
-            proxy.io();
-            assert false : "Expected an IOException.";
-        } catch (IOException expected) {
-            log.info("Got expected exception: " + expected);
-        }
+        catchException(proxy).io();
+
+        assertThat(caughtException())
+                .isInstanceOf(IOException.class)
+                .hasMessage("A simulated I/O problem.");
     }
     
     @Test
@@ -186,8 +202,8 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         DummyTicker ticker = proxy.getTicker("BTC", "USD");
-        assertEquals(12345, ticker.getLast());
-        assertEquals(34567, ticker.getVolume());
+        assertThat(ticker.getLast()).isEqualTo(12345L);
+        assertThat(ticker.getVolume()).isEqualTo(34567L);
     }
     
     @Test
@@ -199,30 +215,296 @@ public class RestInvocationHandlerTest {
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         GenericResult<DummyTicker[]> generic = proxy.getGeneric();
-        assertEquals(2, generic.getResult().length);
-        assertEquals(12345, generic.getResult()[0].getLast());
-        assertEquals(8910, generic.getResult()[1].getVolume());
+        assertThat(generic.getResult().length).isEqualTo(2);
+        assertThat(generic.getResult()[0].getLast()).isEqualTo(12345);
+        assertThat(generic.getResult()[1].getVolume()).isEqualTo(8910);
     }
-    
-    private static class TestRestInvocationHandler extends RestInvocationHandler {
 
-        private RestInvocation invocation;
-        private final int responseStatusCode;
-        private final String responseBody;
-        
-        public TestRestInvocationHandler(Class<?> restInterface, ClientConfig config,
-                String responseBody, int responseStatusCode) {
-            super(restInterface, "https://example.com", config);
-            
-            this.responseStatusCode = responseStatusCode;
-            this.responseBody = responseBody;
+    @Test
+    public void testGetTextPlain() throws Exception {
+        ClientConfig clientConfig = new ClientConfig();
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, clientConfig, "Hello World in plain text!", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final String string = proxy.getString();
+        assertThat(string).isEqualTo("Hello World in plain text!");
+        final Map<String, String> httpHeaders = testHandler.getInvocation().getAllHttpHeaders();
+        assertThat(httpHeaders.get("Content-Type")).isEqualTo(null);
+        assertThat(httpHeaders.get("Accept")).isEqualTo(MediaType.TEXT_PLAIN);
+    }
+
+    @Test
+    public void testGetTextPlainError() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "Error message.", 400);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).getString();
+
+        assertThat(caughtException())
+                .isInstanceOf(MessageException.class)
+                .hasMessage("Error message.");
+    }
+
+    @Test
+    public void testPutTextPlain() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.putNumber(123456);
+        assertThat(testHandler.getInvocation().getRequestBody()).isEqualTo("123456");
+    }
+
+    @Test
+    public void testValueGenerator()  {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.getNonce(new ConstantValueFactory<>(1L));
+    }
+
+    @Test
+    public void testSciNotUrl() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        final String numberString = "0.00000043";
+        final BigDecimal smallNumber = new BigDecimal(numberString);
+        Assert.assertTrue(smallNumber.toString().toUpperCase().contains("E"));
+
+        proxy.testSmallNumbersQuery(smallNumber);
+
+        final String invocationUrl = testHandler.getInvocation().getInvocationUrl();
+        Assert.assertTrue(invocationUrl.contains(numberString), invocationUrl);
+    }
+
+    @Test
+    public void testSciNotJson() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        final String numberString = "0.00000043";
+        final BigDecimal smallNumber = new BigDecimal(numberString);
+        Assert.assertTrue(smallNumber.toString().toUpperCase().contains("E"));
+
+        proxy.testSmallNumbersJson(smallNumber);
+
+        final String requestBody = testHandler.getInvocation().getRequestBody();
+        Assert.assertTrue(requestBody.contains(numberString), requestBody);
+    }
+
+    @Test
+    public void testParseAsExceptionWhenReturnTypeParseFails() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), ResourceUtils.getResourceAsString("/error.json"), 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).getInfo(0L, 10L);
+
+        ExampleException caughtException = caughtException();
+        assertThat(caughtException).isInstanceOf(ExampleException.class);
+        assertThat(caughtException.getError()).isEqualTo("Order not found");
+    }
+
+    @Test
+    public void testParseAsExceptionWhenHttpErrorAndNoExceptionDeclared() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).testIOExceptionDeclared(null);
+
+        assertThat(caughtException())
+                .isInstanceOf(HttpStatusIOException.class)
+                .hasMessage("HTTP status code was not OK: 500");
+    }
+
+    @Test
+    public void testParseAsExceptionWhenReturnTypeParseFailsAndNoExceptionDeclared() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{\"result\":\"error\",\"error\":\"Not parsable as ticker\"}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).testIOExceptionDeclared();
+
+        assertThat(caughtException())
+                .isInstanceOf(HttpStatusIOException.class)
+                .hasMessage(String.format("Response body could not be parsed as method return type %s: last and volume required", DummyTicker.class.toString()));
+    }
+
+    @Test
+    public void testExceptionOnArrayMethod() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "[{\"last\":300,\"volume\":1}]", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        DummyTicker[] result = proxy.testExceptionOnArrayMethod("");
+        Assert.assertEquals(result.length, 1);
+
+        testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{\"result\":\"error\",\"error\":\"Not good\"}", 200);
+        proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).testExceptionOnArrayMethod("");
+
+        ExampleException ex = caughtException();
+        assertThat(ex).isInstanceOf(ExampleException.class);
+
+        assertThat(ex.getError()).isEqualTo("Not good");
+    }
+
+    @Test
+    public void testGetMethodWithBodyFail() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.testGetMethodWithBody(new DummyAccountInfo());
+        // No assertions here, but a warning (or two) about a GET request with a body should be logged.
+    }
+
+    @Test
+    public void testInterceptor() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), null, 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler, new HttpCodeExceptionInterceptor());
+
+        catchException(proxy).test500();
+
+        assertThat(caughtException())
+                .isInstanceOf(Http500Exception.class);
+    }
+
+    @Test
+    public void testEquals() throws Exception {
+        ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://example.com");
+        assertThat(service).isNotEqualTo("something");
+    }
+
+    @Test
+    public void testHashCode() throws Exception {
+        ExampleService service = RestProxyFactory.createProxy(ExampleService.class, "http://example.com");
+        new HashMap<ExampleService, Object>().put(service, 1);
+    }
+
+    @Test
+    public void testInvocationAwareException() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).invocationAwareException();
+
+        ExampleInvocationAwareException ex = caughtException();
+        assertThat(ex).isInstanceOf(ExampleInvocationAwareException.class);
+        assertThat(ex.getInvocation()).isNotNull();
+        //noinspection ConstantConditions
+        assertThat(ex.getInvocation().getHttpMethod()).isEqualTo("GET");
+    }
+
+    @Test
+    public void responseHeadersAwareException() throws Exception {
+        final Map<String, List<String>> mockHeaders = new HashMap<>();
+        mockHeaders.put("X-my-header", Collections.singletonList("My value"));
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500) {
+            @Override
+            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                super.invokeHttp(invocation);
+                HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
+                Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
+                return mockConnection;
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).responseHeadersAwareException();
+
+        ExampleResponseHeadersAwareException e = caughtException();
+        assertThat(e).isInstanceOf(ExampleResponseHeadersAwareException.class);
+        Map<String, List<String>> actualHeaders = e.getResponseHeaders();
+        assertThat(actualHeaders).isNotNull()
+                .containsEntry("X-my-header", Collections.singletonList("My value"));
+    }
+
+    @Test
+    public void responseHeadersAwareException500() throws Exception {
+        final Map<String, List<String>> mockHeaders = new HashMap<>();
+        mockHeaders.put("X-my-header", Collections.singletonList("My value"));
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500) {
+            @Override
+            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                super.invokeHttp(invocation);
+                HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
+                Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
+                return mockConnection;
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        catchException(proxy).test500();
+
+        HttpStatusIOException e = caughtException();
+        assertThat(e).isInstanceOf(HttpResponseAware.class);
+        Map<String, List<String>> actualHeaders = e.getResponseHeaders();
+        assertThat(actualHeaders).isNotNull()
+                .containsEntry("X-my-header", Collections.singletonList("My value"));
+    }
+
+    @Test
+    public void shouldUrlEncodePathParams() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        proxy.removeEntity("Entity name");
+
+        assertThat(testHandler.getInvocation().getInvocationUrl()).contains("Entity+name");
+    }
+
+    @Test
+    public void shouldDigestUrlEncodedFormParams() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final MockParamsDigest digest = new MockParamsDigest();
+        proxy.getFuturesOrders("1233455,1234324,2123131", digest);
+
+        assertThat(digest.requestBody).isEqualTo("order_id=1233455%2C1234324%2C2123131");
+    }
+
+    @Test
+    public void shouldReceiveSequentialNonces() throws Exception {
+        final TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
+            @Override protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                // Pause to symulate network lag
+                try { Thread.sleep(new Random().nextInt(100));
+                } catch (InterruptedException e) { throw new RuntimeException(e); }
+                return super.invokeHttp(invocation);
+            }
+        };
+        final ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final SynchronizedValueFactory vf = new SynchronizedValueFactory() {
+            private int seq = 0;
+            @Override public Object createValue() { return seq++; }
+        };
+
+        final AtomicLong maxNonce = new AtomicLong(-1);
+        final ExecutorService threadPool = new ForkJoinPool(5);
+
+        List<Future<Boolean>> futures = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            Future<Boolean> test = threadPool.submit(new Callable<Boolean>() {
+                @Override
+                public Boolean call() {
+                    log.info("Submitting call");
+                    proxy.getNonce(vf);
+                    long nonce = ((Number) testHandler.getInvocation().getParamsMap().get(FormParam.class).getParamValue("nonce")).longValue();
+                    log.info("Got nonce {}, maxNonce = {}", nonce, maxNonce);
+                    boolean success = nonce > maxNonce.get();
+                    maxNonce.set(nonce);
+                    return success;
+                }
+            });
+            futures.add(test);
         }
-
-        @Override
-        protected InvocationResult invokeHttp(RestInvocation invocation) {
-            this.invocation = invocation;
-            return new InvocationResult(responseBody, responseStatusCode);
+        for (Future<Boolean> future : futures) {
+            assertThat(future.get(5, TimeUnit.SECONDS)).isTrue();
         }
+    }
 
+    private static class MockParamsDigest implements ParamsDigest {
+
+        private String requestBody;
+
+        @Override public String digestParams(RestInvocation restInvocation) {
+            requestBody = restInvocation.getRequestBody();
+            return "";
+        }
     }
 }

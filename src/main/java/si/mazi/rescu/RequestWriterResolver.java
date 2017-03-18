@@ -35,38 +35,28 @@ import java.util.HashMap;
 public class RequestWriterResolver {
 
     //media-type => request writer
-    protected final HashMap<String, RequestWriter> writers = new HashMap<String, RequestWriter>();
+    protected final HashMap<String, RequestWriter> writers = new HashMap<>();
     
-    /**
-     * Constructor.
-     */
     public RequestWriterResolver() {
     }
     
-    /**
-     * Adds a writer for specified content media type.
-     */
     public void addWriter(String mediaType, RequestWriter writer) {
         writers.put(mediaType, writer);
     }
     
-    /**
-     * Resolves the writer for specified REST invocation.
-     */
-    public RequestWriter resolveWriter(RestInvocation invocation) {
+    public RequestWriter resolveWriter(RestMethodMetadata methodMetadata) {
         RequestWriter writer;
-        
-        if (invocation.getContentType() == null) {
+
+        String reqContentType = methodMetadata.getReqContentType();
+        if (reqContentType == null) {
             //throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
-            writer = writers.get(MediaType.APPLICATION_FORM_URLENCODED);
-        } else {
-            writer = writers.get(invocation.getContentType());
+            reqContentType = MediaType.APPLICATION_FORM_URLENCODED;
         }
-        
+        writer = writers.get(reqContentType);
         if (writer == null) {
-            throw new IllegalArgumentException("Unsupported media type: " + invocation.getContentType());
+            throw new IllegalArgumentException("Unsupported media type: " + reqContentType);
         }
-        
+
         return writer;
     }
     

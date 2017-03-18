@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2014 RedDragCZ.
+ * Copyright 2014 Matija Mazi.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,49 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import si.mazi.rescu.RequestWriter;
 import si.mazi.rescu.RestInvocation;
 
 import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
+
+import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 
 /**
- * Writes the data as JSON-serialized string using Jackson.
- * 
- * @author Martin ZIMA
+ * Writes the data as string using toString.
  */
-public class JacksonRequestWriter implements RequestWriter {
-    private final JacksonMapper jacksonMapper;
-
-    public JacksonRequestWriter(JacksonMapper jacksonMapper) {
-        this.jacksonMapper = jacksonMapper;
-    }
+public class ToStringRequestWriter implements RequestWriter {
 
     public String writeBody(RestInvocation invocation) {
-        if (!MediaType.APPLICATION_JSON.equals(invocation.getMethodMetadata().getContentType())) {
-            throw new IllegalArgumentException("JsonRequestWriter supports application/json content type only!");
+        if (!TEXT_PLAIN.equals(invocation.getMethodMetadata().getReqContentType())) {
+            throw new IllegalArgumentException("ToStringRequestWriter supports " + TEXT_PLAIN + " content type only!");
         }
         
         if (invocation.getParamsMap().get(FormParam.class) != null
                 && !invocation.getParamsMap().get(FormParam.class).isEmpty()) {
-            throw new IllegalArgumentException("@FormParams are not allowed with " + MediaType.APPLICATION_JSON);
+            throw new IllegalArgumentException("@FormParams are not allowed with " + TEXT_PLAIN);
         } else if (invocation.getUnannanotatedParams().size() > 1) {
-            throw new IllegalArgumentException("Can only have a single unannotated parameter with " + MediaType.APPLICATION_JSON);
+            throw new IllegalArgumentException("Can only have a single unannotated parameter with " + TEXT_PLAIN);
         }
         
         if (invocation.getUnannanotatedParams().isEmpty()) {
             return null;
         }
         
-        try {
-            return jacksonMapper.getObjectMapper().writeValueAsString(
-                    invocation.getUnannanotatedParams().get(0));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error writing json. This could be due to an error in your Jackson mapping, or a bug in rescu.", e);
-        }
+        return invocation.getUnannanotatedParams().get(0).toString();
     }
-
 }

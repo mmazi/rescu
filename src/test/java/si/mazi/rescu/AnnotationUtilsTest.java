@@ -21,7 +21,6 @@
  */
 package si.mazi.rescu;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.testng.annotations.Test;
 import si.mazi.rescu.dto.DummyAccountInfo;
 
@@ -30,42 +29,44 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Matija Mazi <br>
  */
+@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 public class AnnotationUtilsTest {
 
     @Test
     public void testGetFromMethodOrClass() throws Exception {
         Path path = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getTicker", String.class, String.class), Path.class);
-        assertThat("Wrong path.", path.value(), equalTo("{ident: [a-Z]+}_{currency}/ticker"));
+        assertThat(path).isNotNull();
+        assertThat(path.value()).isEqualTo("{ident: [a-Z]+}_{currency}/ticker");
 
         Path pathFromIntf = AnnotationUtils.getFromMethodOrClass(ExampleService.class.getMethod("getInfo", Long.class, Long.class), Path.class);
-        assertThat("Wrong path.", pathFromIntf.value(), equalTo("api/{version}"));
+        assertThat(pathFromIntf).isNotNull();
+        assertThat(pathFromIntf.value()).isEqualTo("api/{version}");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testGetMethodAnnotations() throws Exception {
         Method method = ExampleService.class.getMethod("testJsonBody", DummyAccountInfo.class);
-        testForAnns(method, Arrays.<Class<? extends Annotation>>asList(POST.class, Consumes.class));
+        testForAnns(method, Arrays.asList(POST.class, Consumes.class));
         testForAnns(method, Arrays.<Class<? extends Annotation>>asList(Path.class));
         testForAnns(method, Arrays.<Class<? extends Annotation>>asList());
 
         List<Class<? extends Annotation>> classes = Arrays.asList(POST.class, GET.class, DELETE.class, PUT.class, HEAD.class);
         Map<Class<? extends Annotation>,Annotation> map = AnnotationUtils.getMethodAnnotationMap(method, classes);
-        assertThat(map.keySet(), equalTo(sorted(Arrays.<Class<? extends Annotation >>asList(POST.class))));
-        assertThat(map.get(POST.class), IsInstanceOf.instanceOf(POST.class));
+        assertThat(map.keySet()).isEqualTo(sorted(Arrays.<Class<? extends Annotation>>asList(POST.class)));
+        assertThat(map.get(POST.class)).isInstanceOf(POST.class);
     }
 
     private void testForAnns(Method method, List<Class<? extends Annotation>> classes) {
         Map<Class<? extends Annotation>,Annotation> map = AnnotationUtils.getMethodAnnotationMap(method, classes);
-        assertThat(sorted(map.keySet()), equalTo(sorted(classes)));
+        assertThat(sorted(map.keySet())).isEqualTo(sorted(classes));
         for (Class<? extends Annotation> annClass : classes) {
-            assertThat(map.get(annClass), IsInstanceOf.instanceOf(annClass));
+            assertThat(map.get(annClass)).isInstanceOf(annClass);
         }
     }
 
@@ -75,7 +76,7 @@ public class AnnotationUtilsTest {
                 return o1.getCanonicalName().compareTo(o2.getCanonicalName());
             }
         };
-        SortedSet<Class<? extends T>> sortedSet = new TreeSet<Class<? extends T>>(comparator);
+        SortedSet<Class<? extends T>> sortedSet = new TreeSet<>(comparator);
         sortedSet.addAll(classes);
         return sortedSet;
     }

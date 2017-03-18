@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Matija Mazi
+ * Copyright (C) 2015 Matija Mazi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -18,25 +18,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package si.mazi.rescu.jackson.serializers;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+package si.mazi.rescu.serialization.jackson;
 
-import java.io.IOException;
-import java.util.Date;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
+import java.util.regex.Pattern;
 
 /**
- * @author Matija Mazi <br>
+ * Deserializing {@link Throwable} objects has caused problems on some restricted platforms
+ * (in particular, GAE). This class is used to prevent these problems by making Jackson
+ * ignore (some) properties declared on class Throwable.
  */
-public class FloatingTimestampDeserializer extends JsonDeserializer<Date> {
+public class IgnoreThrowableProperties extends JacksonAnnotationIntrospector {
 
-    @Override
-    public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    private final Pattern IGNORED_THROWABLE_MEMBER = Pattern.compile("(cause)|(stacktrace)");
 
-        return new Date(Math.round(jp.getValueAsDouble() * 1000));
+    @Override public boolean hasIgnoreMarker(final AnnotatedMember m) {
+        final String memberName = m.getName();
+        return super.hasIgnoreMarker(m) ||
+                (m.getDeclaringClass() == Throwable.class && IGNORED_THROWABLE_MEMBER.matcher(memberName).matches());
     }
 }

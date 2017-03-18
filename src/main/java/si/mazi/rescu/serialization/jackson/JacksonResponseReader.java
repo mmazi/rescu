@@ -22,48 +22,40 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.testng.annotations.Test;
+import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
+ * Reads the JSON responses into POJO object using Jackson.
  *
  * @author Martin ZIMA
  */
-public class JacksonMapperTest {
-    
-    private boolean testConfigured;
-    
-    public JacksonMapperTest() {
+public class JacksonResponseReader extends ResponseReader {
+
+    private final ObjectMapper objectMapper;
+
+    public JacksonResponseReader(ObjectMapper objectMapper, boolean ignoreHttpErrorCodes) {
+        super(ignoreHttpErrorCodes);
+        this.objectMapper = objectMapper;
     }
 
-    /**
-     * Test of createObjectMapper method, of class JacksonMapper.
-     */
-    @Test
-    public void testCreateObjectMapper() {
-        ObjectMapper objectMapper = JacksonMapper.createObjectMapper();
-        //assert(objectMapper.)
-        //TODO: test default config (i.e. not fail on unknown properties)
+    public <T> T read(String httpBody, Type returnType) throws IOException {
+        JavaType javaType = objectMapper
+                .getTypeFactory()
+                .constructType(returnType);
+
+        return objectMapper.readValue(httpBody, javaType);
     }
 
-    @Test
-    public void testConfigurator() throws IOException {
-        testConfigured = false;
-        
-        JacksonMapper jacksonMapper = new JacksonMapper(new JacksonConfigureListener() {
-            
-            public void configureObjectMapper(ObjectMapper objectMapper) {
-                testConfigured = true;
-            }
-        });
-        
-        JsonNode testRead = jacksonMapper.getObjectMapper().readTree("{}");
-        assert(testConfigured); //configurator ran
+    @Override
+    protected RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException {
+        return read(httpBody, exceptionType);
     }
-    
+
 }

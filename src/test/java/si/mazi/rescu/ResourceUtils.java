@@ -24,8 +24,6 @@
 
 package si.mazi.rescu;
 
-import si.mazi.rescu.jackson.JacksonResponseReaderTest;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
@@ -34,11 +32,14 @@ import java.util.Scanner;
  *
  * @author Martin ZIMA
  */
-public class ResourceUtils {
+public final class ResourceUtils {
+
+    private ResourceUtils() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
 
     public static String getResourceAsString(String resourcePath) throws IOException {
-        InputStream resStream = JacksonResponseReaderTest.class
-                .getResourceAsStream(resourcePath);
+        InputStream resStream = ResourceUtils.class.getResourceAsStream(resourcePath);
         try {
             return new Scanner(resStream, "UTF-8").useDelimiter("\\A").next();
         } finally {

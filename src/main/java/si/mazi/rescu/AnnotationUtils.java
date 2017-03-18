@@ -29,9 +29,12 @@ import java.util.Map;
 
 /**
  * @author Matija Mazi <br>
- * @created 1/19/13 7:46 AM
  */
-public class AnnotationUtils {
+public final class AnnotationUtils {
+
+    private AnnotationUtils() throws InstantiationException {
+        throw new InstantiationException("This class is not for instantiation");
+    }
 
     static <T extends Annotation> String getValueOrNull(Class<T> annotationClass, Annotation ann) {
 
@@ -41,7 +44,7 @@ public class AnnotationUtils {
         try {
             return (String) ann.getClass().getMethod("value").invoke(ann);
         } catch (Exception e) {
-            throw new RuntimeException("Annotation " + annotationClass + " has no element 'value'. This is a bug in rescu.");
+            throw new RuntimeException("Can't access element 'value' in  " + annotationClass + ". This is probably a bug in rescu.", e);
         }
     }
 
@@ -69,7 +72,7 @@ public class AnnotationUtils {
      */
     static Map<Class<? extends Annotation>, Annotation> getMethodAnnotationMap(Method method, Collection<Class<? extends Annotation>> annotationClasses) {
         Annotation[] methodAnnotations = method.getAnnotations();
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = new HashMap<Class<? extends Annotation>, Annotation>();
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap = new HashMap<>();
         for (Annotation methodAnnotation : methodAnnotations) {
             methodAnnotationMap.put(methodAnnotation.annotationType(), methodAnnotation);
         }

@@ -30,6 +30,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Matija Mazi
@@ -57,7 +59,7 @@ public interface ExampleService {
     @POST
     @FormParam("method")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    Object getInfo(Long from, Long count) throws ExampleException;
+    DummyTicker getInfo(Long from, Long count) throws ExampleException;
 
     @GET
     @Path("auth")
@@ -77,4 +79,89 @@ public interface ExampleService {
     @Path("generic")
     @Produces(MediaType.APPLICATION_JSON)
     GenericResult<DummyTicker[]> getGeneric();
+
+    @GET
+    @Path("string")
+    @Produces(MediaType.TEXT_PLAIN)
+    String getString() throws MessageException;
+
+    @PUT
+    @Path("number")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String putNumber(int number);
+
+    @GET
+    @Path("nonce")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String getNonce(@FormParam("nonce") SynchronizedValueFactory nonce);
+
+    @GET
+    @Path("testSmallNumbers")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String testSmallNumbersQuery(@QueryParam("value") BigDecimal value);
+
+    @GET
+    @Path("testSmallNumbers")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    String testSmallNumbersJson(BigDecimal value);
+
+    @GET
+    @Path("testExceptionOnArrayMethod")
+    @Produces(MediaType.APPLICATION_JSON)
+    DummyTicker[] testExceptionOnArrayMethod(String param) throws ExampleException;
+
+    @GET
+    @Path("ioexception")
+    @Consumes(MediaType.APPLICATION_JSON)
+    Object testIOExceptionDeclared(DummyAccountInfo ticker) throws IOException;
+
+    @GET
+    @Path("ioexception")
+    @Consumes(MediaType.APPLICATION_JSON)
+    DummyTicker testIOExceptionDeclared() throws IOException;
+
+    @GET
+    @Path("getWithBody")
+    @Consumes(MediaType.APPLICATION_JSON)
+    DummyTicker testGetMethodWithBody(DummyAccountInfo ticker) throws IOException;
+
+    @POST
+    @Path("formPostCollection")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testFromPostCollection(@FormParam("data") List<String> data);
+
+    @POST
+    @Path("formPostCollection")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testFromPostCollectionAsArray(@FormParam("data[]") List<String> data);
+
+    @POST
+    @Path("dateQueryParam")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    Object testDateQueryParam(@QueryParam("startDate") Date date);
+
+    @GET
+    @Path("500")
+    Object test500() throws IOException;
+
+    @GET
+    @Path("invocationAwareException")
+    Object invocationAwareException() throws ExampleInvocationAwareException;
+
+    @GET
+    @Path("responseHeadersAwareException")
+    Object responseHeadersAwareException() throws ExampleResponseHeadersAwareException;
+
+    @DELETE
+    @Path("entity/{name}/remove")
+    Object removeEntity(@PathParam("name") String name);
+
+    @POST
+    @Path(value = "future_orders_info.do")
+    Object getFuturesOrders(@FormParam("order_id") String orderId, @HeaderParam("sign") ParamsDigest signer)
+            throws IOException;
 }

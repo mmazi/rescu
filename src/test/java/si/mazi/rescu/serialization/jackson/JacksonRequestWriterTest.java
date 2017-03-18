@@ -22,19 +22,16 @@
  * THE SOFTWARE.
  */
 
-package si.mazi.rescu.jackson;
+package si.mazi.rescu.serialization.jackson;
 
 import org.testng.annotations.Test;
 import si.mazi.rescu.HttpMethod;
-import si.mazi.rescu.Params;
 import si.mazi.rescu.RestInvocation;
 import si.mazi.rescu.RestMethodMetadata;
 import si.mazi.rescu.dto.DummyAccountInfo;
 
 import javax.ws.rs.core.MediaType;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static org.testng.Assert.assertEquals;
 
@@ -53,17 +50,17 @@ public class JacksonRequestWriterTest {
     @Test
     public void testWriteBody() {
         JacksonRequestWriter writer = new JacksonRequestWriter(
-                new JacksonMapper(null));
+                new DefaultJacksonObjectMapperFactory().createObjectMapper());
         
         DummyAccountInfo dummyAccountInfo = new DummyAccountInfo("mm", "USD", 3);
         ArrayList<Object> unannotatedParams = new ArrayList<Object>();
         unannotatedParams.add(dummyAccountInfo);
-        
+
         RestInvocation invocation = new RestInvocation(
-                new HashMap<Class<? extends Annotation>, Params>(),
+                RestInvocation.createEmptyParamsMap(null),
                 unannotatedParams,
                 new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, MediaType.APPLICATION_JSON, null, null, null),
+                        RuntimeException.class, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, null, null, null),
                 null, null, null, null, null
             );
         

@@ -21,6 +21,9 @@
  */
 package si.mazi.rescu;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.ws.rs.*;
 import java.io.IOException;
 import java.io.Serializable;
@@ -38,6 +41,8 @@ import java.util.Map;
  */
 public class RestMethodMetadata implements Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(RestMethodMetadata.class);
+
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS
             = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
@@ -48,22 +53,24 @@ public class RestMethodMetadata implements Serializable {
     private final String intfacePath;
     private final String methodPathTemplate;
     private final Class<? extends RuntimeException> exceptionType;
-    private final String contentType;
+    private final String reqContentType;
+    private final String resContentType;
     private final String methodName;
     private final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
     private final Annotation[][] parameterAnnotations;
 
     public RestMethodMetadata(Type returnType, HttpMethod httpMethod,
-            String baseUrl, String intfacePath, String methodPathTemplate,
-            Class<? extends RuntimeException> exceptionType, String contentType,
-            String methodName,
-            Map<Class<? extends Annotation>, Annotation> methodAnnotationMap,
-            Annotation[][] parameterAnnotations) {
+                              String baseUrl, String intfacePath, String methodPathTemplate,
+                              Class<? extends RuntimeException> exceptionType, String reqContentType,
+                              String resContentType, String methodName,
+                              Map<Class<? extends Annotation>, Annotation> methodAnnotationMap,
+                              Annotation[][] parameterAnnotations) {
         this.returnType = returnType;
         this.httpMethod = httpMethod;
         this.baseUrl = baseUrl;
         this.intfacePath = intfacePath;
-        this.contentType = contentType;
+        this.reqContentType = reqContentType;
+        this.resContentType = resContentType;
         this.methodName = methodName;
         this.methodAnnotationMap = methodAnnotationMap;
         this.parameterAnnotations = parameterAnnotations;
@@ -71,14 +78,16 @@ public class RestMethodMetadata implements Serializable {
         this.exceptionType = exceptionType;
     }
 
-    static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
+    public static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
         String methodName = method.getName();
         Map<Class<? extends Annotation>, Annotation> methodAnnotationMap
                 = AnnotationUtils.getMethodAnnotationMap(method,
                         RestInvocation.PARAM_ANNOTATION_CLASSES);
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
-        String contentType = consumes != null ? consumes.value()[0] : null;
+        String reqContentType = consumes != null ? consumes.value()[0] : null;
+        Produces produces = AnnotationUtils.getFromMethodOrClass(method, Produces.class);
+        String resContentType = produces != null ? produces.value()[0] : null;
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
@@ -96,9 +105,15 @@ public class RestMethodMetadata implements Serializable {
                 exceptionType = (Class<? extends RuntimeException>) thrownException;
             }
         }
+
+        // Do some validation.
+        if (consumes != null && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(httpMethod)) {
+            log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended? Method: {}", httpMethod, reqContentType, method);
+        }
+
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
                 baseUrl, intfacePath, methodPathTemplate, exceptionType,
-                contentType, methodName, methodAnnotationMap, parameterAnnotations);
+                reqContentType, resContentType, methodName, methodAnnotationMap, parameterAnnotations);
     }
 
     static HttpMethod getHttpMethod(Method method) {
@@ -163,8 +178,12 @@ public class RestMethodMetadata implements Serializable {
     /**
      * @return the contentType
      */
-    public String getContentType() {
-        return contentType;
+    public String getReqContentType() {
+        return reqContentType;
+    }
+
+    public String getResContentType() {
+        return resContentType;
     }
 
     /**

@@ -19,39 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package si.mazi.rescu.jackson.serializers;
+package si.mazi.rescu.serialization.jackson.serializers;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import java.io.IOException;
+import java.util.Date;
 
 /**
  * @author Matija Mazi <br>
- * @created 2/19/13 9:06 PM
  */
-public abstract class BooleanDeserializer extends JsonDeserializer<Boolean> {
-
-    private String trueValue, falseValue;
-
-    protected BooleanDeserializer(String trueValue, String falseValue) {
-
-        this.trueValue = trueValue;
-        this.falseValue = falseValue;
-    }
+public class TimestampDeserializer extends JsonDeserializer<Date> {
 
     @Override
-    public Boolean deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-
-        String valueAsString = jp.getValueAsString();
-        if (trueValue.equals(valueAsString)) {
-            return true;
-        } else if (falseValue.equals(valueAsString)) {
-            return false;
-        }
-        throw new InvalidFormatException(String.format("Unrecognized value; expected %s or %s: %s", trueValue, falseValue, valueAsString), valueAsString, Boolean.class);
+    public Date deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
+        return new Date(jp.getValueAsLong() * 1000);
     }
 }

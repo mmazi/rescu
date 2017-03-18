@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Matija Mazi
+ * Copyright (C) 2015 Matija Mazi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -18,39 +18,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
-package si.mazi.rescu.jackson.serializers;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-
-import java.io.IOException;
-
-/**
- * @author Matija Mazi
  *
- * 0-based enum deserializer. This wil deserialize 0 as the first enum constant, 1 as the second etc.
  */
-public abstract class EnumIntDeserializer<E extends Enum<E>> extends JsonDeserializer<E> {
 
-    private Class<E> enumClass;
+package si.mazi.rescu;
 
-    protected EnumIntDeserializer(Class<E> enumClass) {
+import java.util.List;
+import java.util.Map;
 
-        this.enumClass = enumClass;
-    }
+public interface HttpResponseAware {
 
-    @Override
-    public E deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    void setResponseHeaders(Map<String, List<String>> headers);
 
-        E[] constants = enumClass.getEnumConstants();
-        return constants[jp.getValueAsInt() + getIndexBase()];
-    }
-
-    protected int getIndexBase() {
-
-        return 0;
-    }
+    Map<String, List<String>> getResponseHeaders();
 }

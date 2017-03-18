@@ -34,9 +34,9 @@ import javax.ws.rs.core.MediaType;
 public class FormUrlEncodedRequestWriter implements RequestWriter {
 
     public String writeBody(RestInvocation invocation) {
-        if (invocation.getMethodMetadata().getContentType() != null
+        if (invocation.getMethodMetadata().getReqContentType() != null
                 && !MediaType.APPLICATION_FORM_URLENCODED.equals(
-                        invocation.getMethodMetadata().getContentType())) {
+                        invocation.getMethodMetadata().getReqContentType())) {
             throw new IllegalArgumentException("FormUrlEncodedRequestWriter supports application/x-www-form-urlencoded content type only!");
         }
 
