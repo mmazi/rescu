@@ -58,7 +58,8 @@ public abstract class ResponseReader {
         Exception normalParseFailCause = null;
         final boolean isHttpStatusPass = !invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes();
         if (isHttpStatusPass) {
-            if (httpBody == null || httpBody.length() == 0) {
+            // assume empty but valid json on valid request is not mapped by jackson can replace wiht regular expression later  
+            if (httpBody == null || httpBody.length() == 0 || httpBody.toString().trim().equals("[]") ) {
                 return null;
             } else {
                 try {
