@@ -75,8 +75,6 @@ public class RestInvocationHandler implements InvocationHandler {
         ObjectMapper mapper = mapperFactory.createObjectMapper();
 
         requestWriterResolver = new RequestWriterResolver();
-        /*requestWriterResolver.addWriter(null,
-                new NullRequestWriter());*/
         requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED,
                 new FormUrlEncodedRequestWriter());
         requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,

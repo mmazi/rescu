@@ -79,18 +79,7 @@ public class RestMethodMetadata implements Serializable {
     }
 
     public static RestMethodMetadata create(Method method, String baseUrl, String intfacePath) {
-        String methodName = method.getName();
-        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap
-                = AnnotationUtils.getMethodAnnotationMap(method,
-                        RestInvocation.PARAM_ANNOTATION_CLASSES);
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
-        String reqContentType = consumes != null ? consumes.value()[0] : null;
         Produces produces = AnnotationUtils.getFromMethodOrClass(method, Produces.class);
-        String resContentType = produces != null ? produces.value()[0] : null;
-        Path pathAnn = method.getAnnotation(Path.class);
-        String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
-        HttpMethod httpMethod = getHttpMethod(method);
         Class[] thrownExceptions = method.getExceptionTypes();
         Class<? extends RuntimeException> exceptionType = null;
         for (Class thrownException : thrownExceptions) {
@@ -106,10 +95,23 @@ public class RestMethodMetadata implements Serializable {
             }
         }
 
+        Map<Class<? extends Annotation>, Annotation> methodAnnotationMap
+                = AnnotationUtils.getMethodAnnotationMap(method,
+                RestInvocation.PARAM_ANNOTATION_CLASSES);
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        Consumes consumes = AnnotationUtils.getFromMethodOrClass(method, Consumes.class);
+        String reqContentType = consumes != null ? consumes.value()[0] : null;
+        HttpMethod httpMethod = getHttpMethod(method);
+
         // Do some validation.
         if (consumes != null && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(httpMethod)) {
             log.warn("{} request declared as consuming method body as {}. While body is allowed, it should be ignored by the server. Is this intended? Method: {}", httpMethod, reqContentType, method);
         }
+
+        String methodName = method.getName();
+        Path pathAnn = method.getAnnotation(Path.class);
+        String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
+        String resContentType = produces != null ? produces.value()[0] : null;
 
         return new RestMethodMetadata(method.getGenericReturnType(), httpMethod,
                 baseUrl, intfacePath, methodPathTemplate, exceptionType,
