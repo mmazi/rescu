@@ -255,6 +255,14 @@ public class RestInvocationHandlerTest {
     }
 
     @Test
+    public void testPatchTextPlain() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+        proxy.updateNumber(123456);
+        assertThat(testHandler.getInvocation().getRequestBody()).isEqualTo("123456");
+    }
+
+    @Test
     public void testValueGenerator()  {
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "OK", 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
