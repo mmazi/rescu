@@ -27,7 +27,7 @@
 
     <groupId>com.github.mmazi</groupId>
     <artifactId>rescu</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.1-PATCH-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ResCU</name>
@@ -119,8 +119,8 @@
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-            <version>1.1.1</version>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1</version>
         </dependency>
         <!-- JSR-305 annotations (@Nullable etc.) -->
         <dependency>

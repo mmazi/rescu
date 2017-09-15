@@ -91,6 +91,12 @@ public interface ExampleService {
     @Produces(MediaType.TEXT_PLAIN)
     String putNumber(int number);
 
+    @PATCH
+    @Path("number")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
+    String updateNumber(int number);
+
     @GET
     @Path("nonce")
     @Consumes(MediaType.TEXT_PLAIN)
