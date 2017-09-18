@@ -25,6 +25,7 @@ import si.mazi.rescu.dto.DummyAccountInfo;
 import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 import si.mazi.rescu.dto.Order;
+import si.mazi.rescu.jaxrs.PATCH;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;

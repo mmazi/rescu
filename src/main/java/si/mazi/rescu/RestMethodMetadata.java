@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import si.mazi.rescu.jaxrs.PATCH;
+
 /**
  * @author Matija Mazi
  *
