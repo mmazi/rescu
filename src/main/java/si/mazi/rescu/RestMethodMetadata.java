@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import si.mazi.rescu.jaxrs.PATCH;
+
 /**
  * @author Matija Mazi
  *
@@ -45,7 +47,7 @@ public class RestMethodMetadata implements Serializable {
 
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> HTTP_METHOD_ANNS
-            = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class);
+            = Arrays.asList(GET.class, POST.class, PUT.class, OPTIONS.class, HEAD.class, DELETE.class, PATCH.class);
 
     private final Type returnType;
     private final HttpMethod httpMethod;
