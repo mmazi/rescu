@@ -36,8 +36,6 @@ import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -76,12 +74,10 @@ public class JacksonResponseReaderTest {
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        catchException(reader).read(invocationResult,
-                new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null));
-
-        ExampleException e = caughtException();
-        assertThat(e).isInstanceOf(ExampleException.class);
+        ExampleException e = ExceptionUtils.catchException(ExampleException.class,
+                () -> reader.read(invocationResult, new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
+                        ExampleException.class, null, MediaType.APPLICATION_JSON, null, null, null))
+        );
         assertThat(e.getError()).isEqualTo("Order not found");
         assertThat(e.getToken()).isEqualTo("unknown_error");
         assertThat(e.getResult()).isEqualTo("error");
@@ -95,12 +91,11 @@ public class JacksonResponseReaderTest {
         InvocationResult invocationResult = new InvocationResult(
                 ResourceUtils.getResourceAsString("/error.json"), 500);
 
-        catchException(reader).read(invocationResult,
+        HttpStatusIOException e = ExceptionUtils.catchException(HttpStatusIOException.class,
+                () -> reader.read(invocationResult,
                 new RestMethodMetadata(DummyTicker.class, HttpMethod.GET, null, null, null,
-                        null, null, MediaType.APPLICATION_JSON, null, null, null));
-
-        HttpStatusIOException e = caughtException();
-        assertThat(e).isInstanceOf(HttpStatusIOException.class);
+                        null, null, MediaType.APPLICATION_JSON, null, null, null))
+        );
 
         assertThat(e.getHttpBody()).contains("Order not found");
         assertThat(e.getHttpBody()).contains("unknown_error");
