@@ -27,7 +27,7 @@
 
     <groupId>com.github.mmazi</groupId>
     <artifactId>rescu</artifactId>
-    <version>1.9.1-SNAPSHOT</version>
+    <version>1.9.1</version>
     <packaging>jar</packaging>
 
     <name>ResCU</name>
@@ -61,7 +61,7 @@
         <connection>scm:git:git@github.com:mmazi/rescu.git</connection>
         <developerConnection>scm:git:git@github.com:mmazi/rescu.git</developerConnection>
         <url>git@github.com:mmazi/rescu.git</url>
-        <tag>HEAD</tag>
+        <tag>rescu-1.9.1</tag>
     </scm>
 
     <ciManagement>
