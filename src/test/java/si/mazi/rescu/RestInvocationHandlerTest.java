@@ -442,6 +442,7 @@ public class RestInvocationHandlerTest {
         assertThat(digest.requestBody).isEqualTo("order_id=1233455%2C1234324%2C2123131");
     }
 
+    /** NOTE: this test sometimes fails. Not sure how to fix it. */
     @Test
     public void shouldReceiveSequentialNonces() throws Exception {
         final TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
