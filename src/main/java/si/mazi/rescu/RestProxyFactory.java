@@ -34,7 +34,7 @@ public final class RestProxyFactory {
 
     /**
      * Create a proxy implementation of restInterface. The interface must be annotated with jax-rs annotations. Basic support exists for {@link javax.ws.rs.Path}, {@link javax.ws.rs.GET},
-     * {@link javax.ws.rs.POST}, {@link javax.ws.rs.QueryParam}, {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}.
+     * {@link javax.ws.rs.POST}, {@link javax.ws.rs.QueryParam}, {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}., {@link javax.ws.rs.PATCH}
      *
      * @param restInterface The interface to implement
      * @param baseUrl       The service base baseUrl
