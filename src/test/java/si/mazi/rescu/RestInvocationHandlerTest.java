@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.internal.collections.Pair;
 import si.mazi.rescu.dto.DummyAccountInfo;
@@ -40,12 +41,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -442,26 +443,27 @@ public class RestInvocationHandlerTest {
         assertThat(digest.requestBody).isEqualTo("order_id=1233455%2C1234324%2C2123131");
     }
 
+    @DataProvider(parallel = true)
+    public Object[][] randomSeed() {
+        int rounds = 200;
+        Object[][] result = new Object[rounds][];
+        for (int i = 0; i < rounds; i++) {
+            // try to distribute seed values across the long domain
+            result[i] = new Object[]{(1L<<i)+i};
+        }
+        return result;
+    }
+
     /** NOTE: this test sometimes fails. Not sure how to fix it. */
-    @Test
-    public void shouldReceiveSequentialNonces() throws Exception {
-        final TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
-            @Override protected HttpURLConnection invokeHttp(RestInvocation invocation) {
-                // Pause to symulate network lag
-                try { Thread.sleep(new Random().nextInt(100));
-                } catch (InterruptedException e) { throw new RuntimeException(e); }
-                return super.invokeHttp(invocation);
-            }
-        };
+    @Test(dataProvider = "randomSeed")
+    public void shouldReceiveSequentialNonces(long randomSeed) throws Exception {
+        final InvocationHandler testHandler = new NonceCheckingDelayingInvocationHandler(randomSeed);
+
         final ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
-        final SynchronizedValueFactory vf = new SynchronizedValueFactory() {
-            private int seq = 0;
-            @Override public Object createValue() { return seq++; }
-        };
+        final SynchronizedValueFactory<Long> vf = new LongValueFactory();
 
-        final AtomicLong maxNonce = new AtomicLong(-1);
-        final ExecutorService threadPool = new ForkJoinPool(5);
+        final ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
         List<Future<Boolean>> futures = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
@@ -470,11 +472,7 @@ public class RestInvocationHandlerTest {
                 public Boolean call() {
                     log.info("Submitting call");
                     proxy.getNonce(vf);
-                    long nonce = ((Number) testHandler.getInvocation().getParamsMap().get(FormParam.class).getParamValue("nonce")).longValue();
-                    log.info("Got nonce {}, maxNonce = {}", nonce, maxNonce);
-                    boolean success = nonce > maxNonce.get();
-                    maxNonce.set(nonce);
-                    return success;
+                    return true;
                 }
             });
             futures.add(test);
@@ -492,5 +490,40 @@ public class RestInvocationHandlerTest {
             requestBody = restInvocation.getRequestBody();
             return "";
         }
+    }
+
+    private static class NonceCheckingDelayingInvocationHandler extends RestInvocationHandler {
+        private final Random random;
+        private long maxNonce;
+
+        NonceCheckingDelayingInvocationHandler(long randomSeed) {
+            super(ExampleService.class, null, null);
+            maxNonce = -1;
+            random = new Random(randomSeed);
+        }
+
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            Long nonce;
+            synchronized (this) {
+                RestInvocation invocation = createInvocation(method, args);
+                nonce = (Long) invocation.getParamValue(FormParam.class, "nonce");
+                log.info("Got nonce {}, maxNonce = {}", nonce, maxNonce);
+                if (nonce <= maxNonce) {
+                    throw new IllegalArgumentException("" + nonce);
+                }
+                maxNonce = nonce;
+            }
+
+            // Pause to simulate network lag
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            return null;
+        }
+
     }
 }

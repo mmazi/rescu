@@ -113,8 +113,7 @@ public class RestInvocationHandler implements InvocationHandler {
         }
         try {
             synchronized (lock) {
-                invocation = RestInvocation.create(
-                        requestWriterResolver, methodMetadata, args, config.getDefaultParamsMap());
+                invocation = createInvocation(method, args);
                 connection = invokeHttp(invocation);
             }
             return receiveAndMap(methodMetadata, connection);
@@ -176,5 +175,11 @@ public class RestInvocationHandler implements InvocationHandler {
             methodMetadataCache.put(method, metadata);
         }
         return metadata;
+    }
+
+    protected RestInvocation createInvocation(Method method, Object[] args) {
+        return RestInvocation.create(
+                requestWriterResolver, getMetadata(method), args, config.getDefaultParamsMap()
+        );
     }
 }
