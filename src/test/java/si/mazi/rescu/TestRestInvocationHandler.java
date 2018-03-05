@@ -26,6 +26,9 @@ package si.mazi.rescu;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+/**
+ * NOT thread-safe
+ */
 class TestRestInvocationHandler extends RestInvocationHandler {
 
     private RestInvocation invocation;
