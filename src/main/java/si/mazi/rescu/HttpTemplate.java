@@ -36,6 +36,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -120,6 +121,13 @@ class HttpTemplate {
     InvocationResult receive(HttpURLConnection connection) throws IOException {
         int httpStatus = connection.getResponseCode();
         log.debug("Request http status = {}", httpStatus);
+        if (log.isTraceEnabled()) {
+            for (Map.Entry<String, List<String>> entry : connection.getHeaderFields().entrySet()) {
+                if (entry.getKey() != null) {
+                    log.trace("Header response property: key='{}', value='{}'", entry.getKey(), entry.getValue());
+                }
+            }
+        }
 
         InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
             connection.getInputStream() : connection.getErrorStream();
