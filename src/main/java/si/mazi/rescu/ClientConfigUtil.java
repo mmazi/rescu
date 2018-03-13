@@ -23,10 +23,9 @@
 
 package si.mazi.rescu;
 
-import net.iharder.Base64;
-
 import javax.ws.rs.HeaderParam;
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 
 public enum ClientConfigUtil {
     ;
@@ -38,7 +37,7 @@ public enum ClientConfigUtil {
     static String digestForBasicAuth(String username, String password) {
         try {
             byte[] inputBytes = (username + ":" + password).getBytes("ISO-8859-1");
-            return "Basic " + Base64.encodeBytes(inputBytes);
+            return "Basic " + Base64.getEncoder().encodeToString(inputBytes);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Unsupported encoding, fix the code.", e);
         }

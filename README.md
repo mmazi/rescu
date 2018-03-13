@@ -15,7 +15,6 @@ Dependencies
 - slf4j (logging interface)
 - jsr-311 (JAX-RS) (a set of REST-service specific annotations)
 - jsr-305 (a set of annotations)
-- net.iharder Base64
 
 
 Features and benefits
