@@ -423,6 +423,29 @@ public class RestInvocationHandlerTest {
     }
 
     @Test
+    public void responseHeadersAwareResult() throws Exception {
+        final Map<String, List<String>> mockHeaders = new HashMap<>();
+        mockHeaders.put("X-my-header-1", Collections.singletonList("My value for result"));
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
+            @Override
+            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+                super.invokeHttp(invocation);
+                HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
+                Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
+                return mockConnection;
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final ExampleResponseHeadersAwareResult result = proxy.getResultWithResponseHeaders();
+
+        Map<String, List<String>> actualHeaders = result.getResponseHeaders();
+        assertThat(actualHeaders)
+                .isNotNull()
+                .containsEntry("X-my-header-1", Collections.singletonList("My value for result"));
+    }
+
+    @Test
     public void shouldUrlEncodePathParams() throws Exception {
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);

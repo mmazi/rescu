@@ -116,30 +116,37 @@ public class RestInvocationHandler implements InvocationHandler {
                 invocation = createInvocation(method, args);
                 connection = invokeHttp(invocation);
             }
-            return receiveAndMap(methodMetadata, connection);
+            final Object result = receiveAndMap(methodMetadata, connection);
+            makeAware(result, connection, invocation);
+            return result;
         } catch (Exception e) {
-            boolean shouldWrap = config.isWrapUnexpectedExceptions();
-            if (e instanceof InvocationAware) {
-                try {
-                    ((InvocationAware) e).setInvocation(invocation);
-                    shouldWrap = false;
-                } catch (Exception ex) {
-                    log.warn("Failed to set invocation on the InvocationAware", ex);
-                }
-            }
-            if (e instanceof HttpResponseAware && connection != null) {
-                try {
-                    ((HttpResponseAware) e).setResponseHeaders(connection.getHeaderFields());
-                    shouldWrap = false;
-                } catch (Exception ex) {
-                    log.warn("Failed to set response headers on the HttpReponseAware", ex);
-                }
-            }
-            if (shouldWrap) {
+            final boolean madeAware = makeAware(e, connection, invocation);
+            if (config.isWrapUnexpectedExceptions() && !madeAware) {
                 throw new AwareException(e, invocation);
             }
             throw e;
         }
+    }
+
+    private boolean makeAware(Object result, HttpURLConnection connection, RestInvocation invocation) {
+        boolean madeAware = false;
+        if (result instanceof InvocationAware) {
+            try {
+                ((InvocationAware) result).setInvocation(invocation);
+                madeAware = true;
+            } catch (Exception ex) {
+                log.warn("Failed to set invocation on the InvocationAware", ex);
+            }
+        }
+        if (result instanceof HttpResponseAware && connection != null) {
+            try {
+                ((HttpResponseAware) result).setResponseHeaders(connection.getHeaderFields());
+                madeAware = true;
+            } catch (Exception ex) {
+                log.warn("Failed to set response headers on the HttpResponseAware", ex);
+            }
+        }
+        return madeAware;
     }
 
     protected HttpURLConnection invokeHttp(RestInvocation invocation) throws IOException {

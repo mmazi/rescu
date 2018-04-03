@@ -170,4 +170,8 @@ public interface ExampleService {
     @Path(value = "future_orders_info.do")
     Object getFuturesOrders(@FormParam("order_id") String orderId, @HeaderParam("sign") ParamsDigest signer)
             throws IOException;
+
+    @POST
+    @Path("resultWithResponseHeaders")
+    ExampleResponseHeadersAwareResult getResultWithResponseHeaders();
 }
