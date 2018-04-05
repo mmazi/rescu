@@ -38,11 +38,6 @@ public class ExampleCheckedException extends Exception {
     @JsonProperty("myProperty")
     private String myProperty;
 
-    public ExampleCheckedException(String message, String myProperty) {
-        super(message);
-        this.myProperty = myProperty;
-    }
-
     public String getError() {
         return error;
     }

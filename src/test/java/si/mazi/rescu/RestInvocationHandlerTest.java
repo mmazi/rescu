@@ -193,18 +193,13 @@ public class RestInvocationHandlerTest {
 
     @Test
     public void testCheckedException() throws Exception {
-        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null, null, 200) {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                throw new ExampleCheckedException("Checked exception error message", "Property value");
-            }
-        };
+        final String responseBody = "{\"result\":\"error\",\"error\":\"Checked exception error message\", \"myProperty\":\"Property value\"}";
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null, responseBody, 500);
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
 
         final Throwable caught = catchThrowable(proxy::throwsCheckedException);
         assertThat(caught)
-                .isInstanceOf(ExampleCheckedException.class)
-                .hasMessage("Checked exception error message");
+                .isInstanceOf(ExampleCheckedException.class);
         assertThat(((ExampleCheckedException) caught).getMyProperty()).isEqualTo("Property value");
     }
 
