@@ -176,7 +176,7 @@ public class RestInvocationHandlerTest {
     }
 
     @Test
-    public void testCheckedException() throws Exception {
+    public void testIOException() throws Exception {
 
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null, null, 200) {
             @Override
@@ -190,7 +190,24 @@ public class RestInvocationHandlerTest {
                 .isInstanceOf(IOException.class)
                 .hasMessage("A simulated I/O problem.");
     }
-    
+
+    @Test
+    public void testCheckedException() throws Exception {
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, null, null, 200) {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                throw new ExampleCheckedException("Checked exception error message", "Property value");
+            }
+        };
+        ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
+
+        final Throwable caught = catchThrowable(proxy::throwsCheckedException);
+        assertThat(caught)
+                .isInstanceOf(ExampleCheckedException.class)
+                .hasMessage("Checked exception error message");
+        assertThat(((ExampleCheckedException) caught).getMyProperty()).isEqualTo("Property value");
+    }
+
     @Test
     public void testJsonResponse() throws IOException {
         ClientConfig clientConfig = new ClientConfig();

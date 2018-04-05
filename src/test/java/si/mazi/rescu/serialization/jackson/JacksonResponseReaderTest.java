@@ -150,7 +150,7 @@ public class JacksonResponseReaderTest {
     public void testExceptionPropertyConflict() throws Exception {
         JacksonResponseReader reader = new JacksonResponseReader(createObjectMapper(), true);
 
-        final RuntimeException ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
+        final Exception ex = reader.readException("{\"message\": \"msg\", \"cause\":\"cs\", \"stackTrace\":\"st\", \"backtrace\":\"bt\", \"detailMessage\":\"dm\"}", HttpStatusExceptionSupport.class);
         assertThat(ex.getMessage()).contains("msg");
         log.debug("ex = " + ex);
     }

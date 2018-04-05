@@ -53,7 +53,7 @@ public abstract class ResponseReader {
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public Object read(InvocationResult invocationResult, RestMethodMetadata methodMetadata)
-            throws IOException {
+            throws Exception {
         final String httpBody = invocationResult.getHttpBody();
         Exception normalParseFailCause = null;
         final boolean isHttpStatusPass = !invocationResult.isErrorStatusCode() || isIgnoreHttpErrorCodes();
@@ -63,7 +63,7 @@ public abstract class ResponseReader {
             } else {
                 try {
                     return read(httpBody, methodMetadata.getReturnType());
-                } catch (IOException|RuntimeException e) {
+                } catch (Exception e) {
                     normalParseFailCause = findCause(e, ExceptionalReturnContentException.class, JsonMappingException.class);
                     if (normalParseFailCause == null) {
                         throw e;
@@ -77,7 +77,7 @@ public abstract class ResponseReader {
 
         if (methodMetadata.getExceptionType() != null && httpBody != null) {
             // Try with the declared custom exception first (methodMetadata.getExceptionType()).
-            RuntimeException exception = null;
+            Exception exception = null;
             try {
                 exception = readException(httpBody, methodMetadata.getExceptionType());
             } catch (Exception e) {
@@ -106,7 +106,7 @@ public abstract class ResponseReader {
 
     protected abstract <T> T read(String httpBody, Type returnType) throws IOException, ExceptionalReturnContentException;
 
-    protected abstract RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException;
+    protected abstract Exception readException(String httpBody, Class<? extends Exception> exceptionType) throws IOException;
 
     /**
      * Search the cause chain of <em>t</em> (starting from and including <em>t</em>) for a Throwable
