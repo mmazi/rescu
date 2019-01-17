@@ -88,7 +88,7 @@ Supported settings with example values (copy this into your `rescu.properties` f
 License
 ---------------
 
-Rescu is released under the MIT License. Please see [LINCESE.txt](LICENSE.txt) for the full text.
+Rescu is released under the MIT License. Please see [LICENSE.txt](LICENSE.txt) for the full text.
 
 An important note
 ---------------
