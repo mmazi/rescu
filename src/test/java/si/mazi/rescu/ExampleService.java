@@ -174,4 +174,8 @@ public interface ExampleService {
     @POST
     @Path("resultWithResponseHeaders")
     ExampleResponseHeadersAwareResult getResultWithResponseHeaders();
+
+    @POST
+    @Path("throwsCheckedException")
+    Object throwsCheckedException() throws ExampleCheckedException;
 }

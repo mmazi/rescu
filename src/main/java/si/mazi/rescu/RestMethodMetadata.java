@@ -52,7 +52,7 @@ public class RestMethodMetadata implements Serializable {
     private final String baseUrl;
     private final String intfacePath;
     private final String methodPathTemplate;
-    private final Class<? extends RuntimeException> exceptionType;
+    private final Class<? extends Exception> exceptionType;
     private final String reqContentType;
     private final String resContentType;
     private final String methodName;
@@ -61,7 +61,7 @@ public class RestMethodMetadata implements Serializable {
 
     public RestMethodMetadata(Type returnType, HttpMethod httpMethod,
                               String baseUrl, String intfacePath, String methodPathTemplate,
-                              Class<? extends RuntimeException> exceptionType, String reqContentType,
+                              Class<? extends Exception> exceptionType, String reqContentType,
                               String resContentType, String methodName,
                               Map<Class<? extends Annotation>, Annotation> methodAnnotationMap,
                               Annotation[][] parameterAnnotations) {
@@ -91,18 +91,18 @@ public class RestMethodMetadata implements Serializable {
         Path pathAnn = method.getAnnotation(Path.class);
         String methodPathTemplate = pathAnn == null ? "" : pathAnn.value();
         HttpMethod httpMethod = getHttpMethod(method);
-        Class[] thrownExceptions = method.getExceptionTypes();
-        Class<? extends RuntimeException> exceptionType = null;
+        Class<?>[] thrownExceptions = method.getExceptionTypes();
+        Class<? extends Exception> exceptionType = null;
         for (Class thrownException : thrownExceptions) {
             if (!IOException.class.isAssignableFrom(thrownException)) {
-                if (!RuntimeException.class.isAssignableFrom(thrownException)) {
-                    throw new IllegalArgumentException("Only IOExceptions and RuntimeExceptions are supported on API methods; this method doesn't comply: " + method);
+                if (!Exception.class.isAssignableFrom(thrownException)) {
+                    throw new IllegalArgumentException("The only Throwables allowed on API methods are Exceptions; this method doesn't comply: " + method);
                 }
                 if (exceptionType != null) {
-                    throw new IllegalArgumentException("At most one RuntimeException is supported on an API method; this method has more: " + method);
+                    throw new IllegalArgumentException("Apart from IOException, at most one Exception is supported on an API method; this method has more: " + method);
                 }
                 //noinspection unchecked
-                exceptionType = (Class<? extends RuntimeException>) thrownException;
+                exceptionType = (Class<? extends Exception>) thrownException;
             }
         }
 
@@ -171,7 +171,7 @@ public class RestMethodMetadata implements Serializable {
     /**
      * @return the exceptionType
      */
-    public Class<? extends RuntimeException> getExceptionType() {
+    public Class<? extends Exception> getExceptionType() {
         return exceptionType;
     }
 

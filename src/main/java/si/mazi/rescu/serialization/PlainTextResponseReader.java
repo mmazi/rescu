@@ -50,9 +50,9 @@ public class PlainTextResponseReader extends ResponseReader {
 
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     @Override
-    protected RuntimeException readException(String httpBody, Class<? extends RuntimeException> exceptionType) throws IOException {
+    protected Exception readException(String httpBody, Class<? extends Exception> exceptionType) throws IOException {
         final String message = read(httpBody, exceptionType);
-        RuntimeException constructedException = null;
+        Exception constructedException = null;
 
         Exception reflectiveOperationException = null;
         try {

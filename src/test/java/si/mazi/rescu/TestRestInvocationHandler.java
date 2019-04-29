@@ -23,7 +23,6 @@
 
 package si.mazi.rescu;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
@@ -55,7 +54,7 @@ class TestRestInvocationHandler extends RestInvocationHandler {
     }
 
     @Override
-    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws IOException {
+    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws Exception {
         InvocationResult invocationResult = new InvocationResult(getResponseBody(), getResponseStatusCode());
         return mapInvocationResult(invocationResult, methodMetadata);
     }
