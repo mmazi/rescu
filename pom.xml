@@ -118,9 +118,9 @@
             <version>1.7.25</version>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-            <version>2.1.1</version>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>2.1.5</version>
         </dependency>
         <!-- JSR-305 annotations (@Nullable etc.) -->
         <dependency>
