@@ -35,6 +35,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ class HttpTemplate {
         preconditionNotNull(urlString, "urlString cannot be null");
         preconditionNotNull(httpHeaders, "httpHeaders should not be null");
 
-        int contentLength = requestBody == null ? 0 : requestBody.getBytes().length;
+        int contentLength = requestBody == null ? 0 : requestBody.getBytes(StandardCharsets.UTF_8).length;
         HttpURLConnection connection = configureURLConnection(method, urlString, httpHeaders, contentLength);
 
         if (oAuthConsumer != null) {
@@ -112,7 +113,7 @@ class HttpTemplate {
         if (contentLength > 0) {
             // Write the request body
             OutputStream out = connection.getOutputStream();
-            out.write(requestBody.getBytes(CHARSET_UTF_8));
+            out.write(requestBody.getBytes(StandardCharsets.UTF_8));
             out.flush();
         }
         return connection;
