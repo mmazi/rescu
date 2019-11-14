@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import si.mazi.rescu.ResponseReader;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
 /**
@@ -54,11 +53,11 @@ public class PlainTextResponseReader extends ResponseReader {
         final String message = read(httpBody, exceptionType);
         RuntimeException constructedException = null;
 
-        Exception reflectiveOperationException = null;
+        ReflectiveOperationException reflectiveOperationException = null;
         try {
             // try constructng the exception with message
             constructedException = exceptionType.getConstructor(String.class).newInstance(message);
-        } catch (IllegalAccessException|InstantiationException|InvocationTargetException|NoSuchMethodException e) {
+        } catch (ReflectiveOperationException e) {
             reflectiveOperationException = e;
         }
 
@@ -67,9 +66,9 @@ public class PlainTextResponseReader extends ResponseReader {
 
             try {
                 // fallback to no-parameter constructor
-                constructedException = exceptionType.newInstance();
+                constructedException = exceptionType.getDeclaredConstructor().newInstance();
                 log.warn("Cannot construct a {} with message parameter. Ommiting the message, which was: {}", exceptionType, message);
-            } catch (IllegalAccessException | InstantiationException e) {
+            } catch (ReflectiveOperationException e) {
                 reflectiveOperationException = e;
             }
 
