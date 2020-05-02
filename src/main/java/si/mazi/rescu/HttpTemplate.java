@@ -35,6 +35,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.*;
+import java.net.Proxy.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,14 +60,13 @@ class HttpTemplate {
     private final SSLSocketFactory sslSocketFactory;
     private final HostnameVerifier hostnameVerifier;
     private final OAuthConsumer oAuthConsumer;
-
-
-    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
+   
+    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort, Type proxyType,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
-      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
+      this(0, readTimeout, proxyHost, proxyPort, proxyType, sslSocketFactory, hostnameVerifier, oAuthConsumer);
     }
     
-    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
+    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort, Type proxyType,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
@@ -83,7 +83,8 @@ class HttpTemplate {
         if (proxyHost == null || proxyPort == null) {
             proxy = Proxy.NO_PROXY;
         } else {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+            Type type = proxyType == null ? Proxy.Type.HTTP : proxyType; 
+            proxy = new Proxy(type, new InetSocketAddress(proxyHost, proxyPort));
             log.info("Using proxy {}", proxy);
         }
     }

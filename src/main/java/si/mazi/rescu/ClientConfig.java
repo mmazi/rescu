@@ -31,6 +31,7 @@ import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 import java.lang.annotation.Annotation;
+import java.net.Proxy.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +46,7 @@ public class ClientConfig {
     private int httpReadTimeout;
     private Integer proxyPort;
     private String proxyHost;
+    private Type proxyType;
     private boolean ignoreHttpErrorCodes;
     private boolean wrapUnexpectedExceptions;
     private OAuthConsumer oAuthConsumer;
@@ -54,6 +56,7 @@ public class ClientConfig {
         httpReadTimeout = Config.getHttpReadTimeout();
         proxyPort = Config.getProxyPort();
         proxyHost = Config.getProxyHost();
+        proxyType = Config.getProxyType();
         ignoreHttpErrorCodes = Config.isIgnoreHttpErrorCodes();
         wrapUnexpectedExceptions = Config.isWrapUnexpectedExceptions();
     }
@@ -142,6 +145,14 @@ public class ClientConfig {
 
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
+    }
+    
+    public Type getProxyType() {
+        return proxyType;
+    }
+
+    public void setProxyType(Type proxyType) {
+        this.proxyType = proxyType;
     }
 
     public boolean isIgnoreHttpErrorCodes() {

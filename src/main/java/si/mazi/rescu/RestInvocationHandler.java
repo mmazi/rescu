@@ -94,7 +94,7 @@ public class RestInvocationHandler implements InvocationHandler {
         this.httpTemplate = new HttpTemplate(
                 this.config.getHttpConnTimeout(),
                 this.config.getHttpReadTimeout(),
-                this.config.getProxyHost(), this.config.getProxyPort(),
+                this.config.getProxyHost(), this.config.getProxyPort(), this.config.getProxyType(),
                 this.config.getSslSocketFactory(), this.config.getHostnameVerifier(), this.config.getOAuthConsumer());
     }
 
