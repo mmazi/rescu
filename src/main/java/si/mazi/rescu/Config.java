@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Proxy;
+import java.net.Proxy.Type;
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -47,6 +50,8 @@ final class Config {
     private static final String PROXY_HOST = "rescu.http.readProxyHost";
 
     private static final String PROXY_PORT = "rescu.http.readProxyPort";
+    
+    private static final String PROXY_TYPE = "rescu.http.readProxyType";
 
     private static final String IGNORE_HTTP_ERROR_CODES = "rescu.http.ignoreErrorCodes";
 
@@ -59,6 +64,8 @@ final class Config {
     private static final String proxyHost;
 
     private static final Integer proxyPort;
+    
+    private static final Type proxyType;
 
     private static final boolean ignoreHttpErrorCodes;
 
@@ -85,6 +92,7 @@ final class Config {
         proxyHost = properties.getProperty(PROXY_HOST);
         String proxyPortStr = properties.getProperty(PROXY_PORT);
         proxyPort = proxyPortStr == null ? null : Integer.parseInt(proxyPortStr);
+        proxyType = Optional.ofNullable(properties.getProperty(PROXY_TYPE)).map(Proxy.Type::valueOf).orElse(null);
         ignoreHttpErrorCodes = getBoolean(properties, IGNORE_HTTP_ERROR_CODES);
         wrapUnexpectedExceptions = getBoolean(properties, WRAP_UNEXPECTED_EXCEPTIONS);
 
@@ -93,6 +101,7 @@ final class Config {
         log.debug("httpReadTimeout = {}", httpReadTimeout);
         log.debug("proxyHost = {}", proxyHost);
         log.debug("proxyPort = {}", proxyPort);
+        log.debug("proxyType = {}", proxyType);
         log.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
     }
 
@@ -120,6 +129,10 @@ final class Config {
     public static Integer getProxyPort() {
         return proxyPort;
     }
+    
+    public static Type getProxyType() {
+      return proxyType;
+  }
 
     public static boolean isIgnoreHttpErrorCodes() {
         return ignoreHttpErrorCodes;
