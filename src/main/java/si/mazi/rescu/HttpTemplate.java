@@ -1,17 +1,17 @@
 /**
  * Copyright (C) 2012 - 2013 Xeiam LLC http://xeiam.com
  * Copyright (C) 2012 - 2013 Matija Mazi matija.mazi@gmail.com
- * <p/>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
  * the Software without restriction, including without limitation the rights to
  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
  * of the Software, and to permit persons to whom the Software is furnished to do
  * so, subject to the following conditions:
- * <p/>
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * <p/>
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -62,7 +62,7 @@ class HttpTemplate {
 
 
     /**
-     * if log level DEBUG is set to this class, request body will be logged.
+     * if log level DEBUG is set to this class, response body will be logged.
      * Maximum logged length is truncated at this static variable
      */
     public static int requestMaxLogLen = 4096;
@@ -83,7 +83,7 @@ class HttpTemplate {
 
     HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
-        this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
+      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
     }
 
     HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
@@ -152,13 +152,12 @@ class HttpTemplate {
             }
         }
 
-        InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ?
-                connection.getInputStream() : connection.getErrorStream();
+        InputStream inputStream = !HttpUtils.isErrorStatusCode(httpStatus) ? connection.getInputStream() : connection.getErrorStream();
         String responseString = readInputStreamAsEncodedString(inputStream, connection);
         if (responseString != null && responseString.startsWith("\uFEFF")) {
             responseString = responseString.substring(1);
         }
-        log.debug("response body:\n{}", truncate(responseString, responseMaxLogLen));
+        log.debug("Http call returned {}; response body:\n{}", httpStatus, truncate(responseString, responseMaxLogLen));
 
         return new InvocationResult(responseString, httpStatus);
     }
@@ -208,7 +207,7 @@ class HttpTemplate {
             connection.setReadTimeout(readTimeout);
         }
         if (connTimeout > 0) {
-            connection.setConnectTimeout(connTimeout);
+          connection.setConnectTimeout(connTimeout);
         }
 
         if (connection instanceof HttpsURLConnection) {
@@ -298,12 +297,19 @@ class HttpTemplate {
         }
     }
 
-
+    /**
+     * This will truncate string toTruncate to maximum length or return it as is if shorter
+     * @param toTruncate
+     * @param maxLen
+     * @return
+     */
     private String truncate(String toTruncate, int maxLen) {
-        if (toTruncate == null)
+        if (toTruncate == null) {
             return null;
-        if (toTruncate.length() <= maxLen)
+        }
+        if (toTruncate.length() <= maxLen) {
             return toTruncate;
+        }
         return toTruncate.substring(0, maxLen);
     }
 }
