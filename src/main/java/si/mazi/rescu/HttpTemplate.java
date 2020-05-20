@@ -54,15 +54,15 @@ import java.util.zip.GZIPInputStream;
 class HttpTemplate {
     public final static String CHARSET_UTF_8 = "UTF-8";
 
-    /**
-     * if log level DEBUG is set to this class, request body will be logged.
-     * Maximum logged length is truncated at this static variable
-     */
-    public static int responseMaxLogLen = 4096;
-
 
     /**
      * if log level DEBUG is set to this class, response body will be logged.
+     * Maximum logged length is truncated at this static variable
+     */
+    public static int responseMaxLogLen = 4096;
+    
+    /**
+     * if log level DEBUG is set to this class, request body will be logged.
      * Maximum logged length is truncated at this static variable
      */
     public static int requestMaxLogLen = 4096;
