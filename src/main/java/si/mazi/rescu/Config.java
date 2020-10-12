@@ -131,7 +131,7 @@ final class Config {
     }
     
     public static Type getProxyType() {
-      return proxyType;
+        return proxyType;
   }
 
     public static boolean isIgnoreHttpErrorCodes() {
