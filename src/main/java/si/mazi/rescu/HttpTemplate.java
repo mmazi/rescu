@@ -60,7 +60,7 @@ class HttpTemplate {
      * Maximum logged length is truncated at this static variable
      */
     public static int responseMaxLogLen = 4096;
-    
+
     /**
      * if log level DEBUG is set to this class, request body will be logged.
      * Maximum logged length is truncated at this static variable
@@ -80,13 +80,12 @@ class HttpTemplate {
     private final HostnameVerifier hostnameVerifier;
     private final OAuthConsumer oAuthConsumer;
 
-
-    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort,
+    HttpTemplate(int readTimeout, String proxyHost, Integer proxyPort, Proxy.Type proxyType,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
-      this(0, readTimeout, proxyHost, proxyPort, sslSocketFactory, hostnameVerifier, oAuthConsumer);
+      this(0, readTimeout, proxyHost, proxyPort, proxyType, sslSocketFactory, hostnameVerifier, oAuthConsumer);
     }
 
-    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort,
+    HttpTemplate(int connTimeout, int readTimeout, String proxyHost, Integer proxyPort, Proxy.Type proxyType,
                  SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier, OAuthConsumer oAuthConsumer) {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
@@ -103,7 +102,8 @@ class HttpTemplate {
         if (proxyHost == null || proxyPort == null) {
             proxy = Proxy.NO_PROXY;
         } else {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+            Proxy.Type type = proxyType == null ? Proxy.Type.HTTP : proxyType;
+            proxy = new Proxy(type, new InetSocketAddress(proxyHost, proxyPort));
             log.info("Using proxy {}", proxy);
         }
     }

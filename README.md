@@ -81,8 +81,9 @@ Rescu can be configured by adding a `rescu.properties` file in your classpath.
 Supported settings with example values (copy this into your `rescu.properties` file):
 
     rescu.http.readTimeoutMillis = 5000             # Read timeout in milliseconds when performing HTTP requests. The default is 30000 (30 seconds).
-    rescu.http.readProxyHost = www.example.com      # HTTP proxy host. Both host and port must be set in order to use a proxy.
-    rescu.http.readProxyPort = 80                   # HTTP proxy port. Both host and port must be set in order to use a proxy.
+    rescu.http.readProxyHost = www.example.com      # Proxy host. Both host and port must be set in order to use a proxy.
+    rescu.http.readProxyPort = 80                   # Proxy port. Both host and port must be set in order to use a proxy.
+    rescu.http.readProxyType = SOCKS                # Proxy type. Applied only when readProxyHost and readProxyPort are set. Allowed values: DIRECT, HTTP, SOCKS.
     rescu.http.ignoreErrorCodes = true              # If set to true, the HTTP response body never be parsed as Exception but always as the method response type. Defaults to false.
 
 License
