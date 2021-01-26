@@ -505,6 +505,39 @@ public class RestInvocationHandlerTest {
         }
     }
 
+    @Test
+    public void shouldDigestParmasOnEveryCall() {
+        ClientConfig config = new ClientConfig();
+
+        CountingParamsDigest countingParamsDigest = new CountingParamsDigest();
+        config.addDefaultParam(HeaderParam.class, "Authorization", countingParamsDigest);
+
+        TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, config, "{}", 200);
+        ExampleService2 proxy = RestProxyFactory.createProxy(ExampleService2.class, testHandler);
+
+        log.info("before: " + config.getDefaultParamsMap());
+
+        // first call
+        proxy.getSomething();
+        log.info("after first call: " + config.getDefaultParamsMap());
+        assertParamValue(testHandler.getInvocation().getParamsMap(), HeaderParam.class, "Authorization", "1");
+
+        // second call
+        proxy.getSomething();
+        log.info("after second call: " + config.getDefaultParamsMap());
+        assertParamValue(testHandler.getInvocation().getParamsMap(), HeaderParam.class, "Authorization", "2");
+
+        // third call
+        proxy.getSomething();
+        log.info("after third call: " + config.getDefaultParamsMap());
+        assertParamValue(testHandler.getInvocation().getParamsMap(), HeaderParam.class, "Authorization", "3");
+    }
+
+    private static <P extends Annotation> void assertParamValue(Map<Class<? extends Annotation>, Params> paramsMap, Class<P> paramClass, String paramName, String value) {
+        assertThat(paramsMap.get(paramClass).getParamValue(paramName))
+                .isEqualTo(value);
+    }
+
     private static class MockParamsDigest implements ParamsDigest {
 
         private String requestBody;
@@ -548,5 +581,14 @@ public class RestInvocationHandlerTest {
             return null;
         }
 
+    }
+
+    static class CountingParamsDigest implements ParamsDigest {
+        private int value = 0;
+
+        @Override
+        public synchronized String digestParams(RestInvocation restInvocation) {
+            return String.valueOf(++this.value);
+        }
     }
 }

@@ -71,6 +71,10 @@ public final class Params implements Serializable {
     private Params() {
     }
 
+    private Params(Map<String, Object> data) {
+        this.data.putAll(data);
+    }
+
     public static Params of() {
         return new Params();
     }
@@ -222,4 +226,7 @@ public final class Params implements Serializable {
         return toQueryString(false);
     }
 
+    public Params copy() {
+        return new Params(this.data);
+    }
 }

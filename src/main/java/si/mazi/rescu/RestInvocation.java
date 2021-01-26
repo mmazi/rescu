@@ -163,7 +163,8 @@ public class RestInvocation implements Serializable {
         }
 
         if (defaultParamsMap != null) {
-            paramsMap.putAll(defaultParamsMap);
+            defaultParamsMap.keySet().forEach(
+                    h -> paramsMap.put(h, defaultParamsMap.get(h).copy()));
         }
         return paramsMap;
     }

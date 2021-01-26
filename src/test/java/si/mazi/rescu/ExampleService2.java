@@ -40,4 +40,7 @@ public interface ExampleService2 {
     @Produces(MediaType.APPLICATION_JSON)
     Order buy(@QueryParam("user") String user);
 
+    @GET
+    @Path("something")
+    Object getSomething();
 }
