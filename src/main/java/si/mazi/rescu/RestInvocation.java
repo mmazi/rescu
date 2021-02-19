@@ -55,8 +55,8 @@ public class RestInvocation implements Serializable {
     private final List<Object> unannanotatedParams;
     private final RestMethodMetadata methodMetadata;
     private final String methodPath;
-    private final String invocationUrl;
-    private final String queryString;
+    private String invocationUrl;
+    private String queryString;
     private final String path;
     private final RequestWriter requestWriter;
 
@@ -146,6 +146,9 @@ public class RestInvocation implements Serializable {
         for (Params params : paramsMap.values()) {
             params.digestAll(invocation);
         }
+
+        invocation.queryString = paramsMap.get(QueryParam.class).asQueryString();
+        invocation.invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
 
         // Do some validation.
         if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
