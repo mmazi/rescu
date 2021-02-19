@@ -31,9 +31,12 @@ import org.testng.annotations.Test;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,24 +50,28 @@ public class RestInvocationTest {
     private static final Logger log = LoggerFactory.getLogger(RestInvocationTest.class);
 
     @Test
-    public void testCreateWithParamsDigest() {
+    public void testCreateWithParamsDigest() throws UnsupportedEncodingException {
         Map<Class<? extends Annotation>, Params> paramsMap = new HashMap<Class<? extends Annotation>, Params>();
         paramsMap.put(FormParam.class, Params.of("nonce", 1328626350245256L));
         paramsMap.put(HeaderParam.class, Params.of("digest", HmacPostBodyDigest.createInstance("9WkB3zUil6h5pXrqUX7XT57c+g2rxxemeGYv3aBSW4hlkwSIgmul+mC3yxwU8fPtQsR8jTpyI2xo7WznjhTf4g==")));
+        paramsMap.put(QueryParam.class, Params.of("digest", HmacPostBodyDigest.createInstance("9WkB3zUil6h5pXrqUX7XT57c+g2rxxemeGYv3aBSW4hlkwSIgmul+mC3yxwU8fPtQsR8jTpyI2xo7WznjhTf4g==")));
 
         RequestWriterResolver requestWriterResolver = new RequestWriterResolver();
         requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED, new FormUrlEncodedRequestWriter());
-        
+
         RestInvocation invocation = RestInvocation.create(requestWriterResolver,
                 new RestMethodMetadata(String.class, HttpMethod.GET,
                         "http://example.com", "/api", null,
                         RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, null,
-                        new HashMap<Class<? extends Annotation>, Annotation>(), 
+                        new HashMap<Class<? extends Annotation>, Annotation>(),
                         new Annotation[][] {}),
                 new Object[] {}, paramsMap);
-        
+
         assertEquals("eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==",
                 invocation.getParamValue(HeaderParam.class, "digest"));
+
+        assertEquals("digest=" + URLEncoder.encode("eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==", "UTF-8"),
+                invocation.getQueryString());
     }
 
     @Test
