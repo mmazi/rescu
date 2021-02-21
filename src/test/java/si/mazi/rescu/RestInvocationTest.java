@@ -72,6 +72,8 @@ public class RestInvocationTest {
 
         assertEquals("digest=" + URLEncoder.encode("eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==", "UTF-8"),
                 invocation.getQueryString());
+
+        assertThat(invocation.getInvocationUrl()).contains(URLEncoder.encode("eNjLVoVh6LVQfzgv7qFMCL48b5d2Qd1gvratXGA76W6+g46Jl9TNkiTCHks5sLXjfAQ1rGnvWxRHu6pYjC5FSQ==", "UTF-8"));
     }
 
     @Test
