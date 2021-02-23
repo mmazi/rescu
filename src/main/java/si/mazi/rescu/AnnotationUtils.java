@@ -42,7 +42,7 @@ public final class AnnotationUtils {
             return null;
         }
         try {
-            return (String) ann.getClass().getMethod("value").invoke(ann);
+            return (String) ann.annotationType().getMethod("value").invoke(ann);
         } catch (Exception e) {
             throw new RuntimeException("Can't access element 'value' in  " + annotationClass + ". This is probably a bug in rescu.", e);
         }
