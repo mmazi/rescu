@@ -25,15 +25,16 @@
 package si.mazi.rescu.serialization.jackson;
 
 import org.testng.annotations.Test;
-import si.mazi.rescu.HttpMethod;
 import si.mazi.rescu.RestInvocation;
 import si.mazi.rescu.RestMethodMetadata;
 import si.mazi.rescu.dto.DummyAccountInfo;
 
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.testng.Assert.assertEquals;
+import static si.mazi.rescu.HttpMethod.GET;
 
 /**
  *
@@ -53,17 +54,15 @@ public class JacksonRequestWriterTest {
                 new DefaultJacksonObjectMapperFactory().createObjectMapper());
         
         DummyAccountInfo dummyAccountInfo = new DummyAccountInfo("mm", "USD", 3);
-        ArrayList<Object> unannotatedParams = new ArrayList<Object>();
-        unannotatedParams.add(dummyAccountInfo);
 
-        RestInvocation invocation = new RestInvocation(
-                RestInvocation.createEmptyParamsMap(null),
-                unannotatedParams,
-                new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
-                        RuntimeException.class, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, null, null, null),
-                null, null, null, null, null
-            );
-        
+        RestInvocation invocation = RestInvocation.create(
+                null,
+                new RestMethodMetadata(String.class, GET, null, null, null,
+                        RuntimeException.class, APPLICATION_JSON, APPLICATION_JSON, null, new HashMap<>(), new Annotation[][]{{}}),
+                new Object[]{dummyAccountInfo},
+                null
+        );
+
         String json = writer.writeBody(invocation);
         
         assertEquals(json, "{\"username\":\"mm\",\"currency\":\"USD\",\"amount_int\":3}");
