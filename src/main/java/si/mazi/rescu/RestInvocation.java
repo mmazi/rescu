@@ -62,7 +62,7 @@ public class RestInvocation implements Serializable {
 
     private Map<String, String> allHttpHeaders;
 
-    public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
+    RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
                           List<Object> unannanotatedParams,
                           RestMethodMetadata methodMetadata,
                           String methodPath,
@@ -81,7 +81,7 @@ public class RestInvocation implements Serializable {
         this.invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, this.queryString);
     }
 
-    static RestInvocation create(RequestWriterResolver requestWriterResolver,
+    public static RestInvocation create(RequestWriterResolver requestWriterResolver,
             RestMethodMetadata methodMetadata,
             Object[] args,
             Map<Class<? extends Annotation>, Params> defaultParamsMap) {
