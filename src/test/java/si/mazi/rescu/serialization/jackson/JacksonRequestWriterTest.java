@@ -61,7 +61,7 @@ public class JacksonRequestWriterTest {
                 unannotatedParams,
                 new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
                         RuntimeException.class, MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON, null, null, null),
-                null, null, null, null, null
+                null, null, null
             );
         
         String json = writer.writeBody(invocation);

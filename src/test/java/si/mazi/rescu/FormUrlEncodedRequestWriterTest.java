@@ -61,7 +61,7 @@ public class FormUrlEncodedRequestWriterTest {
                 new ArrayList<Object>(),
                 new RestMethodMetadata(String.class, HttpMethod.GET, null, null, null,
                         RuntimeException.class, MediaType.APPLICATION_FORM_URLENCODED, MediaType.APPLICATION_JSON, null, null, null),
-                null, null, null, null, null
+                null, null, null
             );
         
         String body = writer.writeBody(invocation);

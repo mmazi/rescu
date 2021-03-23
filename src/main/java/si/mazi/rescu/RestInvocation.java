@@ -55,29 +55,30 @@ public class RestInvocation implements Serializable {
     private final List<Object> unannanotatedParams;
     private final RestMethodMetadata methodMetadata;
     private final String methodPath;
-    private String invocationUrl;
-    private String queryString;
+    private final String invocationUrl;
+    private final String queryString;
     private final String path;
     private final RequestWriter requestWriter;
 
     private Map<String, String> allHttpHeaders;
 
     public RestInvocation(Map<Class<? extends Annotation>, Params> paramsMap,
-            List<Object> unannanotatedParams,
-            RestMethodMetadata methodMetadata,
-            String methodPath,
-            String invocationUrl,
-            String queryString,
-            String path,
-            RequestWriterResolver requestWriterResolver) {
+                          List<Object> unannanotatedParams,
+                          RestMethodMetadata methodMetadata,
+                          String methodPath,
+                          String path,
+                          RequestWriterResolver requestWriterResolver) {
         this.paramsMap = paramsMap;
         this.unannanotatedParams = unannanotatedParams;
         this.methodMetadata = methodMetadata;
         this.methodPath = methodPath;
-        this.invocationUrl = invocationUrl;
-        this.queryString = queryString;
         this.path = path;
         this.requestWriter = requestWriterResolver == null ? null : requestWriterResolver.resolveWriter(this.getMethodMetadata());
+
+        digestAll();
+
+        this.queryString = paramsMap.get(QueryParam.class).asQueryString();
+        this.invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, this.queryString);
     }
 
     static RestInvocation create(RequestWriterResolver requestWriterResolver,
@@ -123,33 +124,13 @@ public class RestInvocation implements Serializable {
         String path = getPath(paramsMap, methodMetadata.getIntfacePath());
         path = appendPath(path, methodPath);
 
-        String queryString = paramsMap.get(QueryParam.class).asQueryString();
-        String invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, queryString);
-
         RestInvocation invocation = new RestInvocation(
                 paramsMap,
                 unannanotatedParams,
                 methodMetadata,
                 methodPath,
-                invocationUrl,
-                queryString,
                 path,
                 requestWriterResolver);
-
-        for (int i = 0; i < unannanotatedParams.size(); i++) {
-            Object param = unannanotatedParams.get(i);
-            if (param instanceof ParamsDigest) {
-                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(invocation));
-            }
-        }
-
-        for (Params params : paramsMap.values()) {
-            params.digestAll(invocation);
-        }
-
-        String digestedQueryString = paramsMap.get(QueryParam.class).asQueryString();
-        invocation.queryString = digestedQueryString;
-        invocation.invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, digestedQueryString);
 
         // Do some validation.
         if (!unannanotatedParams.isEmpty() && Arrays.asList(HttpMethod.DELETE, HttpMethod.GET).contains(methodMetadata.getHttpMethod())) {
@@ -157,6 +138,19 @@ public class RestInvocation implements Serializable {
         }
 
         return invocation;
+    }
+
+    private void digestAll() {
+        for (int i = 0; i < unannanotatedParams.size(); i++) {
+            Object param = unannanotatedParams.get(i);
+            if (param instanceof ParamsDigest) {
+                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
+            }
+        }
+
+        for (Params params : paramsMap.values()) {
+            params.digestAll(this);
+        }
     }
 
     public static HashMap<Class<? extends Annotation>, Params> createEmptyParamsMap(Map<Class<? extends Annotation>, Params> defaultParamsMap) {
