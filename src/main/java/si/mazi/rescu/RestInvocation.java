@@ -75,10 +75,22 @@ public class RestInvocation implements Serializable {
         this.path = path;
         this.requestWriter = requestWriterResolver == null ? null : requestWriterResolver.resolveWriter(this.getMethodMetadata());
 
-        digestAll();
+        this.paramsMap.get(QueryParam.class).digestAll(this);
 
         this.queryString = paramsMap.get(QueryParam.class).asQueryString();
         this.invocationUrl = getInvocationUrl(methodMetadata.getBaseUrl(), path, this.queryString);
+
+        for (int i = 0; i < this.unannanotatedParams.size(); i++) {
+            Object param = this.unannanotatedParams.get(i);
+            if (param instanceof ParamsDigest) {
+                this.unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
+            }
+        }
+
+        this.paramsMap.keySet().stream()
+                .filter(par -> !QueryParam.class.equals(par))
+                .map(this.paramsMap::get)
+                .forEach(params -> params.digestAll(this));
     }
 
     public static RestInvocation create(RequestWriterResolver requestWriterResolver,
@@ -138,19 +150,6 @@ public class RestInvocation implements Serializable {
         }
 
         return invocation;
-    }
-
-    private void digestAll() {
-        for (int i = 0; i < unannanotatedParams.size(); i++) {
-            Object param = unannanotatedParams.get(i);
-            if (param instanceof ParamsDigest) {
-                unannanotatedParams.set(i, ((ParamsDigest) param).digestParams(this));
-            }
-        }
-
-        for (Params params : paramsMap.values()) {
-            params.digestAll(this);
-        }
     }
 
     public static HashMap<Class<? extends Annotation>, Params> createEmptyParamsMap(Map<Class<? extends Annotation>, Params> defaultParamsMap) {

@@ -59,6 +59,10 @@ public class RestMethodMetadata implements Serializable {
     private final Map<Class<? extends Annotation>,Annotation> methodAnnotationMap;
     private final Annotation[][] parameterAnnotations;
 
+    /**
+     * @deprecated Use {@link #create(Method, String, String)} instead.
+     */
+    @Deprecated
     public RestMethodMetadata(Type returnType, HttpMethod httpMethod,
                               String baseUrl, String intfacePath, String methodPathTemplate,
                               Class<? extends RuntimeException> exceptionType, String reqContentType,
