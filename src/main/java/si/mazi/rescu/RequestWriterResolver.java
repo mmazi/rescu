@@ -24,6 +24,10 @@
 
 package si.mazi.rescu;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import si.mazi.rescu.serialization.ToStringRequestWriter;
+import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
+
 import javax.ws.rs.core.MediaType;
 import java.util.HashMap;
 
@@ -39,7 +43,16 @@ public class RequestWriterResolver {
     
     public RequestWriterResolver() {
     }
-    
+
+    public static RequestWriterResolver createDefault(ObjectMapper mapper) {
+        final RequestWriterResolver requestWriterResolver = new RequestWriterResolver();
+        /*requestWriterResolver.addWriter(null, new NullRequestWriter());*/
+        requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED, new FormUrlEncodedRequestWriter());
+        requestWriterResolver.addWriter(MediaType.APPLICATION_JSON, new JacksonRequestWriter(mapper));
+        requestWriterResolver.addWriter(MediaType.TEXT_PLAIN, new ToStringRequestWriter());
+        return requestWriterResolver;
+    }
+
     public void addWriter(String mediaType, RequestWriter writer) {
         writers.put(mediaType, writer);
     }

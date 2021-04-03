@@ -25,10 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.serialization.PlainTextResponseReader;
-import si.mazi.rescu.serialization.ToStringRequestWriter;
 import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
-import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
 import si.mazi.rescu.serialization.jackson.JacksonResponseReader;
 
 import javax.ws.rs.Path;
@@ -74,15 +72,7 @@ public class RestInvocationHandler implements InvocationHandler {
         }
         ObjectMapper mapper = mapperFactory.createObjectMapper();
 
-        requestWriterResolver = new RequestWriterResolver();
-        /*requestWriterResolver.addWriter(null,
-                new NullRequestWriter());*/
-        requestWriterResolver.addWriter(MediaType.APPLICATION_FORM_URLENCODED,
-                new FormUrlEncodedRequestWriter());
-        requestWriterResolver.addWriter(MediaType.APPLICATION_JSON,
-                new JacksonRequestWriter(mapper));
-        requestWriterResolver.addWriter(MediaType.TEXT_PLAIN,
-                new ToStringRequestWriter());
+        requestWriterResolver = RequestWriterResolver.createDefault(mapper);
 
         responseReaderResolver = new ResponseReaderResolver();
         responseReaderResolver.addReader(MediaType.APPLICATION_JSON,
