@@ -32,7 +32,7 @@ import si.mazi.rescu.*;
 import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Map;
 

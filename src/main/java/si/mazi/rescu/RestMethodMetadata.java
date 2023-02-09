@@ -24,7 +24,7 @@ package si.mazi.rescu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.*;
+import jakarta.ws.rs.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;

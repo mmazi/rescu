@@ -24,7 +24,7 @@
 
 package si.mazi.rescu;
 
-import javax.ws.rs.FormParam;
+import jakarta.ws.rs.FormParam;
 
 /**
  *

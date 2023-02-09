@@ -21,9 +21,9 @@
  */
 package si.mazi.rescu;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
 
 
 /**

@@ -26,8 +26,8 @@ package si.mazi.rescu;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;

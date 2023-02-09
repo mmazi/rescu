@@ -26,9 +26,9 @@ package si.mazi.rescu.serialization;
 import si.mazi.rescu.RequestWriter;
 import si.mazi.rescu.RestInvocation;
 
-import javax.ws.rs.FormParam;
+import jakarta.ws.rs.FormParam;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
+import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 /**
  * Writes the data as string using toString.

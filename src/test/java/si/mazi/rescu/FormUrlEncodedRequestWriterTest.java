@@ -26,8 +26,8 @@ package si.mazi.rescu;
 
 import org.testng.annotations.Test;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -23,8 +23,8 @@
  */
 package si.mazi.rescu;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * Writes the @FormParam annotated data as URL-encoded string.

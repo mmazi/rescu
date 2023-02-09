@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import si.mazi.rescu.serialization.ToStringRequestWriter;
 import si.mazi.rescu.serialization.jackson.JacksonRequestWriter;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.util.HashMap;
 
 /**

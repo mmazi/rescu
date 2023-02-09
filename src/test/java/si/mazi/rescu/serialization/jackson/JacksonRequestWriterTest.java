@@ -32,7 +32,7 @@ import si.mazi.rescu.dto.DummyAccountInfo;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.testng.Assert.assertEquals;
 import static si.mazi.rescu.HttpMethod.GET;
 

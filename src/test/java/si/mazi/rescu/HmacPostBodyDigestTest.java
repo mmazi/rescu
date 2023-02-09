@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 import java.lang.annotation.Annotation;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;

@@ -28,8 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import si.mazi.rescu.RequestWriter;
 import si.mazi.rescu.RestInvocation;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * Writes the data as JSON-serialized string using Jackson.

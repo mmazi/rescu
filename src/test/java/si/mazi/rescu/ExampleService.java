@@ -26,8 +26,8 @@ import si.mazi.rescu.dto.DummyTicker;
 import si.mazi.rescu.dto.GenericResult;
 import si.mazi.rescu.dto.Order;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;

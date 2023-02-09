@@ -23,7 +23,7 @@
 
 package si.mazi.rescu;
 
-import javax.ws.rs.HeaderParam;
+import jakarta.ws.rs.HeaderParam;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
 
