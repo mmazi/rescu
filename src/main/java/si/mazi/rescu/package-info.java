@@ -28,7 +28,7 @@
  * For a working example see the XChange project on github.
  * </p>
  * <p>
- * This is based on JAX-RS ({@link javax.ws.rs} -- only the JAX-RS annotations are used) and {@link java.lang.reflect.Proxy}.
+ * This is based on JAX-RS ({@link jakarta.ws.rs} -- only the JAX-RS annotations are used) and {@link java.lang.reflect.Proxy}.
  * </p>
  *
  * Usage:
@@ -38,9 +38,9 @@
  *   <li>Call {@link si.mazi.rescu.RestProxyFactory#createProxy(Class, String)}</li>
  * </ol>
  * <p>
- * Basic support is provided for {@link javax.ws.rs.Path}, {@link javax.ws.rs.GET}, {@link javax.ws.rs.POST},
- * {@link javax.ws.rs.DELETE}, {@link javax.ws.rs.HEAD}, {@link javax.ws.rs.OPTIONS}, {@link javax.ws.rs.QueryParam},
- * {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}.
+ * Basic support is provided for {@link jakarta.ws.rs.Path}, {@link jakarta.ws.rs.GET}, {@link jakarta.ws.rs.POST},
+ * {@link jakarta.ws.rs.DELETE}, {@link jakarta.ws.rs.HEAD}, {@link jakarta.ws.rs.OPTIONS}, {@link jakarta.ws.rs.QueryParam},
+ * {@link jakarta.ws.rs.FormParam}, {@link jakarta.ws.rs.HeaderParam}, {@link jakarta.ws.rs.PathParam}.
  * </p>
  *
  * Some of the classes here may also be useful even when not using the JAX-RS approach to calling REST web services,

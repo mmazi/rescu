@@ -22,13 +22,13 @@
 package si.mazi.rescu;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -310,8 +310,8 @@ public class RestInvocation implements Serializable {
     }
 
     /**
-     * @param paramAnnotation One of {@link javax.ws.rs.QueryParam}.class, {@link javax.ws.rs.PathParam}.class,
-     *                         {@link javax.ws.rs.FormParam}.class, {@link javax.ws.rs.HeaderParam}.class
+     * @param paramAnnotation One of {@link jakarta.ws.rs.QueryParam}.class, {@link jakarta.ws.rs.PathParam}.class,
+     *                         {@link jakarta.ws.rs.FormParam}.class, {@link jakarta.ws.rs.HeaderParam}.class
      * @param paramName       The name of the parameter, ie. the value of the value() element in the annotation.
      * @return                The actual value that was passed as the argument in the method call; null if either no
      *                        parameter with the given name exists or null was passed as argument.

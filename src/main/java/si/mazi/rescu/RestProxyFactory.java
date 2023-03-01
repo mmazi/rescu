@@ -33,8 +33,8 @@ public final class RestProxyFactory {
     private RestProxyFactory() { }
 
     /**
-     * Create a proxy implementation of restInterface. The interface must be annotated with jax-rs annotations. Basic support exists for {@link javax.ws.rs.Path}, {@link javax.ws.rs.GET},
-     * {@link javax.ws.rs.POST}, {@link javax.ws.rs.QueryParam}, {@link javax.ws.rs.FormParam}, {@link javax.ws.rs.HeaderParam}, {@link javax.ws.rs.PathParam}., {@link javax.ws.rs.PATCH}
+     * Create a proxy implementation of restInterface. The interface must be annotated with jax-rs annotations. Basic support exists for {@link jakarta.ws.rs.Path}, {@link jakarta.ws.rs.GET},
+     * {@link jakarta.ws.rs.POST}, {@link jakarta.ws.rs.QueryParam}, {@link jakarta.ws.rs.FormParam}, {@link jakarta.ws.rs.HeaderParam}, {@link jakarta.ws.rs.PathParam}., {@link jakarta.ws.rs.PATCH}
      *
      * @param restInterface The interface to implement
      * @param baseUrl       The service base baseUrl

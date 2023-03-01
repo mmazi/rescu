@@ -36,7 +36,7 @@ public class NullRequestWriter implements RequestWriter {
         //just safety checks
         if (!invocation.getParamsMap().get(FormParam.class).isEmpty()
                 || invocation.getUnannanotatedParams().isEmpty()) {
-            throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @javax.ws.rs.Consumes.");
+            throw new IllegalArgumentException("No media type specified; don't know how to create request body. Please specify the body media type using @jakarta.ws.rs.Consumes.");
         }
         
         return null;
