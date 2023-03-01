@@ -46,7 +46,7 @@
     <licenses>
         <license>
             <name>MIT</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://opensource.org/license/mit/</url>
             <distribution>repo</distribution>
             <comments>All source code is under the MIT license.</comments>
         </license>
@@ -65,14 +65,14 @@
     </scm>
 
     <ciManagement>
-        <url>https://travis-ci.org/mmazi/rescu</url>
+        <url>https://app.travis-ci.com/github/mmazi/rescu</url>
     </ciManagement>
 
     <distributionManagement>
         <repository>
             <id>sonatype-nexus-staging</id>
             <name>Sonatype Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
 
         <snapshotRepository>
@@ -81,7 +81,7 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
 
-        <downloadUrl>https://oss.sonatype.org/content/groups/public/com/github/mmazi/rescu</downloadUrl>
+        <downloadUrl>https://oss.sonatype.org/content/groups/public/com/github/mmazi/rescu/</downloadUrl>
     </distributionManagement>
 
     <build>
@@ -102,6 +102,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release-sign-artifacts,sources-docs</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -115,7 +121,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
+            <version>2.0.6</version>
         </dependency>
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
@@ -131,44 +137,44 @@
         <dependency>
             <groupId>oauth.signpost</groupId>
             <artifactId>signpost-core</artifactId>
-            <version>1.2.1.2</version>
+            <version>2.1.1</version>
         </dependency>
 
         <!--  test dependencies -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.14.3</version>
+            <version>7.7.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>1.4.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.0</version>
+            <version>31.1-jre</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.10.5</version>
+            <version>2.12.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <artifactId>mockito-core</artifactId>
+            <version>5.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.14.0</version>
+            <version>3.24.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -198,7 +204,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keyname>Matija Mazi (Maven Central) &lt;matija.mazi@gmail.com&gt;</keyname>
+                            <keyname>Matija Mazi (For Maven Central) &lt;matija.mazi@gmail.com></keyname>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -217,7 +223,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <version>3.2.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -230,7 +236,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.1</version>
+                        <version>3.5.0</version>
                         <configuration>
                             <source>8</source>
                         </configuration>
@@ -252,6 +258,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <version.jackson>2.13.4.1</version.jackson>
+        <version.jackson>2.14.2</version.jackson>
     </properties>
 </project>
