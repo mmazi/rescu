@@ -58,7 +58,7 @@ Rescu is hosted in Maven Central so all you need to do is add this dependency to
     <dependency>
         <groupId>com.github.mmazi</groupId>
         <artifactId>rescu</artifactId>
-        <version>1.6.0</version>
+        <version>3.0</version>
     </dependency>
 
 #### Usage in code
@@ -91,9 +91,3 @@ License
 
 Rescu is released under the MIT License. Please see [LICENSE.txt](LICENSE.txt) for the full text.
 
-An important note
----------------
-
-I am very open to new suggestions, change requests etc. If ResCU seems almost right for you, but not quite,
-do write me a note, eg. by [opening an issue](https://github.com/mmazi/rescu/issues/new). Documentation and
-clarification requests are welcome too!
