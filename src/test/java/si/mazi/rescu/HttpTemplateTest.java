@@ -21,7 +21,7 @@
  */
 package si.mazi.rescu;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,11 +30,14 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
+
+import si.mazi.rescu.clients.HttpConnection;
+import si.mazi.rescu.clients.HttpConnectionType;
+import si.mazi.rescu.clients.JavaConnection;
 
 
 /**
@@ -45,7 +48,7 @@ public class HttpTemplateTest {
     @Test
     public void testGet() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockHttpURLConnection("/example-httpdata.txt");
-        HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
+        HttpTemplate testObject = new MockHttpTemplate(JavaConnection.create(mockHttpURLConnection));
         InvocationResult executeResult = executeRequest(testObject, "http://example.com/ticker", null, new HashMap<String, String>(), HttpMethod.GET);
         assertEquals(200, executeResult.getStatusCode());
         assertEquals("Test data", executeResult.getHttpBody());
@@ -53,9 +56,9 @@ public class HttpTemplateTest {
 
     @Test
     public void testReadInputStreamAsEncodedString() throws Exception {
-        HttpTemplate testObject = new HttpTemplate(30000, null, null, null, null, null, null) {
-            @Override String getResponseEncoding(URLConnection connection) { return "UTF-8"; }
-            @Override boolean izGzipped(HttpURLConnection connection) { return false; }
+        HttpTemplate testObject = new HttpTemplate(30000, null, null, null, null, null, null, HttpConnectionType.DEFAULT) {
+            @Override String getResponseEncoding(HttpConnection connection) { return "UTF-8"; }
+            @Override boolean izGzipped(HttpConnection connection) { return false; }
         };
         InputStream inputStream = HttpTemplateTest.class.getResourceAsStream("/example-httpdata.txt");
         assertEquals("Test data", testObject.readInputStreamAsEncodedString(inputStream, null));
@@ -64,7 +67,7 @@ public class HttpTemplateTest {
     @Test
     public void testPostWithError() throws Exception {
         final HttpURLConnection mockHttpURLConnection = new MockErrorHttpURLConnection("/error.json");
-        HttpTemplate testObject = new MockHttpTemplate(mockHttpURLConnection);
+        HttpTemplate testObject = new MockHttpTemplate(JavaConnection.create(mockHttpURLConnection));
         InvocationResult executeResult = executeRequest(testObject, "http://example.org/accountinfo", "Example", new HashMap<String, String>(), HttpMethod.POST);
         assertEquals(500, executeResult.getStatusCode());
         assertEquals("{\"result\":\"error\",\"error\":\"Order not found\",\"token\":\"unknown_error\"}", executeResult.getHttpBody());
@@ -88,15 +91,15 @@ public class HttpTemplateTest {
 
     private static class MockHttpTemplate extends HttpTemplate {
 
-        private final HttpURLConnection mockHttpURLConnection;
+        private final HttpConnection mockHttpURLConnection;
 
-        public MockHttpTemplate(HttpURLConnection mockHttpURLConnection) {
-            super(30000, null, null, null, null, null, null);
+        public MockHttpTemplate(HttpConnection mockHttpURLConnection) {
+            super(30000, null, null, null, null, null, null, HttpConnectionType.DEFAULT);
             this.mockHttpURLConnection = mockHttpURLConnection;
         }
 
         @Override
-        public HttpURLConnection getHttpURLConnection(String urlString) throws IOException {
+        public HttpConnection getRescuHttpURLConnection(String urlString) throws IOException {
             return mockHttpURLConnection;
         }
     }

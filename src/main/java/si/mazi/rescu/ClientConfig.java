@@ -22,18 +22,21 @@
  */
 package si.mazi.rescu;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import oauth.signpost.OAuthConsumer;
-import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
-import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
-import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSocketFactory;
 import java.lang.annotation.Annotation;
 import java.net.Proxy.Type;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import oauth.signpost.OAuthConsumer;
+import si.mazi.rescu.clients.HttpConnectionType;
+import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
+import si.mazi.rescu.serialization.jackson.JacksonConfigureListener;
+import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
 
 public class ClientConfig {
 
@@ -50,6 +53,7 @@ public class ClientConfig {
     private boolean ignoreHttpErrorCodes;
     private boolean wrapUnexpectedExceptions;
     private OAuthConsumer oAuthConsumer;
+    private HttpConnectionType connectionType;
 
     public ClientConfig() {
         httpConnTimeout = Config.getHttpConnTimeout();
@@ -57,6 +61,7 @@ public class ClientConfig {
         proxyPort = Config.getProxyPort();
         proxyHost = Config.getProxyHost();
         proxyType = Config.getProxyType();
+        connectionType = Config.getConnectionType();
         ignoreHttpErrorCodes = Config.isIgnoreHttpErrorCodes();
         wrapUnexpectedExceptions = Config.isWrapUnexpectedExceptions();
     }
@@ -153,6 +158,14 @@ public class ClientConfig {
 
     public void setProxyType(Type proxyType) {
         this.proxyType = proxyType;
+    }
+    
+    public HttpConnectionType getConnectionType() {
+        return connectionType;
+    }
+
+    public void setConnectionType(HttpConnectionType connectionType) {
+        this.connectionType = connectionType;
     }
 
     public boolean isIgnoreHttpErrorCodes() {

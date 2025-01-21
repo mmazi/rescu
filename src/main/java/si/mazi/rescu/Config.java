@@ -26,6 +26,8 @@ package si.mazi.rescu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import si.mazi.rescu.clients.HttpConnectionType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Proxy;
@@ -57,6 +59,8 @@ final class Config {
 
     private static final String WRAP_UNEXPECTED_EXCEPTIONS = "rescu.http.wrapUnexpectedExceptions";
 
+    private static final String CONNECTION_TYPE = "rescu.http.connectionType";
+    
     private static final int httpConnTimeout;
 
     private static final int httpReadTimeout;
@@ -70,6 +74,8 @@ final class Config {
     private static final boolean ignoreHttpErrorCodes;
 
     private static final boolean wrapUnexpectedExceptions;
+    
+    private static final HttpConnectionType connectionType;
 
     static {
         Properties dfts = new Properties();
@@ -95,13 +101,15 @@ final class Config {
         proxyType = Optional.ofNullable(properties.getProperty(PROXY_TYPE)).map(Proxy.Type::valueOf).orElse(null);
         ignoreHttpErrorCodes = getBoolean(properties, IGNORE_HTTP_ERROR_CODES);
         wrapUnexpectedExceptions = getBoolean(properties, WRAP_UNEXPECTED_EXCEPTIONS);
-
+        connectionType = Optional.ofNullable(properties.getProperty(CONNECTION_TYPE)).map(HttpConnectionType::valueOf).orElse(HttpConnectionType.DEFAULT);
+        
         log.debug("Configuration from rescu.properties:");
         log.debug("httpConnTimeout = {}", httpConnTimeout);
         log.debug("httpReadTimeout = {}", httpReadTimeout);
         log.debug("proxyHost = {}", proxyHost);
         log.debug("proxyPort = {}", proxyPort);
         log.debug("proxyType = {}", proxyType);
+        log.debug("connectionType = {}", connectionType);
         log.debug("ignoreHttpErrorCodes = {}", ignoreHttpErrorCodes);
     }
 
@@ -132,7 +140,11 @@ final class Config {
     
     public static Type getProxyType() {
         return proxyType;
-  }
+    }
+
+    public static HttpConnectionType getConnectionType() {
+        return connectionType;
+    }
 
     public static boolean isIgnoreHttpErrorCodes() {
         return ignoreHttpErrorCodes;

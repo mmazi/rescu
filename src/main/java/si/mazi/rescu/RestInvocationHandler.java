@@ -24,6 +24,8 @@ package si.mazi.rescu;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import si.mazi.rescu.clients.HttpConnection;
 import si.mazi.rescu.serialization.PlainTextResponseReader;
 import si.mazi.rescu.serialization.jackson.DefaultJacksonObjectMapperFactory;
 import si.mazi.rescu.serialization.jackson.JacksonObjectMapperFactory;
@@ -34,7 +36,6 @@ import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,7 +90,8 @@ public class RestInvocationHandler implements InvocationHandler {
                 this.config.getProxyType(),
                 this.config.getSslSocketFactory(),
                 this.config.getHostnameVerifier(),
-                this.config.getOAuthConsumer());
+                this.config.getOAuthConsumer(),
+                this.config.getConnectionType());
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -99,7 +101,7 @@ public class RestInvocationHandler implements InvocationHandler {
 
         RestMethodMetadata methodMetadata = getMetadata(method);
 
-        HttpURLConnection connection = null;
+        HttpConnection connection = null;
         RestInvocation invocation = null;
         Object lock = getValueGenerator(args);
         if (lock == null) {
@@ -122,7 +124,7 @@ public class RestInvocationHandler implements InvocationHandler {
         }
     }
 
-    private boolean makeAware(Object result, HttpURLConnection connection, RestInvocation invocation) {
+    private boolean makeAware(Object result, HttpConnection connection, RestInvocation invocation) {
         boolean madeAware = false;
         if (result instanceof InvocationAware) {
             try {
@@ -143,7 +145,7 @@ public class RestInvocationHandler implements InvocationHandler {
         return madeAware;
     }
 
-    protected HttpURLConnection invokeHttp(RestInvocation invocation) throws IOException {
+    protected HttpConnection invokeHttp(RestInvocation invocation) throws IOException {
         RestMethodMetadata methodMetadata = invocation.getMethodMetadata();
 
         RequestWriter requestWriter = requestWriterResolver.resolveWriter(invocation.getMethodMetadata());
@@ -152,7 +154,7 @@ public class RestInvocationHandler implements InvocationHandler {
         return httpTemplate.send(invocation.getInvocationUrl(), requestBody, invocation.getAllHttpHeaders(), methodMetadata.getHttpMethod());
     }
 
-    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpURLConnection connection) throws IOException {
+    protected Object receiveAndMap(RestMethodMetadata methodMetadata, HttpConnection connection) throws IOException {
         InvocationResult invocationResult = httpTemplate.receive(connection);
         return mapInvocationResult(invocationResult, methodMetadata);
     }

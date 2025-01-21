@@ -21,7 +21,27 @@
  */
 package si.mazi.rescu;
 
-import com.google.common.collect.ImmutableMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,27 +49,20 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.internal.collections.Pair;
-import si.mazi.rescu.dto.DummyAccountInfo;
-import si.mazi.rescu.dto.DummyTicker;
-import si.mazi.rescu.dto.GenericResult;
-import si.mazi.rescu.dto.Order;
+
+import com.google.common.collect.ImmutableMap;
 
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.util.*;
-import java.util.concurrent.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import si.mazi.rescu.clients.JavaConnection;
+import si.mazi.rescu.clients.HttpConnection;
+import si.mazi.rescu.dto.DummyAccountInfo;
+import si.mazi.rescu.dto.DummyTicker;
+import si.mazi.rescu.dto.GenericResult;
+import si.mazi.rescu.dto.Order;
 
 /**
  * @author Matija Mazi
@@ -384,11 +397,11 @@ public class RestInvocationHandlerTest {
         mockHeaders.put("X-my-header", Collections.singletonList("My value"));
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500) {
             @Override
-            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+            protected HttpConnection invokeHttp(RestInvocation invocation) {
                 super.invokeHttp(invocation);
                 HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
                 Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
-                return mockConnection;
+                return JavaConnection.create(mockConnection);
             }
         };
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
@@ -406,11 +419,11 @@ public class RestInvocationHandlerTest {
         mockHeaders.put("X-my-header", Collections.singletonList("My value"));
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 500) {
             @Override
-            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+            protected HttpConnection invokeHttp(RestInvocation invocation) {
                 super.invokeHttp(invocation);
                 HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
                 Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
-                return mockConnection;
+                return JavaConnection.create(mockConnection);
             }
         };
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
@@ -428,11 +441,11 @@ public class RestInvocationHandlerTest {
         mockHeaders.put("X-my-header-1", Collections.singletonList("My value for result"));
         TestRestInvocationHandler testHandler = new TestRestInvocationHandler(ExampleService.class, new ClientConfig(), "{}", 200) {
             @Override
-            protected HttpURLConnection invokeHttp(RestInvocation invocation) {
+            protected HttpConnection invokeHttp(RestInvocation invocation) {
                 super.invokeHttp(invocation);
                 HttpURLConnection mockConnection = Mockito.mock(HttpURLConnection.class);
                 Mockito.when(mockConnection.getHeaderFields()).thenReturn(mockHeaders);
-                return mockConnection;
+                return JavaConnection.create(mockConnection);
             }
         };
         ExampleService proxy = RestProxyFactory.createProxy(ExampleService.class, testHandler);
