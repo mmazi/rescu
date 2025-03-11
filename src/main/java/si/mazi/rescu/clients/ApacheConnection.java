@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.ClientProtocolException;
@@ -113,7 +114,8 @@ public class ApacheConnection implements HttpConnection {
         if (!executed) {
             throw new RuntimeException("Request is not executed yet.");
         }
-        return response.getFirstHeader(name).getValue();
+        Header firstHeader = response.getFirstHeader(name);
+        return firstHeader == null ? null : firstHeader.getValue();
     }
     
     @Override
