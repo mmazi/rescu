@@ -55,6 +55,7 @@ public class ApacheConnection implements HttpConnection {
     private ByteArrayOutputStream out;
     private final Map<String, String> headers = new HashMap<>();
     
+    private CloseableHttpClient client;
     private CloseableHttpResponse response;
 
     private ApacheConnection(String url, Proxy proxy) {
@@ -78,22 +79,20 @@ public class ApacheConnection implements HttpConnection {
             HttpHost proxy = new HttpHost(address.getHostName(), address.getPort());
             clientBuilder.setProxy(proxy);
         }
-        try ( CloseableHttpClient client = clientBuilder.build() ) {
-        
-            HttpRequestBase request = createRequest(method, url);
-            
-            if (request instanceof HttpEntityEnclosingRequestBase && out != null) {
-                HttpEntityEnclosingRequestBase req = (HttpEntityEnclosingRequestBase) request;
-                HttpEntity entity = req.getEntity();
-                if (entity == null) {
-                    entity = new ByteArrayEntity(out.toByteArray());
-                    req.setEntity(entity);
-                }
+
+        client = clientBuilder.build();
+        HttpRequestBase request = createRequest(method, url);
+        if (request instanceof HttpEntityEnclosingRequestBase && out != null) {
+            HttpEntityEnclosingRequestBase req = (HttpEntityEnclosingRequestBase) request;
+            HttpEntity entity = req.getEntity();
+            if (entity == null) {
+                entity = new ByteArrayEntity(out.toByteArray());
+                req.setEntity(entity);
             }
-            headers.forEach(request::addHeader);
-            response = client.execute(request);
-            executed = true;
         }
+        headers.forEach(request::addHeader);
+        response = client.execute(request);
+        executed = true;
     }
 
     private static HttpRequestBase createRequest(HttpMethod method, String url) {
@@ -214,6 +213,19 @@ public class ApacheConnection implements HttpConnection {
     @Override
     public HttpConnectionType getHttpConnectionType() {
         return HttpConnectionType.apache;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (out != null) {
+            out.close();
+        }
+        if (response != null) {
+            response.close();
+        }
+        if (client != null) {
+            client.close();
+        }
     }
 
 }

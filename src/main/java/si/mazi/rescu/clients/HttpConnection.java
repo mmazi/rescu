@@ -1,5 +1,6 @@
 package si.mazi.rescu.clients;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,7 +13,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import si.mazi.rescu.HttpMethod;
 
-public interface HttpConnection {
+public interface HttpConnection extends Closeable {
 
     HttpConnectionType getHttpConnectionType();
     String getHeaderField(String name);
