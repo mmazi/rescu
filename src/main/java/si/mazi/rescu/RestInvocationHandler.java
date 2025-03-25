@@ -121,6 +121,10 @@ public class RestInvocationHandler implements InvocationHandler {
                 throw new AwareException(e, invocation);
             }
             throw e;
+        } finally {
+            if (connection != null) {
+                connection.close();
+            }
         }
     }
 

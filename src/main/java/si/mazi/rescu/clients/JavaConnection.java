@@ -128,4 +128,10 @@ public class JavaConnection implements HttpConnection {
     public HttpConnectionType getHttpConnectionType() {
         return HttpConnectionType.java;
     }
+
+    @Override
+    public void close() {
+        connection.disconnect();
+    }
+
 }
