@@ -139,7 +139,8 @@ public class ApacheConnection implements HttpConnection {
     @Override
     public InputStream getInputStream() throws IOException {
         exec();
-        return response.getEntity().getContent();
+        HttpEntity entity = response.getEntity();
+        return entity != null ? entity.getContent() : null;
     }
     
     @Override
