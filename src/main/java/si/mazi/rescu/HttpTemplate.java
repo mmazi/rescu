@@ -22,6 +22,7 @@
  */
 package si.mazi.rescu;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.net.Proxy;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HostnameVerifier;
@@ -246,33 +248,23 @@ class HttpTemplate {
      * @return A String representation of the input stream
      * @throws IOException If something goes wrong
      */
-    String readInputStreamAsEncodedString(InputStream inputStream, HttpConnection connection) throws IOException {
+    String readInputStreamAsEncodedString(final InputStream inputStream, HttpConnection connection) throws IOException {
         if (inputStream == null) {
             return null;
         }
 
-        BufferedReader reader = null;
-        try {
-            String responseEncoding = getResponseEncoding(connection);
-            if (izGzipped(connection)) {
-                inputStream = new GZIPInputStream(inputStream);
-            }
-            final InputStreamReader in = responseEncoding != null ? new InputStreamReader(inputStream, responseEncoding)
-                    : new InputStreamReader(inputStream, CHARSET_UTF_8);
-            reader = new BufferedReader(in);
+        final String responseEncoding = Optional.ofNullable(getResponseEncoding(connection)).orElse(CHARSET_UTF_8);
+
+        try (
+            final InputStream unzippedStream = izGzipped(connection) ? new GZIPInputStream(inputStream) : new BufferedInputStream(inputStream);
+            final InputStreamReader inputStreamReader = new InputStreamReader(unzippedStream, responseEncoding);
+            final BufferedReader reader = new BufferedReader(inputStreamReader);
+        ) {
             StringBuilder sb = new StringBuilder();
             for (String line; (line = reader.readLine()) != null; ) {
                 sb.append(line);
             }
             return sb.toString();
-        } finally {
-            inputStream.close();
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ignore) {
-                }
-            }
         }
     }
 
