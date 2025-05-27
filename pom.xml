@@ -210,7 +210,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <keyname>Matija Mazi (For Maven Central) &lt;matija.mazi@gmail.com&gt;</keyname>
+                            <keyname>Matija Mazi (Maven Central) &lt;matija.mazi@gmail.com&gt;</keyname>
                         </configuration>
                     </plugin>
                 </plugins>
