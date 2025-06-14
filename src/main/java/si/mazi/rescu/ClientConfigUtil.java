@@ -23,9 +23,11 @@
 
 package si.mazi.rescu;
 
-import jakarta.ws.rs.HeaderParam;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+
+import jakarta.ws.rs.HeaderParam;
+
 
 public enum ClientConfigUtil {
     ;
@@ -35,11 +37,7 @@ public enum ClientConfigUtil {
     }
 
     static String digestForBasicAuth(String username, String password) {
-        try {
-            byte[] inputBytes = (username + ":" + password).getBytes("ISO-8859-1");
-            return "Basic " + Base64.getEncoder().encodeToString(inputBytes);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("Unsupported encoding, fix the code.", e);
-        }
+        byte[] inputBytes = (username + ":" + password).getBytes(StandardCharsets.ISO_8859_1);
+        return "Basic " + Base64.getEncoder().encodeToString(inputBytes);
     }
 }
